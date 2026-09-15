@@ -304,8 +304,8 @@ def project_git_sha() -> str | None:
 
 def build_report(results: list[dict], *, mode: str, provider: str, model: str, base_url: str | None,
                  dataset: Path, dataset_sha: str, all_cases: list[dict], scoring: M.ScoringConfig,
-                 args: argparse.Namespace, temperature: float | None = None, prompt_cache: bool | None = None
-                 ) -> dict:
+                 args: argparse.Namespace, temperature: float | None = None, prompt_cache: bool | None = None,
+                 keep_tool_results: int | None = None) -> dict:
     metrics = M.compute_report_metrics(results, scoring)
     meta = {
         "llm": mode,  # "configured" | "fake" | "baseline"
@@ -318,6 +318,9 @@ def build_report(results: list[dict], *, mode: str, provider: str, model: str, b
         "temperature": temperature,
         # Whether the rolling prompt cache was on. Cost-only; recorded so a cost delta is attributable.
         "prompt_cache": prompt_cache,
+        # Context hygiene: tool results older than the N most recent are stubbed in what the model sees.
+        # Changes agent behaviour, so it is part of the comparison rule (None when no model is called).
+        "keep_tool_results": keep_tool_results,
         "base_url": base_url,
         "dataset": str(dataset),
         "dataset_sha256": dataset_sha,
@@ -386,7 +389,8 @@ def summary_table(report: dict) -> str:
     flag = "!!! " if pe["cases_with_parse_failure"] else ""
     lines = [
         f"PR review eval  llm={m['llm']}  provider={m['provider']}  model={m['model']}  "
-        f"temperature={m.get('temperature')}  prompt_cache={m.get('prompt_cache')}",
+        f"temperature={m.get('temperature')}  keep_tool_results={m.get('keep_tool_results')}  "
+        f"prompt_cache={m.get('prompt_cache')}",
         f"{flag}0. Synthesis parse errors: {pe['cases_with_parse_failure']}/{pe['cases_run']} cases "
         f"({_pct(pe['case_rate'])}); repaired on retry {pe['repaired_cases']}, unrecovered "
         f"{pe['unrecovered_cases']}; failed attempts {pe['failed_attempts']}"
@@ -501,6 +505,7 @@ def main(argv: list[str] | None = None) -> int:
     base_url: str | None = None
     temperature: float | None = None
     prompt_cache: bool | None = None
+    keep_tool_results: int | None = None
     if mode == "configured":
         from app.agent.llm import LLMConfigError, resolve_llm_config
 
@@ -516,6 +521,7 @@ def main(argv: list[str] | None = None) -> int:
         from app.config import get_settings
 
         prompt_cache = get_settings().llm_prompt_cache
+        keep_tool_results = get_settings().llm_keep_tool_results
     elif mode == "fake":
         provider, model = "fake", "fake-review (stub)"
     else:
@@ -538,7 +544,7 @@ def main(argv: list[str] | None = None) -> int:
         return 3
     report = build_report(results, mode=mode, provider=provider, model=model, base_url=base_url,
                           dataset=args.dataset, dataset_sha=sha, all_cases=all_cases, scoring=scoring, args=args,
-                          temperature=temperature, prompt_cache=prompt_cache)
+                          temperature=temperature, prompt_cache=prompt_cache, keep_tool_results=keep_tool_results)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(summary_table(report))

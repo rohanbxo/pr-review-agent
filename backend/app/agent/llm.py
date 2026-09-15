@@ -94,15 +94,41 @@ def default_http_async_client() -> httpx.AsyncClient | None:
     return None
 
 
+def _chat_openai_class():
+    """ChatOpenAI that keeps block-level ``cache_control`` on EVERY message role.
+
+    langchain-openai rebuilds tool-message content blocks keeping only ``type``/``text``, which
+    silently drops a ``cache_control`` breakpoint placed on a tool result (app.agent.context puts one
+    on the newest stub). Chat-completions payload messages map 1:1 onto the input messages, so the
+    breakpoint is re-attached by position. Content text is untouched."""
+    from langchain_openai import ChatOpenAI
+
+    class CacheAwareChatOpenAI(ChatOpenAI):
+        def _get_request_payload(self, input_, *, stop=None, **kwargs):
+            payload = super()._get_request_payload(input_, stop=stop, **kwargs)
+            messages = self._convert_input(input_).to_messages()
+            wire = payload.get("messages")
+            if not isinstance(wire, list) or len(wire) != len(messages):
+                return payload
+            for lc, out in zip(messages, wire):
+                blocks = lc.content if isinstance(lc.content, list) else []
+                if any(isinstance(b, dict) and "cache_control" in b for b in blocks):
+                    out["content"] = [{"type": "text", "text": b.get("text", ""), "cache_control": b["cache_control"]}
+                                      if isinstance(b, dict) and "cache_control" in b
+                                      else ({"type": "text", "text": b.get("text", "")} if isinstance(b, dict) else b)
+                                      for b in blocks]
+            return payload
+
+    return CacheAwareChatOpenAI
+
+
 def build_llm(cfg: LLMConfig) -> BaseChatModel:
     if cfg.provider == "openai_compatible":
-        from langchain_openai import ChatOpenAI
-
         kwargs: dict[str, Any] = {}
         http_client = default_http_async_client()
         if http_client is not None:
             kwargs["http_async_client"] = http_client
-        return ChatOpenAI(
+        return _chat_openai_class()(
             model=cfg.model,
             base_url=cfg.base_url,
             api_key=cfg.api_key,
@@ -128,41 +154,6 @@ def build_llm(cfg: LLMConfig) -> BaseChatModel:
 def get_llm() -> BaseChatModel:
     """The review model as configured in settings (used by the background runner)."""
     return build_llm(resolve_llm_config())
-
-
-CACHE_CONTROL = {"type": "ephemeral"}
-
-
-def with_conversation_cache(runnable: Runnable, llm: BaseChatModel) -> Runnable:
-    """Bind top-level ``cache_control`` so the provider caches the WHOLE request prefix up to the
-    last cacheable block -- tools, system, brief and every tool result so far. Each tool round then
-    reads everything before it from cache and writes only what it added. Nothing the model sees
-    changes: no message content is edited, only a request-level field is added.
-
-    Verified on OpenRouter -> anthropic/claude-haiku-4.5 (Amazon Bedrock) by probe, 2026-09-16:
-    * top-level ``cache_control`` alone rolls: call 2 read all 23,159 tokens of call 1, wrote 1,866;
-    * top-level combined with an explicit block breakpoint does NOT roll (only the explicit block
-      was cached), so no explicit breakpoints are used anywhere;
-    * a request with a different tool list (synthesize) reads nothing from this cache, so bind
-      this to the analyze calls only -- on synthesize it would buy a 1.25x write nobody reads.
-
-    ChatOpenAI sends it via ``extra_body`` (OpenRouter's top-level field). ChatAnthropic accepts a
-    ``cache_control`` call kwarg: top-level on the direct API, expanded to the last eligible block
-    on other transports. Other chat models (test fakes) are returned unchanged.
-    LLM_PROMPT_CACHE=false returns ``runnable`` unchanged, i.e. the exact uncached request."""
-    if not get_settings().llm_prompt_cache:
-        return runnable
-    try:
-        from langchain_openai import ChatOpenAI
-    except ImportError:  # pragma: no cover
-        ChatOpenAI = None  # type: ignore[assignment]
-    from langchain_anthropic import ChatAnthropic
-
-    if ChatOpenAI is not None and isinstance(llm, ChatOpenAI):
-        return runnable.bind(extra_body={"cache_control": CACHE_CONTROL})
-    if isinstance(llm, ChatAnthropic):
-        return runnable.bind(cache_control=CACHE_CONTROL)
-    return runnable
 
 
 def message_text(message: Any) -> str:

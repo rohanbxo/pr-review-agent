@@ -61,9 +61,13 @@ class Settings(BaseSettings):
     # (OpenRouter: "anthropic/<model>"), so openai_compatible has no default -- see app/agent/llm.py.
     agent_model: str = Field(default="", validation_alias=AliasChoices("AGENT_MODEL", "LLM_MODEL", "agent_model"))
     llm_max_tool_rounds: int = 12
-    # Cache the growing conversation on analyze calls (top-level cache_control; see
-    # app/agent/llm.py:with_conversation_cache). Changes cost, never what the model sees.
+    # Prompt-cache breakpoints on the brief and the newest trimmed stub (app/agent/context.py).
+    # Changes cost, never what the model sees.
     llm_prompt_cache: bool = True
+    # Context hygiene: the N most recent tool results are sent in full; older ones become a stub
+    # (tool, args, size). The brief with every patch is never trimmed. This DOES change what the
+    # model sees, so it is recorded in eval reports (meta.keep_tool_results) and is compared.
+    llm_keep_tool_results: int = Field(default=2, ge=0)
     # 0 by default: at non-zero temperature case-level differences between runs are sampling
     # noise and no A/B is interpretable. Recorded in every eval report (meta.temperature).
     llm_temperature: float = 0.0

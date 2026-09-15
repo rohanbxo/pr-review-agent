@@ -1,5 +1,6 @@
 """The LangGraph review agent and its runner, with a scripted fake chat model (no network)."""
 
+import json
 import uuid
 
 import pytest
@@ -291,3 +292,44 @@ def test_installed_langfuse_handler_reads_our_metadata_keys():
     attrs = h._parse_langfuse_trace_attributes(
         metadata={"langfuse_user_id": "42", "langfuse_session_id": "run-1"}, tags=None)
     assert attrs["user_id"] == "42" and attrs["session_id"] == "run-1"
+
+
+async def test_graph_trims_old_tool_results_in_model_view_but_keeps_full_state(monkeypatch):
+    """Four read_file rounds with keep=2: later analyze calls and synthesize see stubs for the
+    oldest results; the brief with its patch is intact; the recorded steps keep full results."""
+    from langchain_core.messages import HumanMessage, ToolMessage
+
+    from app.agent.llm import message_text
+    from app.config import get_settings
+
+    monkeypatch.setenv("LLM_KEEP_TOOL_RESULTS", "2")
+    get_settings.cache_clear()
+    read = lambda: ai("again", [tool_call("read_file", {"path": "src/calc.py"})])  # noqa: E731
+    llm = ScriptedChatModel(script=sequence_script(read(), read(), read(), read(), ai("done"), review(GOOD)))
+    steps = []
+
+    async def on_step(ev):
+        steps.append(ev)
+
+    try:
+        outcome = await review_pull_request(repo=CASE["repo"], pr_number=CASE["pr_number"], client=client_for(CASE),
+                                            llm=llm, on_step=on_step)
+    finally:
+        get_settings.cache_clear()
+    assert outcome.result.findings
+
+    analyze_calls = [c for c in llm.calls if not c.structured]
+    last = analyze_calls[-1].messages  # 4 tool results so far
+    tool_msgs = [m for m in last if isinstance(m, ToolMessage)]
+    assert len(tool_msgs) == 4
+    assert all("Earlier tool result removed" in message_text(m) for m in tool_msgs[:2])
+    assert all("range(len(values) - 1)" in message_text(m) for m in tool_msgs[2:])
+    brief = next(m for m in last if isinstance(m, HumanMessage))
+    assert "range(len(values) - 1)" in message_text(brief)  # patch never trimmed
+
+    synth = llm.calls[-1]
+    assert synth.structured
+    assert sum("Earlier tool result removed" in message_text(m) for m in synth.messages if isinstance(m, ToolMessage)) == 2
+
+    tool_steps = [s for s in steps if s.name == "tools"]
+    assert all("Earlier tool result removed" not in json.dumps(s.output) for s in tool_steps)  # state is full

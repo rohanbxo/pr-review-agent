@@ -33,7 +33,8 @@ from langgraph.graph import END, START, StateGraph, add_messages
 from pydantic import ValidationError
 
 from app.agent.github_client import CallRecord, ReadOnlyGitHubClient
-from app.agent.llm import structured_output, with_conversation_cache
+from app.agent.context import model_view
+from app.agent.llm import structured_output
 from app.agent.prompts import (
     REPAIR_INSTRUCTION,
     SYNTHESIZE_INSTRUCTION,
@@ -145,9 +146,9 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
     pr_ref = PRRef(repo="", pr_number=0)
     tools = build_tools(client, pr_ref)
     tools_by_name = {t.name: t for t in tools}
-    # Rolling prompt cache on analyze only: synthesize binds a different tool list, which cannot
-    # read this cache (verified), so caching it would only pay the write premium.
-    analyst = with_conversation_cache(llm.bind_tools(tools), llm)
+    analyst = llm.bind_tools(tools)
+    settings = get_settings()
+    keep = settings.llm_keep_tool_results
 
     async def fetch_context(state: ReviewState) -> dict:
         pr_ref.repo, pr_ref.pr_number = state["repo"], state["pr_number"]
@@ -172,7 +173,9 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
         }
 
     async def analyze(state: ReviewState, config: RunnableConfig) -> dict:
-        response = await analyst.ainvoke(state["messages"], config)
+        # The model sees a trimmed view; state keeps the full history (app/agent/context.py).
+        view = model_view(state["messages"], keep=keep, cache=settings.llm_prompt_cache)
+        response = await analyst.ainvoke(view, config)
         return {"messages": [response], "usage": usage_of(response)}
 
     async def run_tools(state: ReviewState, config: RunnableConfig) -> dict:
@@ -198,7 +201,9 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
 
     async def synthesize(state: ReviewState, config: RunnableConfig) -> dict:
         structured = structured_output(llm, ReviewResult)
-        messages = _close_dangling_tool_calls(list(state["messages"]))
+        # Same trimmed view as analyze, without cache breakpoints: synthesize binds a different
+        # tool list, so it can never read the analyze cache (measured) and a write would be wasted.
+        messages = model_view(_close_dangling_tool_calls(list(state["messages"])), keep=keep, cache=False)
         messages.append(HumanMessage(content=SYNTHESIZE_INSTRUCTION))
         usage = dict(_EMPTY_USAGE)
         parsed: ReviewResult | None = None

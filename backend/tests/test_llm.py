@@ -184,50 +184,70 @@ async def test_unrecoverable_parse_failure_raises_with_count(settings_env, monke
     assert (info.value.parse_failures, info.value.attempts) == (2, 2)
 
 
-# --- prompt caching: rolling, analyze calls only ------------------------------------------------
+# --- prompt caching with context trimming -------------------------------------------------------
 
 def _is_synth(body: dict) -> bool:
     return [t["function"]["name"] for t in body.get("tools") or []] == ["ReviewResult"]
 
 
-async def test_analyze_calls_carry_top_level_cache_control_and_synthesize_does_not(settings_env, monkeypatch):
+async def test_breakpoint_on_brief_never_top_level_and_none_on_synthesize(settings_env, monkeypatch):
     stub = OpenAIStub()
     await _review_with_stub(settings_env, monkeypatch, stub)
     analyze = [r["body"] for r in stub.requests if not _is_synth(r["body"])]
     synth = [r["body"] for r in stub.requests if _is_synth(r["body"])]
-    assert len(analyze) == 2 and len(synth) == 1
+    assert analyze and synth
     for body in analyze:
-        assert body["cache_control"] == {"type": "ephemeral"}   # rolls to the last cacheable block
-    for body in synth:
-        assert "cache_control" not in body  # a different tool list can't read the cache: no write premium
-    # No explicit per-block breakpoints anywhere: combined with top-level they stop it rolling (probe).
-    for body in analyze + synth:
-        assert "cache_control" not in json.dumps(body["messages"])
+        assert "cache_control" not in body  # top-level + explicit breakpoints don't mix (probe)
+        brief = next(m for m in body["messages"] if m["role"] == "user")
+        assert brief["content"][0]["cache_control"] == {"type": "ephemeral"}
+    for body in synth:  # different tool list: the cache can't be read, so no breakpoints at all
+        assert "cache_control" not in json.dumps(body)
 
 
 async def test_caching_never_changes_what_the_model_sees(settings_env, monkeypatch):
-    """Same case with LLM_PROMPT_CACHE on and off: messages and tools byte-identical."""
+    """LLM_PROMPT_CACHE on vs off: identical text and tools; only breakpoint markers differ."""
+    def texts(stub):
+        out = []
+        for r in stub.requests:
+            b = r["body"]
+            msgs = []
+            for m in b["messages"]:
+                c = m.get("content")
+                msgs.append((m["role"], c if isinstance(c, str) or c is None else "".join(x["text"] for x in c)))
+            out.append((msgs, b.get("tools"), b.get("tool_choice")))
+        return out
+
     on = OpenAIStub()
     await _review_with_stub(settings_env, monkeypatch, on)
     off = OpenAIStub()
     settings_env(LLM_PROMPT_CACHE="false")
     await _review_with_stub(settings_env, monkeypatch, off)
-    assert all("cache_control" not in r["body"] for r in off.requests)
-    strip = lambda rs: [{k: v for k, v in r["body"].items() if k != "cache_control"} for r in rs]  # noqa: E731
-    assert strip(on.requests) == strip(off.requests)
+    assert "cache_control" not in json.dumps([r["body"] for r in off.requests])
+    assert texts(on) == texts(off)
 
 
-def test_chat_anthropic_direct_gets_top_level_cache_control(settings_env):
-    from langchain_core.messages import HumanMessage, SystemMessage
+def test_cache_aware_chat_openai_keeps_breakpoint_on_tool_message(settings_env):
+    from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
-    from app.agent.llm import with_conversation_cache
-
-    settings_env(LLM_PROVIDER="anthropic", ANTHROPIC_API_KEY="sk-ant-test")
+    settings_env(LLM_API_KEY="k", AGENT_MODEL="m")
     model = build_llm(resolve_llm_config())
-    bound = with_conversation_cache(model, model)
-    payload = model._get_request_payload([SystemMessage("sys"), HumanMessage("brief")], **bound.kwargs)
-    assert payload["cache_control"] == {"type": "ephemeral"}
-    assert "cache_control" not in json.dumps(payload["messages"])
+    msgs = [SystemMessage("sys"), HumanMessage("brief"),
+            AIMessage("", tool_calls=[{"name": "read_file", "args": {"path": "a"}, "id": "c1"}]),
+            ToolMessage([{"type": "text", "text": "stub", "cache_control": {"type": "ephemeral"}}], tool_call_id="c1")]
+    wire = model._get_request_payload(msgs)["messages"]
+    assert wire[3]["role"] == "tool"
+    assert wire[3]["content"] == [{"type": "text", "text": "stub", "cache_control": {"type": "ephemeral"}}]
+    assert wire[1]["content"] == "brief"  # unmarked messages untouched
+
+
+def test_chat_anthropic_keeps_breakpoint_on_tool_result():
+    from langchain_anthropic.chat_models import _format_messages
+    from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+
+    msgs = [HumanMessage("brief"), AIMessage("", tool_calls=[{"name": "read_file", "args": {}, "id": "c1"}]),
+            ToolMessage([{"type": "text", "text": "stub", "cache_control": {"type": "ephemeral"}}], tool_call_id="c1")]
+    _system, formatted = _format_messages(msgs)
+    assert "cache_control" in json.dumps(formatted[-1])
 
 
 # --- temperature ---------------------------------------------------------------------------------
