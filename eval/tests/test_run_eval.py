@@ -187,6 +187,22 @@ def test_provider_and_model_overrides_are_recorded(tmp_path, llm_env, monkeypatc
     assert captured["llm_config"].provider == "anthropic"
 
 
+def test_rescore_recomputes_metrics_and_keeps_provenance(tmp_path):
+    ds = _dataset(tmp_path, [CASE])
+    src = tmp_path / "fake-src.json"
+    assert R.main(["--llm", "fake", "--dataset", str(ds), "--report", str(src),
+                   "--narrow-min-lines", "1"]) == 0
+    dst = tmp_path / "fake-rescored.json"
+    assert R.main(["--rescore", str(src), "--report", str(dst)]) == 0
+    a, b = (json.loads(p.read_text(encoding="utf-8")) for p in (src, dst))
+    assert a["meta"]["scoring"]["narrow_min_lines"] == 1 and b["meta"]["scoring"]["narrow_min_lines"] == 3
+    assert b["meta"]["rescored_from"]["scoring"] == a["meta"]["scoring"]
+    for k in ("provider", "model", "dataset_sha256"):
+        assert a["meta"][k] == b["meta"][k]
+    assert a["cases"] == b["cases"]
+    assert R.main(["--rescore", str(src), "--report", str(src)]) == 2  # never overwrites the source
+
+
 class RateLimitError(Exception):
     """Same class name as openai.RateLimitError / anthropic.RateLimitError."""
     status_code = 429

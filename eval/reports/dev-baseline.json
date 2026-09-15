@@ -25,19 +25,20 @@
       "none": 35
     },
     "scoring": {
-      "scoring_version": 2,
+      "scoring_version": 3,
       "tolerance_lines": 5,
       "narrow_max_lines": 30,
       "narrow_span_fraction": 0.25,
+      "narrow_min_lines": 3,
       "detection_rule": "medium+ AND same file AND range overlap within tolerance_lines",
-      "localisation_rule": "detection AND finding_width <= max(bug_width, min(narrow_max_lines, narrow_span_fraction * changed_line_span))",
+      "localisation_rule": "detection AND finding_width <= max(bug_width, narrow_min_lines, min(narrow_max_lines, narrow_span_fraction * changed_line_span))",
       "changed_line_span": "max - min + 1 over the head lines the expected file's patch adds, or deletes next to; context lines excluded"
     },
     "limit": null,
     "splits": null,
     "concurrency": 4,
-    "git_sha": "5d30e6a80aa719b05b7789f860cc5207d67b518c",
-    "timestamp": "2026-09-15T19:21:58+00:00",
+    "git_sha": "2194a105de5e0f9bce98109f31dc2aacf68a7b30",
+    "timestamp": "2026-09-15T19:39:26+00:00",
     "python": "3.12.13"
   },
   "parse_errors": {
@@ -239,7 +240,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000361,
+      "duration_s": 0.000354,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -305,7 +306,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000138,
+      "duration_s": 0.000147,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -360,7 +361,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00012,
+      "duration_s": 4.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -470,7 +471,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000401,
+      "duration_s": 0.000307,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -525,7 +526,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9e-05,
+      "duration_s": 7.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -580,7 +581,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000144,
+      "duration_s": 0.00015,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -646,7 +647,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.0001,
+      "duration_s": 8.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -745,7 +746,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000261,
+      "duration_s": 0.000246,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -811,7 +812,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000105,
+      "duration_s": 9.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -855,7 +856,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.6e-05,
+      "duration_s": 4.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -899,7 +900,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000231,
+      "duration_s": 0.000217,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -998,7 +999,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000448,
+      "duration_s": 0.000389,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1042,7 +1043,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.2e-05,
+      "duration_s": 5.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1141,7 +1142,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000462,
+      "duration_s": 0.000422,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1207,7 +1208,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000245,
+      "duration_s": 0.000186,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1251,7 +1252,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000123,
+      "duration_s": 0.000107,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1295,7 +1296,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.1e-05,
+      "duration_s": 5.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1339,7 +1340,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.3e-05,
+      "duration_s": 6.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1383,7 +1384,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.8e-05,
+      "duration_s": 0.000132,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1427,7 +1428,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.2e-05,
+      "duration_s": 8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1471,7 +1472,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.2e-05,
+      "duration_s": 5.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1515,7 +1516,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000214,
+      "duration_s": 0.000184,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1559,7 +1560,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.8e-05,
+      "duration_s": 3.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1603,7 +1604,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.4e-05,
+      "duration_s": 5.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1647,7 +1648,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.9e-05,
+      "duration_s": 7.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1706,7 +1707,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000173,
+      "duration_s": 0.000172,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1754,7 +1755,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.2e-05,
+      "duration_s": 3.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1802,7 +1803,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.2e-05,
+      "duration_s": 2.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1861,7 +1862,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000303,
+      "duration_s": 0.000275,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1920,7 +1921,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000186,
+      "duration_s": 0.000189,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2001,7 +2002,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000339,
+      "duration_s": 0.000328,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2038,7 +2039,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000249,
+      "duration_s": 0.000265,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2086,7 +2087,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000135,
+      "duration_s": 0.000126,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2145,7 +2146,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000167,
+      "duration_s": 0.000169,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2193,7 +2194,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.8e-05,
+      "duration_s": 5.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2230,7 +2231,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.6e-05,
+      "duration_s": 7.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2311,7 +2312,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000121,
+      "duration_s": 0.00012,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2510,7 +2511,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000503,
+      "duration_s": 0.000482,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2547,7 +2548,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.4e-05,
+      "duration_s": 4.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2606,7 +2607,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000108,
+      "duration_s": 0.000106,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2665,7 +2666,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000144,
+      "duration_s": 0.000193,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2702,7 +2703,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.4e-05,
+      "duration_s": 2.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2739,7 +2740,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.6e-05,
+      "duration_s": 2.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2787,7 +2788,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000165,
+      "duration_s": 0.000153,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2824,7 +2825,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.3e-05,
+      "duration_s": 5.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2883,7 +2884,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000171,
+      "duration_s": 0.000159,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2931,7 +2932,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000125,
+      "duration_s": 0.000119,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3001,7 +3002,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000351,
+      "duration_s": 0.000219,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3038,7 +3039,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.7e-05,
+      "duration_s": 4.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3097,7 +3098,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000134,
+      "duration_s": 0.000135,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3204,7 +3205,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00018,
+      "duration_s": 0.000161,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3241,7 +3242,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3.1e-05,
+      "duration_s": 3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3385,7 +3386,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.7e-05,
+      "duration_s": 9.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3422,7 +3423,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.4e-05,
+      "duration_s": 6.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3459,7 +3460,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000123,
+      "duration_s": 0.000124,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,

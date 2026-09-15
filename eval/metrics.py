@@ -37,7 +37,10 @@ from dataclasses import asdict, dataclass
 DEFAULT_TOLERANCE = 5
 DEFAULT_NARROW_MAX_LINES = 30
 DEFAULT_NARROW_SPAN_FRACTION = 0.25
-SCORING_VERSION = 2
+DEFAULT_NARROW_MIN_LINES = 3
+# v2 -> v3: localisation limit gained a 3-line floor. Under v2 a 2-line pin on a 6-line change
+# (limit 1.5) scored as a shrug, i.e. the right answer scored zero.
+SCORING_VERSION = 3
 
 SEVERITY_RANK = {"low": 0, "medium": 1, "high": 2, "critical": 3}
 CLEAN_SPLITS = frozenset({"clean"})
@@ -49,18 +52,21 @@ class ScoringConfig:
     tolerance_lines: int = DEFAULT_TOLERANCE
     narrow_max_lines: int = DEFAULT_NARROW_MAX_LINES
     narrow_span_fraction: float = DEFAULT_NARROW_SPAN_FRACTION
+    narrow_min_lines: int = DEFAULT_NARROW_MIN_LINES
 
     def __post_init__(self) -> None:
-        if self.tolerance_lines < 0 or self.narrow_max_lines < 1 or not 0 < self.narrow_span_fraction <= 1:
+        if (self.tolerance_lines < 0 or self.narrow_max_lines < 1 or not 0 < self.narrow_span_fraction <= 1
+                or not 1 <= self.narrow_min_lines <= self.narrow_max_lines):
             raise ValueError(f"invalid scoring config: {self}")
 
     def narrow_limit(self, bug_width: int, changed_line_span: int) -> float:
         """Widest finding range (in lines) that still counts as a pin rather than a shrug.
 
         ``min(narrow_max_lines, narrow_span_fraction * changed_line_span)``: thirty lines on a
-        small change is a shrug, on a large one a real pin. Floored at the bug's own width,
-        otherwise a one-line change (limit 0.25) or a multi-line bug could never be localised."""
-        return max(float(bug_width),
+        small change is a shrug, on a large one a real pin. Floored at the bug's own width (a
+        multi-line bug must be coverable) and at ``narrow_min_lines`` (on a tiny change a 2-line
+        pin on the bug is correct localisation, not a shrug)."""
+        return max(float(bug_width), float(self.narrow_min_lines),
                    min(float(self.narrow_max_lines), self.narrow_span_fraction * changed_line_span))
 
     def as_dict(self) -> dict:
@@ -68,8 +74,8 @@ class ScoringConfig:
             "scoring_version": SCORING_VERSION,
             **asdict(self),
             "detection_rule": "medium+ AND same file AND range overlap within tolerance_lines",
-            "localisation_rule": ("detection AND finding_width <= max(bug_width, min(narrow_max_lines, "
-                                  "narrow_span_fraction * changed_line_span))"),
+            "localisation_rule": ("detection AND finding_width <= max(bug_width, narrow_min_lines, "
+                                  "min(narrow_max_lines, narrow_span_fraction * changed_line_span))"),
             "changed_line_span": ("max - min + 1 over the head lines the expected file's patch adds, "
                                   "or deletes next to; context lines excluded"),
         }

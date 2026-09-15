@@ -52,22 +52,32 @@ def test_severity_threshold():
 @pytest.mark.parametrize("bug_width,span,limit", [
     (1, 3000, 30.0),    # large change: the 30-line cap binds
     (1, 40, 10.0),      # 25% of a 40-line change
-    (1, 1, 1.0),        # one-line change: floored at the bug width, not 0.25
+    (1, 1, 3.0),        # one-line change: the 3-line floor, not 0.25
+    (1, 6, 3.0),        # v2 gave 1.5 here, so a 2-line pin on the bug scored as a shrug
     (12, 20, 12.0),     # multi-line bug wider than 25% of span: an exact pin still counts
-    (1, 0, 1.0),
+    (1, 0, 3.0),
 ])
 def test_narrow_limit(bug_width, span, limit):
     assert CFG.narrow_limit(bug_width, span) == limit
 
 
+def test_two_line_pin_on_a_six_line_change_localises():
+    """The requests-2115 case from the first dev run: correct localisation must not score zero."""
+    out = M.case_outcome(R("injected", [F(start=443, end=444)], expected=E(start=443), span=6))
+    assert out["detected"] and out["localised"]
+    v2 = M.ScoringConfig(narrow_min_lines=1)
+    assert not M.case_outcome(R("injected", [F(start=443, end=444)], expected=E(start=443), span=6), v2)["localised"]
+
+
 def test_scoring_config_validates_and_serialises():
     for bad in ({"tolerance_lines": -1}, {"narrow_max_lines": 0}, {"narrow_span_fraction": 0},
-                {"narrow_span_fraction": 1.5}):
+                {"narrow_span_fraction": 1.5}, {"narrow_min_lines": 0}, {"narrow_min_lines": 31}):
         with pytest.raises(ValueError):
             M.ScoringConfig(**bad)
     d = M.ScoringConfig(narrow_max_lines=20).as_dict()
-    assert d["narrow_max_lines"] == 20 and d["tolerance_lines"] == 5 and d["scoring_version"] == 2
-    assert "localisation_rule" in d and "detection_rule" in d
+    assert d["narrow_max_lines"] == 20 and d["tolerance_lines"] == 5 and d["scoring_version"] == 3
+    assert d["narrow_min_lines"] == 3
+    assert "narrow_min_lines" in d["localisation_rule"] and "detection_rule" in d
 
 
 def test_whole_file_finding_detects_but_does_not_localise():

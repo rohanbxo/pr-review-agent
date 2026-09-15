@@ -69,7 +69,14 @@ $PY -m eval.run_eval --llm fake --limit 3 --report eval/reports/smoke-fake.json
 
 Other flags: `--splits injected reverted`, `--limit N` (round-robin across splits),
 `--case-timeout S`, `--max-tool-rounds N`, and the scoring thresholds `--tolerance N` (default 5),
-`--narrow-max-lines N` (default 30), `--narrow-span-fraction F` (default 0.25).
+`--narrow-max-lines N` (default 30), `--narrow-span-fraction F` (default 0.25), `--narrow-min-lines N`
+(default 3).
+
+`--rescore REPORT --report OUT` re-applies the current scoring to an existing report's stored
+findings. It calls no model and is exact, since scoring is a pure function of the findings.
+Provider, model, dataset hash and cases carry over unchanged. `meta.rescored_from` records the
+original scoring. Use it after a scoring change so old runs can be compared under the new rule
+without paying for them again.
 
 ## Dev subset
 
@@ -108,10 +115,13 @@ Then the four groups, always **in this order** — never quote one without the o
 3. **`localisation`** — `localisation_rate_of_detected` overall, `by_split`, `by_bug_kind`, as a
    share of **detected** bugs (the denominator is `detected`; `localised_share_of_all_bugs` is
    also given). A detecting finding localises the bug if its range is also narrow:
-   `width <= max(bug_width, min(narrow_max_lines, narrow_span_fraction × changed_line_span))`,
-   where `changed_line_span` is the head-line span of the lines the expected file's patch changes.
-   Thirty lines on a 40-line change is a shrug; on a 3000-line change it is a real pin. The floor
-   at the bug's own width means a finding that exactly covers the bug always counts.
+   `width <= max(bug_width, narrow_min_lines, min(narrow_max_lines, narrow_span_fraction × changed_line_span))`
+   (scoring v3), where `changed_line_span` is the head-line span of the lines the expected file's
+   patch changes. Thirty lines on a 40-line change is a shrug; on a 3000-line change it is a real
+   pin. The two floors:
+   - **The bug's own width:** a finding that exactly covers the bug always counts.
+   - **3 lines:** v2 lacked this floor. There, a 2-line pin on the bug in a 6-line change had a
+     limit of 1.5, so the correct answer scored as a shrug.
 4. **`cost`** — mean and p95 seconds per review, mean tokens (total / input / output).
 
 Plus `errors` (an errored case counts as a *miss* on bug splits and as a *false positive* on

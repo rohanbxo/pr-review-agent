@@ -311,6 +311,34 @@ def build_report(results: list[dict], *, mode: str, provider: str, model: str, b
     return report
 
 
+def rescore(source: Path, dest: Path | None, scoring: M.ScoringConfig) -> int:
+    """Recompute every metric from a report's stored per-case findings under ``scoring``.
+
+    Scoring is a pure function of the findings, so this is exact: no model is called and provider,
+    model, dataset hash and cases are carried over unchanged. ``meta.scoring`` is replaced and
+    ``meta.rescored_from`` records the original scoring, so the output obeys the comparison rule."""
+    if dest is None or dest.resolve() == source.resolve():
+        print("error: --rescore needs a different --report path (never overwrite the source)", file=sys.stderr)
+        return 2
+    old = json.loads(source.read_text(encoding="utf-8"))
+    results = old["cases"]
+    metrics = M.compute_report_metrics(results, scoring)
+    meta = dict(old["meta"])
+    meta["rescored_from"] = {"report": str(source), "scoring": old["meta"].get("scoring"),
+                             "timestamp": meta.get("timestamp")}
+    meta["scoring"] = metrics["scoring"]
+    meta["timestamp"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    report: dict = {"meta": meta, "parse_errors": metrics["parse_errors"]}
+    for key in ("false_positive_rate", "detection", "localisation", "cost", "errors"):
+        report[key] = metrics[key]
+    report["cases"] = results
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(summary_table(report))
+    print(f"\nrescored {source} -> {dest}")
+    return 0
+
+
 def _pct(x) -> str:
     return "  n/a" if x is None else f"{100 * x:5.1f}%"
 
@@ -327,7 +355,8 @@ def summary_table(report: dict) -> str:
         f"{pe['unrecovered_cases']}; failed attempts {pe['failed_attempts']}"
         + ("  <- if this is not ~0, every number below is noise" if flag else ""),
         f"scoring v{sc['scoring_version']}: tolerance={sc['tolerance_lines']} lines, narrow <= "
-        f"max(bug width, min({sc['narrow_max_lines']}, {sc['narrow_span_fraction']} x changed-line span))",
+        f"max(bug width, {sc.get('narrow_min_lines', '-')}, min({sc['narrow_max_lines']}, "
+        f"{sc['narrow_span_fraction']} x changed-line span))",
         f"dataset {m['dataset']}  sha256={m['dataset_sha256'][:12]}  evaluated={m['evaluated_counts']}",
         "",
         "1. False-positive rate on clean (any medium+ finding)",
@@ -387,6 +416,11 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
                     help="localisation: absolute cap on a finding's width")
     ap.add_argument("--narrow-span-fraction", type=float, default=M.DEFAULT_NARROW_SPAN_FRACTION,
                     help="localisation: cap as a fraction of the file's changed-line span")
+    ap.add_argument("--narrow-min-lines", type=int, default=M.DEFAULT_NARROW_MIN_LINES,
+                    help="localisation: the limit is never below this many lines")
+    ap.add_argument("--rescore", type=Path, default=None,
+                    help="re-apply the current scoring to an existing report's per-case findings; no model "
+                         "calls, provenance kept, written to --report")
     ap.add_argument("--case-timeout", type=float, default=600.0)
     ap.add_argument("--max-tool-rounds", type=int, default=None)
     ap.add_argument("--infra-retries", type=int, default=5,
@@ -400,10 +434,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     try:
         scoring = M.ScoringConfig(tolerance_lines=args.tolerance, narrow_max_lines=args.narrow_max_lines,
-                                  narrow_span_fraction=args.narrow_span_fraction)
+                                  narrow_span_fraction=args.narrow_span_fraction,
+                                  narrow_min_lines=args.narrow_min_lines)
     except ValueError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+    if args.rescore is not None:
+        return rescore(args.rescore, args.report, scoring)
     mode = "baseline" if args.baseline else args.llm
     if args.report is None:
         args.report = REPORTS / {"baseline": "baseline.json", "fake": "smoke-fake.json",

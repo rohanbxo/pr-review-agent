@@ -1,0 +1,2340 @@
+{
+  "meta": {
+    "llm": "configured",
+    "provider": "openai_compatible",
+    "model": "anthropic/claude-haiku-4.5",
+    "base_url": "https://openrouter.ai/api/v1",
+    "dataset": "eval\\data\\dev.jsonl",
+    "dataset_sha256": "13a3ef5c81cdc6d07c0ed1f292b410d80b45404736b66680c69b4b05283b6f17",
+    "dataset_counts": {
+      "injected": 15,
+      "reverted": 10,
+      "clean": 35
+    },
+    "evaluated_counts": {
+      "injected": 15,
+      "reverted": 10,
+      "clean": 35
+    },
+    "evaluated_by_bug_kind": {
+      "removed_none_guard": 4,
+      "off_by_one_range_len": 4,
+      "transposed_args": 3,
+      "flipped_comparison": 4,
+      "reverted_fix": 10,
+      "none": 35
+    },
+    "scoring": {
+      "scoring_version": 3,
+      "tolerance_lines": 5,
+      "narrow_max_lines": 30,
+      "narrow_span_fraction": 0.25,
+      "narrow_min_lines": 3,
+      "detection_rule": "medium+ AND same file AND range overlap within tolerance_lines",
+      "localisation_rule": "detection AND finding_width <= max(bug_width, narrow_min_lines, min(narrow_max_lines, narrow_span_fraction * changed_line_span))",
+      "changed_line_span": "max - min + 1 over the head lines the expected file's patch adds, or deletes next to; context lines excluded"
+    },
+    "limit": null,
+    "splits": null,
+    "concurrency": 2,
+    "git_sha": "5d30e6a80aa719b05b7789f860cc5207d67b518c",
+    "timestamp": "2026-09-15T19:39:26+00:00",
+    "python": "3.12.13",
+    "rescored_from": {
+      "report": "eval\\reports\\dev.json",
+      "scoring": {
+        "scoring_version": 2,
+        "tolerance_lines": 5,
+        "narrow_max_lines": 30,
+        "narrow_span_fraction": 0.25,
+        "detection_rule": "medium+ AND same file AND range overlap within tolerance_lines",
+        "localisation_rule": "detection AND finding_width <= max(bug_width, min(narrow_max_lines, narrow_span_fraction * changed_line_span))",
+        "changed_line_span": "max - min + 1 over the head lines the expected file's patch adds, or deletes next to; context lines excluded"
+      },
+      "timestamp": "2026-09-15T19:20:29+00:00"
+    }
+  },
+  "parse_errors": {
+    "cases_run": 60,
+    "cases_with_parse_failure": 0,
+    "case_rate": 0.0,
+    "repaired_cases": 0,
+    "unrecovered_cases": 0,
+    "failed_attempts": 0,
+    "case_ids": []
+  },
+  "false_positive_rate": {
+    "rate": 0.1714,
+    "false_positives": 6,
+    "cases": 35,
+    "errored_counted_as_fp": 0,
+    "mean_medium_plus_findings_per_clean_case": 0.2
+  },
+  "detection": {
+    "overall": {
+      "detection_rate": 0.76,
+      "detected": 19,
+      "cases": 25,
+      "errored": 0
+    },
+    "by_split": {
+      "injected": {
+        "detection_rate": 0.8667,
+        "detected": 13,
+        "cases": 15,
+        "errored": 0
+      },
+      "reverted": {
+        "detection_rate": 0.6,
+        "detected": 6,
+        "cases": 10,
+        "errored": 0
+      }
+    },
+    "by_bug_kind": {
+      "flipped_comparison": {
+        "detection_rate": 1.0,
+        "detected": 4,
+        "cases": 4,
+        "errored": 0
+      },
+      "off_by_one_range_len": {
+        "detection_rate": 0.75,
+        "detected": 3,
+        "cases": 4,
+        "errored": 0
+      },
+      "removed_none_guard": {
+        "detection_rate": 0.75,
+        "detected": 3,
+        "cases": 4,
+        "errored": 0
+      },
+      "reverted_fix": {
+        "detection_rate": 0.6,
+        "detected": 6,
+        "cases": 10,
+        "errored": 0
+      },
+      "transposed_args": {
+        "detection_rate": 1.0,
+        "detected": 3,
+        "cases": 3,
+        "errored": 0
+      }
+    }
+  },
+  "localisation": {
+    "overall": {
+      "localisation_rate_of_detected": 1.0,
+      "localised": 19,
+      "detected": 19,
+      "cases": 25,
+      "localised_share_of_all_bugs": 0.76
+    },
+    "by_split": {
+      "injected": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 13,
+        "detected": 13,
+        "cases": 15,
+        "localised_share_of_all_bugs": 0.8667
+      },
+      "reverted": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 6,
+        "detected": 6,
+        "cases": 10,
+        "localised_share_of_all_bugs": 0.6
+      }
+    },
+    "by_bug_kind": {
+      "flipped_comparison": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 4,
+        "detected": 4,
+        "cases": 4,
+        "localised_share_of_all_bugs": 1.0
+      },
+      "off_by_one_range_len": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 3,
+        "detected": 3,
+        "cases": 4,
+        "localised_share_of_all_bugs": 0.75
+      },
+      "removed_none_guard": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 3,
+        "detected": 3,
+        "cases": 4,
+        "localised_share_of_all_bugs": 0.75
+      },
+      "reverted_fix": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 6,
+        "detected": 6,
+        "cases": 10,
+        "localised_share_of_all_bugs": 0.6
+      },
+      "transposed_args": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 3,
+        "detected": 3,
+        "cases": 3,
+        "localised_share_of_all_bugs": 1.0
+      }
+    }
+  },
+  "cost": {
+    "cases_timed": 60,
+    "mean_seconds": 26.117,
+    "p95_seconds": 43.325,
+    "mean_total_tokens": 125075.067,
+    "mean_input_tokens": 123115.333,
+    "mean_output_tokens": 1959.733
+  },
+  "errors": {
+    "count": 0,
+    "by_split": {},
+    "infra_errors": 0,
+    "cases_retried_for_provider": 20,
+    "cases": []
+  },
+  "cases": [
+    {
+      "id": "flask-4580-removed_none_guard",
+      "split": "injected",
+      "repo": "pallets/flask",
+      "pr_number": 4580,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "src/flask/app.py",
+        "lines": {
+          "start": 1751,
+          "end": 1752
+        }
+      },
+      "expected_changed_line_span": 1972,
+      "findings": [
+        {
+          "file": "src/flask/app.py",
+          "lines": {
+            "start": 1766,
+            "end": 1772
+          },
+          "severity": "critical",
+          "title": "Invalid url_scheme parameter passed to url_adapter.build()",
+          "detail": "The code passes `url_scheme=_scheme` to `url_adapter.build()`, but Werkzeug's MapAdapter.build() method does not accept a `url_scheme` keyword argument. The old implementation in helpers.py (lines 1713-1745 in base) explicitly worked around this limitation by temporarily modifying the `url_adapter.url_scheme` attribute and restoring it in a finally block, with a comment stating 'the underlying Werkzeug router does not support overriding the scheme on a per build call basis.' This change will cause URL building to fail or ignore the custom scheme when `_scheme` is specified.",
+          "suggestion": "Replace the direct `.build()` call with the old pattern: temporarily modify `url_adapter.url_scheme` before calling `.build()` and restore it in a finally block, as shown in the original helpers.py implementation (lines 1713-1745 of base version)."
+        }
+      ],
+      "summary": "This PR moves the `url_for` function from `flask/helpers.py` to `Flask.url_for()` method on the app object, with `helpers.url_for` becoming a thin wrapper that delegates to `current_app.url_for()`. The refactoring has been implemented across 3 files with appropriate documentation updates.",
+      "risk": "high",
+      "duration_s": 32.073,
+      "usage": {
+        "input_tokens": 273811,
+        "output_tokens": 2178,
+        "total_tokens": 275989
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-108-removed_none_guard",
+      "split": "injected",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 108,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "more_itertools/more.py",
+        "lines": {
+          "start": 1100,
+          "end": 1101
+        }
+      },
+      "expected_changed_line_span": 1098,
+      "findings": [
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 1101,
+            "end": 1106
+          },
+          "severity": "critical",
+          "title": "always_iterable() returns wrong value for None",
+          "detail": "The function's docstring states that `always_iterable(None)` should return `()` (line 1071-1074), and the test at test_more.py line 946 expects this behavior. However, the implementation at lines 1101-1106 will return `(None,)` instead. Since `None` does not have the `__iter__` attribute, the condition `not hasattr(obj, '__iter__')` evaluates to True, causing the function to return `obj,` (wrapping None in a tuple) rather than the documented empty tuple.",
+          "suggestion": "Add an explicit check for `None` before line 1102: `if obj is None: return ()`. This should be the first check in the function body before the string/iterable checks."
+        }
+      ],
+      "summary": "This PR adds the `always_iterable()` function to convert any object into an iterable. The function has documentation, implementation, and tests. However, there is a critical logic error: the function returns `(None,)` instead of `()` for `None` inputs, contradicting both the docstring and the test expectations.",
+      "risk": "high",
+      "duration_s": 26.967,
+      "usage": {
+        "input_tokens": 125128,
+        "output_tokens": 1381,
+        "total_tokens": 126509
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-1868-off_by_one_range_len",
+      "split": "injected",
+      "repo": "networkx/networkx",
+      "pr_number": 1868,
+      "expected": {
+        "bug_kind": "off_by_one_range_len",
+        "file": "networkx/algorithms/richclub.py",
+        "lines": {
+          "start": 94,
+          "end": 94
+        }
+      },
+      "expected_changed_line_span": 98,
+      "findings": [
+        {
+          "file": "networkx/algorithms/richclub.py",
+          "lines": {
+            "start": 94,
+            "end": 94
+          },
+          "severity": "high",
+          "title": "Loop skips last element of nks, causing missing dictionary keys in result",
+          "detail": "The loop on line 94 uses `range(len(nks) - 1)` instead of `range(len(nks))`, which causes iteration to stop one element early. When nks has length n, this produces only n-1 iterations. Since each iteration adds one key-value pair to the rc dictionary (rc[d] = ...), the last degree level never gets added. This contradicts the test expectations in test_richclub3 and test_richclub4, which both expect rc to contain consecutive degree keys up to the maximum (e.g., test_richclub4 expects rc[0], rc[1], rc[2], rc[3], but this code would only produce rc[0], rc[1], rc[2]).",
+          "suggestion": "Change line 94 from `for d,nk in zip(range(len(nks) - 1),nks):` to `for d,nk in zip(range(len(nks)),nks):`"
+        }
+      ],
+      "summary": "This PR attempts to fix a boundary case in the rich club coefficient algorithm by replacing manual exception handling with decorators and adjusting the loop logic. However, the change from `range(len(nks))` to `range(len(nks) - 1)` on line 94 causes the last degree level to be omitted from the result dictionary, making the function return incomplete results that contradict the test expectations.",
+      "risk": "high",
+      "duration_s": 35.794,
+      "usage": {
+        "input_tokens": 44011,
+        "output_tokens": 3255,
+        "total_tokens": 47266
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-901-transposed_args",
+      "split": "injected",
+      "repo": "Textualize/rich",
+      "pr_number": 901,
+      "expected": {
+        "bug_kind": "transposed_args",
+        "file": "rich/segment.py",
+        "lines": {
+          "start": 361,
+          "end": 361
+        }
+      },
+      "expected_changed_line_span": 363,
+      "findings": [
+        {
+          "file": "rich/segment.py",
+          "lines": {
+            "start": 361,
+            "end": 361
+          },
+          "severity": "critical",
+          "title": "Swapped arguments in Segment constructor call",
+          "detail": "In the `remove_color` method, line 361 calls `cls(text, is_control, colorless_style)` but the Segment NamedTuple constructor expects arguments in the order: text, style, is_control. The second and third arguments are swapped, which will cause `is_control` (a boolean) to be assigned to the `style` field and `colorless_style` to be assigned to the `is_control` field. This breaks the entire no_color feature.",
+          "suggestion": "Change line 361 from `yield cls(text, is_control, colorless_style)` to `yield cls(text, colorless_style, is_control)`"
+        }
+      ],
+      "summary": "This PR adds a `no_color` argument to Console to support the NO_COLOR environment variable standard, allowing disabling of color output. It includes new methods in Segment and Style to remove colors from styled output. However, there is a critical bug in the `Segment.remove_color` method where constructor arguments are in the wrong order.",
+      "risk": "high",
+      "duration_s": 28.741,
+      "usage": {
+        "input_tokens": 210858,
+        "output_tokens": 1629,
+        "total_tokens": 212487
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-4132-flipped_comparison",
+      "split": "injected",
+      "repo": "networkx/networkx",
+      "pr_number": 4132,
+      "expected": {
+        "bug_kind": "flipped_comparison",
+        "file": "networkx/drawing/nx_pylab.py",
+        "lines": {
+          "start": 643,
+          "end": 643
+        }
+      },
+      "expected_changed_line_span": 2,
+      "findings": [
+        {
+          "file": "networkx/drawing/nx_pylab.py",
+          "lines": {
+            "start": 643,
+            "end": 643
+          },
+          "severity": "critical",
+          "title": "Inverted logic in edgelist empty check breaks edge drawing",
+          "detail": "Line 643 changed from 'if not edgelist or len(edgelist) == 0:' to 'if len(edgelist) != 0:', inverting the condition. The original logic returns early when edgelist is empty; the new logic returns early when edgelist is NOT empty. This causes the function to return without drawing when edges exist, and to attempt processing non-existent edges when the list is empty, leading to runtime errors.",
+          "suggestion": "Change line 643 back to check if the edgelist is empty: 'if not edgelist or len(edgelist) == 0:' (or the equivalent 'if len(edgelist) == 0:')"
+        }
+      ],
+      "summary": "This PR attempts to update draw_networkx to accept numpy arrays for edgelist and adds a test. However, it introduces a critical logic error in the edge-checking condition that inverts the original logic, causing the function to return early when edges exist and to attempt processing when edges are empty.",
+      "risk": "high",
+      "duration_s": 15.859,
+      "usage": {
+        "input_tokens": 69633,
+        "output_tokens": 1012,
+        "total_tokens": 70645
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-259-off_by_one_range_len",
+      "split": "injected",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 259,
+      "expected": {
+        "bug_kind": "off_by_one_range_len",
+        "file": "more_itertools/more.py",
+        "lines": {
+          "start": 570,
+          "end": 570
+        }
+      },
+      "expected_changed_line_span": 23,
+      "findings": [
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 570,
+            "end": 570
+          },
+          "severity": "critical",
+          "title": "Loop starts at index 1 instead of 0, preventing insertion at beginning of permutations",
+          "detail": "The loop `for j in range(1, len(permutation)):` skips index 0, which means elements can never be inserted at the start of a permutation. This breaks the algorithm's correctness and causes missing permutations in the output. For example, with input [1, 0, 1], the result will be missing (0, 1, 1) because the algorithm cannot generate a permutation starting with 0. The range should be `range(0, len(permutation))` to include all insertion positions.",
+          "suggestion": "Change `range(1, len(permutation))` to `range(0, len(permutation))`"
+        }
+      ],
+      "summary": "This PR refactors the `distinct_permutations` function to use an iterative insertion-based algorithm instead of the recursive approach, and updates documentation. However, the new implementation has a critical bug: the loop that inserts elements into current permutations starts at index 1 instead of index 0, preventing insertions at the beginning of permutations. This causes the function to generate incomplete and incorrect results.",
+      "risk": "high",
+      "duration_s": 39.032,
+      "usage": {
+        "input_tokens": 177943,
+        "output_tokens": 3898,
+        "total_tokens": 181841
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "typer-1035-flipped_comparison",
+      "split": "injected",
+      "repo": "tiangolo/typer",
+      "pr_number": 1035,
+      "expected": {
+        "bug_kind": "flipped_comparison",
+        "file": "typer/main.py",
+        "lines": {
+          "start": 1091,
+          "end": 1091
+        }
+      },
+      "expected_changed_line_span": 1146,
+      "findings": [
+        {
+          "file": "typer/main.py",
+          "lines": {
+            "start": 1090,
+            "end": 1094
+          },
+          "severity": "critical",
+          "title": "Inverted logic in `_is_linux_or_bsd()` function",
+          "detail": "The function has a logic error on line 1091. The condition `if platform.system() != \"Linux\": return True` returns True for ALL non-Linux systems (macOS, Windows, etc.), when it should only return True for Linux and BSD systems. This causes the `launch()` function at line 1134 to incorrectly attempt using `xdg-open` on systems like macOS and Windows where it doesn't exist, breaking the intended cross-platform behavior shown in the tests.",
+          "suggestion": "Replace the function with correct logic: `def _is_linux_or_bsd() -> bool:\\n    system = platform.system()\\n    return system == \"Linux\" or \"BSD\" in system`"
+        }
+      ],
+      "summary": "This PR updates the `launch` function to handle URLs differently across operating systems to avoid printing unnecessary output. It moves the launch functionality from Click's implementation to Typer's own, with custom OS-specific handling. However, there is a critical logic error in the `_is_linux_or_bsd()` helper function that inverts the platform detection, causing incorrect behavior on non-Linux systems.",
+      "risk": "high",
+      "duration_s": 27.135,
+      "usage": {
+        "input_tokens": 137261,
+        "output_tokens": 1599,
+        "total_tokens": 138860
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-1834-off_by_one_range_len",
+      "split": "injected",
+      "repo": "Textualize/rich",
+      "pr_number": 1834,
+      "expected": {
+        "bug_kind": "off_by_one_range_len",
+        "file": "rich/palette.py",
+        "lines": {
+          "start": 76,
+          "end": 76
+        }
+      },
+      "expected_changed_line_span": 83,
+      "findings": [
+        {
+          "file": "rich/palette.py",
+          "lines": {
+            "start": 76,
+            "end": 76
+          },
+          "severity": "high",
+          "title": "Off-by-one error in palette color matching range",
+          "detail": "Line 76 uses `range(len(available_colors) - 1)` instead of `range(len(available_colors))`. This excludes the last color index from the palette matching algorithm. The original code at line 71 in the base version correctly used `range(len(self._colors))`. Now the last palette color will never be returned as a match, even when it is the closest match to the requested color.",
+          "suggestion": "Change line 76 from `min_index = min(range(len(available_colors) - 1), key=get_color_distance)` to `min_index = min(range(len(available_colors)), key=get_color_distance)`"
+        }
+      ],
+      "summary": "This PR converts instance methods decorated with `@lru_cache` to module-level functions with the decorator, which is the correct approach since `lru_cache` on instance methods causes memory leaks. However, there is a critical off-by-one error in the palette matching function that excludes the last color from consideration.",
+      "risk": "high",
+      "duration_s": 24.101,
+      "usage": {
+        "input_tokens": 103802,
+        "output_tokens": 1344,
+        "total_tokens": 105146
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-1278-flipped_comparison",
+      "split": "injected",
+      "repo": "pypa/packaging",
+      "pr_number": 1278,
+      "expected": {
+        "bug_kind": "flipped_comparison",
+        "file": "src/packaging/requirements.py",
+        "lines": {
+          "start": 164,
+          "end": 164
+        }
+      },
+      "expected_changed_line_span": 18,
+      "findings": [
+        {
+          "file": "src/packaging/requirements.py",
+          "lines": {
+            "start": 164,
+            "end": 164
+          },
+          "severity": "critical",
+          "title": "Inverted equality operator for extras comparison in __eq__",
+          "detail": "Line 164 uses `self_extras != other_extras` when it should use `self_extras == other_extras`. This inverts the logic, causing requirements with equivalent normalized extras (e.g., 'urllib3[secure]' and 'urllib3[SECURE]') to incorrectly compare as unequal. The base version correctly used `==`, and this PR introduced the inversion while normalizing the extras. The test at tests/test_requirements.py lines 42-46 and the assertion at line 736 (`assert req1 == req2`) would fail.",
+          "suggestion": "Change line 164 from `and self_extras != other_extras` to `and self_extras == other_extras`"
+        }
+      ],
+      "summary": "This PR normalizes extra names in requirements for comparison and hashing per PEP 685. However, there is a critical logic error in the `__eq__` method where the comparison operator for extras is inverted, causing requirements with equivalent normalized extras to incorrectly compare as unequal.",
+      "risk": "high",
+      "duration_s": 16.637,
+      "usage": {
+        "input_tokens": 52061,
+        "output_tokens": 1169,
+        "total_tokens": 53230
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-195-flipped_comparison",
+      "split": "injected",
+      "repo": "pypa/packaging",
+      "pr_number": 195,
+      "expected": {
+        "bug_kind": "flipped_comparison",
+        "file": "packaging/tags.py",
+        "lines": {
+          "start": 198,
+          "end": 198
+        }
+      },
+      "expected_changed_line_span": 32,
+      "findings": [
+        {
+          "file": "packaging/tags.py",
+          "lines": {
+            "start": 197,
+            "end": 200
+          },
+          "severity": "critical",
+          "title": "Inverted logic in x86_64 case breaks platform tag generation",
+          "detail": "The condition for x86_64 was incorrectly inverted. The original code at lines 198-201 was: `if version >= (10, 4): formats.extend([...]) else: return []`. The refactored code now has: `if version >= (10, 4): return [] formats.extend([...])`, which reverses the logic. When version >= (10, 4), it should extend formats and continue, not return an empty list. The correct refactoring should be: `if version < (10, 4): return []` followed by `formats.extend([...])`. This breaks platform tag generation for macOS x86_64 on versions 10.4+.",
+          "suggestion": "Change lines 198-200 to: `if version < (10, 4):\n            return []\n        formats.extend([\"intel\", \"fat64\", \"fat32\"])`"
+        }
+      ],
+      "summary": "This PR refactors `_mac_arch()` and `_mac_binary_formats()` in packaging/tags.py to use early returns instead of else blocks. While most of the refactoring is correct, the x86_64 case in `_mac_binary_formats()` has a critical logic error: the condition was inverted incorrectly, causing the function to return an empty list when it should extend formats for macOS versions 10.4 and later.",
+      "risk": "high",
+      "duration_s": 17.16,
+      "usage": {
+        "input_tokens": 27343,
+        "output_tokens": 1544,
+        "total_tokens": 28887
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-423-off_by_one_range_len",
+      "split": "injected",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 423,
+      "expected": {
+        "bug_kind": "off_by_one_range_len",
+        "file": "more_itertools/more.py",
+        "lines": {
+          "start": 601,
+          "end": 601
+        }
+      },
+      "expected_changed_line_span": 75,
+      "findings": [
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 594,
+            "end": 594
+          },
+          "severity": "critical",
+          "title": "Incorrect slice expression for array reversal in _full function",
+          "detail": "Line 594 uses `A[:i - size:-1]` to reverse `A[i + 1:]`, but this slice is mathematically incorrect. When i=0 and size=3, this evaluates to `A[:-3:-1]` which does not properly reverse the tail of the array. The correct slice to reverse elements from index i+1 to the end should be `A[size - 1:i:-1]`, which properly selects elements from the end going backward down to (but not including) index i, then reverses them with the step of -1.",
+          "suggestion": "Change line 594 from `A[i + 1:] = A[:i - size:-1]` to `A[i + 1:] = A[size - 1:i:-1]`"
+        },
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 632,
+            "end": 632
+          },
+          "severity": "critical",
+          "title": "Incorrect slice expression for array reversal in _partial function",
+          "detail": "Line 632 uses `head[:i - r:-1]` to reverse `head[i + 1:]`, but this slice is mathematically incorrect for the same reason as line 594. The correct slice to reverse the tail portion of head starting from index i+1 should be `head[len(head) - 1:i:-1]` or more clearly `head[r - 1:i:-1]` since head has length r.",
+          "suggestion": "Change line 632 from `tail += head[:i - r:-1]` to `tail += head[r - 1:i:-1]`"
+        }
+      ],
+      "summary": "This PR refactors the `distinct_permutations` function with new algorithm implementations using nested `_full` and `_partial` generator functions. However, there are critical bugs in the array slicing logic used to reverse array portions during permutation generation.",
+      "risk": "high",
+      "duration_s": 35.566,
+      "usage": {
+        "input_tokens": 268804,
+        "output_tokens": 3014,
+        "total_tokens": 271818
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-2636-transposed_args",
+      "split": "injected",
+      "repo": "pallets/flask",
+      "pr_number": 2636,
+      "expected": {
+        "bug_kind": "transposed_args",
+        "file": "flask/testing.py",
+        "lines": {
+          "start": 231,
+          "end": 231
+        }
+      },
+      "expected_changed_line_span": 217,
+      "findings": [
+        {
+          "file": "flask/testing.py",
+          "lines": {
+            "start": 231,
+            "end": 231
+          },
+          "severity": "critical",
+          "title": "Swapped argument order in parent class invoke() call",
+          "detail": "The arguments passed to the parent CliRunner.invoke() method are reversed. Click's CliRunner.invoke() signature is invoke(cli, args=None, **kwargs), where cli (the command) should be the first positional argument and args should be the second. The code calls super().invoke(args, cli, **kwargs), passing args first and cli second. This will cause command invocation to fail or behave incorrectly because Click will receive the arguments list as the command and the command object as the arguments.",
+          "suggestion": "Change line 231 from `return super(FlaskCliRunner, self).invoke(args, cli, **kwargs)` to `return super(FlaskCliRunner, self).invoke(cli, args, **kwargs)` to pass arguments in the correct order."
+        }
+      ],
+      "summary": "This PR adds a `test_cli_runner()` method to Flask for testing CLI commands, including a new `FlaskCliRunner` class and comprehensive documentation. However, there is a critical bug in the argument order when calling the parent class's `invoke()` method, which will cause CLI command invocations to fail.",
+      "risk": "high",
+      "duration_s": 31.779,
+      "usage": {
+        "input_tokens": 202132,
+        "output_tokens": 2168,
+        "total_tokens": 204300
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-2115-removed_none_guard",
+      "split": "injected",
+      "repo": "psf/requests",
+      "pr_number": 2115,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "requests/sessions.py",
+        "lines": {
+          "start": 443,
+          "end": 443
+        }
+      },
+      "expected_changed_line_span": 6,
+      "findings": [
+        {
+          "file": "requests/sessions.py",
+          "lines": {
+            "start": 439,
+            "end": 440
+          },
+          "severity": "high",
+          "title": "Inverted logic breaks explicit verify=True setting",
+          "detail": "The condition changed from `if not verify and verify is not False:` to `if verify is True or verify is None:`. This new logic will execute when verify is explicitly True, causing environment variables to override the user's explicit request for verification. The original logic only checked environment variables when verify was falsy but not False. When verify=True (the default), the code should NOT consult environment variables.",
+          "suggestion": "Revert to `if not verify and verify is not False:` or use `if verify is None:` if the intent is to only check environment variables when verify is unset."
+        },
+        {
+          "file": "requests/sessions.py",
+          "lines": {
+            "start": 443,
+            "end": 444
+          },
+          "severity": "high",
+          "title": "Incompatible condition for second environment variable check",
+          "detail": "The condition changed from `if not verify and verify is not False:` to `if verify is True:`. This is logically incompatible with the previous block. If the first block sets verify to a string (from REQUESTS_CA_BUNDLE), this condition should never execute. However, the logic is now broken because when verify=True is passed, both blocks will execute sequentially, with the second potentially overwriting the first environment variable result.",
+          "suggestion": "Restore original logic or clarify the intended behavior. If two environment variables should be checked in sequence with fallback behavior, use `if not verify and verify is not False:` for both blocks."
+        }
+      ],
+      "summary": "This PR changes the logic for checking environment variables to configure SSL verification. The changes invert the original logic, causing environment variables to override explicit user settings when verify=True is passed. This breaks the intended behavior where environment variables should only be consulted when verify is not explicitly set.",
+      "risk": "high",
+      "duration_s": 19.95,
+      "usage": {
+        "input_tokens": 38017,
+        "output_tokens": 2173,
+        "total_tokens": 40190
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-1103-removed_none_guard",
+      "split": "injected",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 1103,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "marshmallow/fields.py",
+        "lines": {
+          "start": 685,
+          "end": 686
+        }
+      },
+      "expected_changed_line_span": 1299,
+      "findings": [
+        {
+          "file": "marshmallow/fields.py",
+          "lines": {
+            "start": 685,
+            "end": 690
+          },
+          "severity": "high",
+          "title": "Tuple._serialize does not handle None values",
+          "detail": "The _serialize method attempts to zip self.tuple_fields with value without first checking if value is None. When value is None, this will raise TypeError: 'NoneType' object is not iterable. The test test_tuple_field_serialize_none_returns_none (test_serialization.py:836-839) expects this to return None, but it will fail. The List field properly handles this case at lines 591-592 with 'if value is None: return None'.",
+          "suggestion": "Add a None check at the start of the _serialize method: 'if value is None: return None' before the tuple comprehension."
+        }
+      ],
+      "summary": "This PR adds a new Tuple field to marshmallow for handling fixed-size tuples of heterogeneous fields. The implementation includes refactored code to extract field instance resolution into a utility function, which is applied to List, Tuple, and Mapping fields. However, there is a critical defect in the Tuple._serialize method.",
+      "risk": "high",
+      "duration_s": 36.434,
+      "usage": {
+        "input_tokens": 233580,
+        "output_tokens": 2891,
+        "total_tokens": 236471
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-3-transposed_args",
+      "split": "injected",
+      "repo": "pallets/werkzeug",
+      "pr_number": 3,
+      "expected": {
+        "bug_kind": "transposed_args",
+        "file": "werkzeug/urls.py",
+        "lines": {
+          "start": 114,
+          "end": 114
+        }
+      },
+      "expected_changed_line_span": 97,
+      "findings": [
+        {
+          "file": "werkzeug/urls.py",
+          "lines": {
+            "start": 114,
+            "end": 114
+          },
+          "severity": "critical",
+          "title": "SplitResult arguments swapped in irisplit function",
+          "detail": "Line 114 returns `SplitResult(scheme, iri, netloc, query, fragment)` but the correct order should be `SplitResult(scheme, netloc, iri, query, fragment)`. The netloc (second field) and iri/path (third field) are swapped. This is inconsistent with line 93 which correctly returns them in the right order. This bug will cause URL parsing to fail for URLs that don't match the 'http' fast-path optimization, returning the path where the netloc should be and vice versa, breaking URL parsing for non-HTTP schemes.",
+          "suggestion": "Change line 114 to: `return SplitResult(scheme, netloc, iri, query, fragment)`"
+        }
+      ],
+      "summary": "This PR makes three main changes: (1) fixes a keyword argument in werkzeug/routing.py to use `charset=` explicitly, (2) removes duplicate urllib import in werkzeug/serving.py and switches to using `url_unquote` from werkzeug.urls, and (3) refactors werkzeug/urls.py to return namedtuple SplitResult objects instead of plain tuples. However, there is a critical bug in the irisplit function where arguments are passed to SplitResult in the wrong order, swapping netloc and path components.",
+      "risk": "high",
+      "duration_s": 26.681,
+      "usage": {
+        "input_tokens": 133994,
+        "output_tokens": 1712,
+        "total_tokens": 135706
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-9da1791476-reverted",
+      "split": "reverted",
+      "repo": "pallets/click",
+      "pr_number": 705204,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "click/core.py",
+        "lines": {
+          "start": 1404,
+          "end": 1405
+        }
+      },
+      "expected_changed_line_span": 1597,
+      "findings": [
+        {
+          "file": "click/core.py",
+          "lines": {
+            "start": 10,
+            "end": 11
+          },
+          "severity": "critical",
+          "title": "ImportError: MissingParameter exception class does not exist",
+          "detail": "The PR imports 'MissingParameter' from '.exceptions' but this exception class does not appear to be defined in the Click codebase. This will cause an ImportError when click/core.py is first imported. Line 1270 attempts to raise this non-existent exception, which would never execute due to the import failure.",
+          "suggestion": null
+        },
+        {
+          "file": "click/core.py",
+          "lines": {
+            "start": 1404,
+            "end": 1405
+          },
+          "severity": "medium",
+          "title": "Removed validation check for negative nargs on options",
+          "detail": "The PR removes the validation check 'if self.nargs < 0: raise TypeError(\"Options cannot have nargs < 0\")' without explanation. This removes bounds checking that prevented invalid option configurations with negative nargs values.",
+          "suggestion": null
+        }
+      ],
+      "summary": "This PR refactors error handling in Click's parameter processing, replacing a custom message generation method with a new MissingParameter exception. However, the PR has a critical flaw: it imports MissingParameter from .exceptions, but this exception class does not appear to exist in the repository, which will cause an ImportError when the module loads. Additionally, the PR removes validation that prevented negative nargs values on options without explanation.",
+      "risk": "high",
+      "duration_s": 34.522,
+      "usage": {
+        "input_tokens": 209727,
+        "output_tokens": 2229,
+        "total_tokens": 211956
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-e3290ea9f3-reverted",
+      "split": "reverted",
+      "repo": "pallets/jinja",
+      "pr_number": 818761,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "jinja2/parser.py",
+        "lines": {
+          "start": 712,
+          "end": 713
+        }
+      },
+      "expected_changed_line_span": 687,
+      "findings": [
+        {
+          "file": "jinja2/parser.py",
+          "lines": {
+            "start": 464,
+            "end": 471
+          },
+          "severity": "medium",
+          "title": "Unreliable string type comparison using `is` operator",
+          "detail": "Lines 464 and 468 use `is` to compare `token.type` with the string literal `'string'`. This relies on string interning and is not a reliable pattern for type checking. The original code at line 465 used `in ('integer', 'float', 'string')` which is the correct approach. Using `is` for string comparison will fail unpredictably depending on Python's interning behavior.",
+          "suggestion": "Change `elif token.type is 'string':` to `elif token.type == 'string':` on line 464, and change `while self.stream.current.type is 'string':` to `while self.stream.current.type == 'string':` on line 468."
+        },
+        {
+          "file": "jinja2/parser.py",
+          "lines": {
+            "start": 710,
+            "end": 716
+          },
+          "severity": "high",
+          "title": "Removal of validation for chained test expressions",
+          "detail": "The PR removes validation logic (lines 706-710 in the base version) that prevented invalid chaining of multiple tests with the `is` operator. The removed code included `and not self.stream.current.test_any('name:else', 'name:or', 'name:and')` and `if self.stream.current.test('name:is'): self.fail('You cannot chain multiple tests with is')`. This check ensured templates with syntax like `value is test1 is test2` would be rejected as errors. Removing this validation allows malformed templates to parse successfully, changing the parser's semantic behavior and bypassing error detection.",
+          "suggestion": "Restore the removed validation: add back the condition `and not self.stream.current.test_any('name:else', 'name:or', 'name:and'):` after line 712, and add the check `if self.stream.current.test('name:is'): self.fail('You cannot chain multiple tests with is')` before line 714."
+        }
+      ],
+      "summary": "This PR makes three changes to the parser: refactoring stream initialization, extracting string concatenation logic into a separate branch, and removing validation for chained test expressions. Two significant defects are present: unreliable use of `is` operator for string type comparison (fragile and non-standard), and removal of legitimate error checking that prevents invalid chained test syntax.",
+      "risk": "high",
+      "duration_s": 28.826,
+      "usage": {
+        "input_tokens": 68302,
+        "output_tokens": 2095,
+        "total_tokens": 70397
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-3eff74cee0-reverted",
+      "split": "reverted",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 228974,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "marshmallow/utils.py",
+        "lines": {
+          "start": 299,
+          "end": 300
+        }
+      },
+      "expected_changed_line_span": 326,
+      "findings": [],
+      "summary": "This PR updates marshmallow/utils.py with import reorganization, error message fixes, a bug fix to from_iso_date to return a date object, introduction of a new get_callable_name function, and deprecation of get_func_name. The removal of explicit dict handling in _get_value_for_key is a code quality change that preserves functional equivalence.",
+      "risk": "low",
+      "duration_s": 30.89,
+      "usage": {
+        "input_tokens": 38058,
+        "output_tokens": 2636,
+        "total_tokens": 40694
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-55520decbb-reverted",
+      "split": "reverted",
+      "repo": "networkx/networkx",
+      "pr_number": 340876,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "networkx/classes/multidigraph.py",
+        "lines": {
+          "start": 547,
+          "end": 548
+        }
+      },
+      "expected_changed_line_span": 182,
+      "findings": [
+        {
+          "file": "networkx/classes/multidigraph.py",
+          "lines": {
+            "start": 548,
+            "end": 548
+          },
+          "severity": "critical",
+          "title": "Incorrect tuple unpacking in degree_iter weighted case breaks functionality",
+          "detail": "Line 548 attempts to unpack `nodes_nbrs` as `(n,succ,pred)` expecting 3 values, but `nodes_nbrs` is created via `zip()` on lines 541-545 which yields 2-tuples of the form `((n, succ_dict), (n2, pred_dict))`. This unpacking pattern will raise `ValueError: too many values to unpack (expected 3)` at runtime when calling `degree_iter(weighted=True)`. The original correct pattern was `for (n,succ),(n2,pred) in nodes_nbrs:` which properly unpacks the nested structure.",
+          "suggestion": "Change line 548 from `for (n,succ,pred) in nodes_nbrs:` to `for (n,succ),(n2,pred) in nodes_nbrs:` to match the correct unpacking of zip output."
+        }
+      ],
+      "summary": "This PR adds `out_edges()` and `in_edges()` methods to the MultiDiGraph class that wrap their respective `_iter` methods, and updates documentation. However, it introduces a critical bug in the `degree_iter()` method's weighted case by changing the tuple unpacking pattern incorrectly.",
+      "risk": "high",
+      "duration_s": 19.959,
+      "usage": {
+        "input_tokens": 67689,
+        "output_tokens": 1511,
+        "total_tokens": 69200
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-47914226c2-reverted",
+      "split": "reverted",
+      "repo": "psf/requests",
+      "pr_number": 801990,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "src/requests/utils.py",
+        "lines": {
+          "start": 234,
+          "end": 235
+        }
+      },
+      "expected_changed_line_span": 230,
+      "findings": [
+        {
+          "file": "src/requests/utils.py",
+          "lines": {
+            "start": 285,
+            "end": 292
+          },
+          "severity": "high",
+          "title": "Refactored extract_zipped_paths loses atomic file placement semantics",
+          "detail": "The old code used atomic_open(extracted_path) which would atomically move a temporary file to extracted_path via os.replace(). The new code uses mkstemp() which returns a random temporary filename (e.g., /tmp/tmpXXXXXX) and never moves it to the intended location. This changes the API behavior - callers expecting files at predictable paths within temp will now get files with random suffixes, and the atomic placement guarantee is lost.",
+          "suggestion": "Either restore the atomic_open() approach or document the breaking API change. If mkstemp is desired, move/rename the file to the intended location before returning: extracted_path = os.path.join(tempfile.gettempdir(), member.split('/')[-1]); os.rename(fd_path, extracted_path)"
+        },
+        {
+          "file": "src/requests/utils.py",
+          "lines": {
+            "start": 285,
+            "end": 290
+          },
+          "severity": "high",
+          "title": "Temporary file not cleaned up on write failure",
+          "detail": "The mkstemp() call creates a temporary file but if os.write() raises an exception (e.g., disk full), the file descriptor is closed in the finally block but the file itself is never deleted. This leaks the temporary file on disk. The old atomic_open() function had proper cleanup: os.remove(tmp_name) in the except clause.",
+          "suggestion": "Add os.remove(extracted_path) in the except clause, or wrap the entire block in a try-except that cleans up: try: ... finally: os.close(fd); if error_occurred: os.remove(extracted_path)"
+        },
+        {
+          "file": "src/requests/utils.py",
+          "lines": {
+            "start": 288,
+            "end": 288
+          },
+          "severity": "medium",
+          "title": "Incomplete write not detected",
+          "detail": "os.write(fd, zip_file.read(member)) may write fewer bytes than requested and return the number written. The code ignores the return value, so a partial write (e.g., disk full mid-write) would silently succeed with a corrupted file. This should verify the number of bytes written matches the length of the data.",
+          "suggestion": "Capture the return value and verify: written = os.write(fd, data); assert written == len(data), or use a loop to ensure all bytes are written."
+        }
+      ],
+      "summary": "This PR makes three changes to utils.py: adds a comment about certificate extraction, simplifies a netrc authentication check, and refactors the extract_zipped_paths function to use tempfile.mkstemp() instead of atomic_open(). The refactoring introduces several defects: it changes the file extraction behavior by returning random temporary filenames instead of predictable paths, lacks proper error handling for cleanup on write failures, and doesn't verify complete writes to disk.",
+      "risk": "high",
+      "duration_s": 43.325,
+      "usage": {
+        "input_tokens": 111775,
+        "output_tokens": 3596,
+        "total_tokens": 115371
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-9a4fbf83c5-reverted",
+      "split": "reverted",
+      "repo": "Textualize/rich",
+      "pr_number": 217635,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "rich/table.py",
+        "lines": {
+          "start": 173,
+          "end": 174
+        }
+      },
+      "expected_changed_line_span": 174,
+      "findings": [
+        {
+          "file": "rich/table.py",
+          "lines": {
+            "start": 174,
+            "end": 174
+          },
+          "severity": "high",
+          "title": "Default parameter value conflicts with docstring documentation",
+          "detail": "The `expand` parameter default at line 174 is now `True`, but the docstring at line 182 documents it as defaulting to `False`. This creates a documentation-to-code mismatch where users reading the docstring will expect different behavior than what actually occurs.",
+          "suggestion": "Either change the default back to `False` and revert this change, or update the docstring at line 182 to reflect that `expand` now defaults to `True`."
+        },
+        {
+          "file": "rich/table.py",
+          "lines": {
+            "start": 174,
+            "end": 174
+          },
+          "severity": "high",
+          "title": "Undocumented breaking change to Table.grid() default behavior",
+          "detail": "Changing the default of the `expand` parameter from `False` to `True` in the `Table.grid()` classmethod is a breaking change that will alter behavior for all existing code calling this method without explicitly specifying `expand`. The PR has an empty description with no justification or migration guidance for this change.",
+          "suggestion": "Revert this change or provide clear documentation in the PR and potentially a deprecation period for this breaking change."
+        }
+      ],
+      "summary": "This PR makes two changes to rich/table.py: reformatting the typing imports to a single line (a style change with no functional impact), and changing the default value of the `expand` parameter in the `Table.grid()` classmethod from `False` to `True`. The semantic change to the `expand` default is undocumented and inconsistent with the method's docstring, which still claims the default is `False`.",
+      "risk": "high",
+      "duration_s": 17.138,
+      "usage": {
+        "input_tokens": 47881,
+        "output_tokens": 1338,
+        "total_tokens": 49219
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "attrs-97f8d17565-reverted",
+      "split": "reverted",
+      "repo": "python-attrs/attrs",
+      "pr_number": 166165,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "src/attr/_make.py",
+        "lines": {
+          "start": 303,
+          "end": 304
+        }
+      },
+      "expected_changed_line_span": 3389,
+      "findings": [],
+      "summary": "This PR updates the on_setattr hooks mechanism to support generator functions, which can run code before and after an attribute is set. The changes add support for lazy evaluation of whether a hook is a generator, refactor the __setattr__ implementation to handle generator yielding, remove an annotation forwarding line, and add documentation formatting.",
+      "risk": "low",
+      "duration_s": 34.522,
+      "usage": {
+        "input_tokens": 282015,
+        "output_tokens": 2106,
+        "total_tokens": 284121
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-c9a2ad2b8d-reverted",
+      "split": "reverted",
+      "repo": "pallets/flask",
+      "pr_number": 581579,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "flask/templating.py",
+        "lines": {
+          "start": 80,
+          "end": 96
+        }
+      },
+      "expected_changed_line_span": 116,
+      "findings": [
+        {
+          "file": "flask/templating.py",
+          "lines": {
+            "start": 96,
+            "end": 96
+          },
+          "severity": "high",
+          "title": "Logic inversion in blueprint template prefix condition",
+          "detail": "The condition for adding a blueprint name prefix to templates was inverted from 'if blueprint_is_module(blueprint):' to 'if not blueprint_is_module(blueprint):'. This reverses the intended behavior: module blueprints should receive prefixes, but now non-module blueprints receive them instead. This breaks the template organization and lookup scheme for blueprints.",
+          "suggestion": "Change line 96 back to 'if blueprint_is_module(blueprint):' to restore the correct prefix logic."
+        }
+      ],
+      "summary": "This PR updates flask/templating.py with several changes: copyright year update, removal of a module-skip condition in _iter_loaders, a logic inversion in list_templates for blueprint prefix handling, and an enhancement to render_template to support template lists. The logic inversion in list_templates is a defect that breaks blueprint template prefixing behavior.",
+      "risk": "high",
+      "duration_s": 17.334,
+      "usage": {
+        "input_tokens": 23827,
+        "output_tokens": 1209,
+        "total_tokens": 25036
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-acd2645444-reverted",
+      "split": "reverted",
+      "repo": "psf/requests",
+      "pr_number": 369396,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "requests/utils.py",
+        "lines": {
+          "start": 58,
+          "end": 60
+        }
+      },
+      "expected_changed_line_span": 14,
+      "findings": [
+        {
+          "file": "requests/utils.py",
+          "lines": {
+            "start": 59,
+            "end": 60
+          },
+          "severity": "high",
+          "title": "Removed int() normalization breaks type handling for registry values",
+          "detail": "The int() conversion was removed from proxyEnable assignment (line 59-60). The original code included this conversion because ProxyEnable can be stored as either REG_DWORD (integer) or REG_SZ (string) in the Windows registry. Without int() conversion, when ProxyEnable is a string like '0', the condition `if not proxyEnable` at line 65 will evaluate incorrectly (non-empty strings are truthy), causing the function to skip the early return and proceed with invalid data. The removed comment explicitly documented this: 'ProxyEnable could be REG_SZ or REG_DWORD, normalizing it'. This is a regression in Windows proxy bypass logic.",
+          "suggestion": "Restore the int() conversion: `proxyEnable = int(winreg.QueryValueEx(internetSettings, 'ProxyEnable')[0])` to ensure the registry value is normalized to an integer regardless of its stored type."
+        }
+      ],
+      "summary": "This PR wraps the winreg import in a try-except block and removes the int() conversion from proxyEnable retrieval. While the ImportError handling is an improvement, removing the int() conversion breaks type normalization for registry values that may be stored as strings (REG_SZ), causing the subsequent conditional check to fail silently and incorrectly process proxy bypass logic on Windows.",
+      "risk": "high",
+      "duration_s": 17.27,
+      "usage": {
+        "input_tokens": 51276,
+        "output_tokens": 1516,
+        "total_tokens": 52792
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-5b4b64c346-reverted",
+      "split": "reverted",
+      "repo": "psf/requests",
+      "pr_number": 567651,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "src/requests/utils.py",
+        "lines": {
+          "start": 220,
+          "end": 228
+        }
+      },
+      "expected_changed_line_span": 258,
+      "findings": [
+        {
+          "file": "src/requests/utils.py",
+          "lines": {
+            "start": 242,
+            "end": 242
+          },
+          "severity": "high",
+          "title": "Incorrect netrc tuple validation using any() breaks valid authentication",
+          "detail": "The check `if _netrc and any(_netrc):` will fail for valid netrc 3-tuples where any element is an empty string (e.g., ('', 'account', 'password')). The netrc.authenticators() method returns valid 3-tuples with empty strings as legitimate values. Using any() on such tuples returns False, causing valid authentication entries to be rejected. The original check `if _netrc:` correctly validates that a tuple was returned.",
+          "suggestion": null
+        },
+        {
+          "file": "src/requests/utils.py",
+          "lines": {
+            "start": 292,
+            "end": 299
+          },
+          "severity": "high",
+          "title": "Zip extraction refactoring introduces resource leak and behavior change",
+          "detail": "The refactoring replaces the previous strategy of creating a predictable temp path and checking existence (which cached extracted files) with tempfile.mkstemp() that creates unique files on every call. The new code provides no cleanup mechanism for the temporary files, creating a resource leak as files accumulate on disk. Additionally, the behavior change from caching to always creating new files may break code depending on the cached behavior. The old code used atomic_open() which properly managed file lifecycle.",
+          "suggestion": null
+        }
+      ],
+      "summary": "This PR updates utils.py with reorganized imports, adds error handling for os.path.expanduser, refactors netrc authentication checking, and changes the zip file extraction strategy. However, it introduces two significant logic defects: a flawed netrc tuple validation that will incorrectly reject valid authentication entries with empty string fields, and a resource leak in the zip extraction function that no longer cleans up temporary files and changes caching behavior.",
+      "risk": "high",
+      "duration_s": 26.656,
+      "usage": {
+        "input_tokens": 82708,
+        "output_tokens": 2103,
+        "total_tokens": 84811
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-2898-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 2898,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds an `--extra-files` option to the `flask run` CLI command to specify additional files that trigger the reloader on change. The implementation includes a new `SeparatedPathType` Click parameter type, a new CLI option, and integration with werkzeug's `run_simple()` function. The feature is documented in both CHANGES.rst and docs/cli.rst.",
+      "risk": "low",
+      "duration_s": 44.454,
+      "usage": {
+        "input_tokens": 78508,
+        "output_tokens": 4374,
+        "total_tokens": 82882
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-321-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 321,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a bug in the Marshaller class where the prefix parameter was being ignored when a field had a dump_to parameter set. The fix changes the key construction logic to always prepend the prefix to the serialized field name, whether dump_to is used or not. A new test validates the corrected behavior.",
+      "risk": "low",
+      "duration_s": 22.639,
+      "usage": {
+        "input_tokens": 46823,
+        "output_tokens": 2157,
+        "total_tokens": 48980
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-21-clean",
+      "split": "clean",
+      "repo": "pypa/packaging",
+      "pr_number": 21,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR performs small cleanups: it reorganizes the CHANGELOG to move the VERSION_PATTERN exposure note from the 14.3 section to the unreleased 14.5 section, and reformats the _regex definition in packaging/version.py to a multi-line format with consistent quote style. Both changes are purely stylistic or organizational with no functional impact.",
+      "risk": "low",
+      "duration_s": 10.154,
+      "usage": {
+        "input_tokens": 18178,
+        "output_tokens": 687,
+        "total_tokens": 18865
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-801-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 801,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a bug where `gettz()` attempts to store `None` values in a `WeakValueDictionary`, which cannot hold weak references to `None`. The fix adds a check `or rv is None` to the cache condition, and includes tests verifying that invalid timezone names return `None` without errors.",
+      "risk": "low",
+      "duration_s": 24.0,
+      "usage": {
+        "input_tokens": 301135,
+        "output_tokens": 1226,
+        "total_tokens": 302361
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-213-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 213,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR implements a new `last()` function for the more-itertools library that returns the last item of an iterable, or a default value if the iterable is empty. The implementation uses a hybrid approach: attempting direct negative indexing for sliceable objects, then falling back to a deque-based approach for non-sliceable iterables. Comprehensive tests and documentation are included.",
+      "risk": "low",
+      "duration_s": 28.241,
+      "usage": {
+        "input_tokens": 172553,
+        "output_tokens": 2346,
+        "total_tokens": 174899
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-2271-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 2271,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "PR #2271 introduces the `deprecated` parameter for Options and Arguments (previously only available for Commands) and allows customization of deprecation messages using string values. The implementation adds proper validation, warning display, help text updates, and comprehensive test coverage. No real defects were found.",
+      "risk": "low",
+      "duration_s": 44.214,
+      "usage": {
+        "input_tokens": 256705,
+        "output_tokens": 4229,
+        "total_tokens": 260934
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-868-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 868,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR improves numerical stability in the _sample_unweighted function by replacing log(1.0 - W) with log1p(-W). The change is mathematically equivalent and provides better precision for small values of W. The import of log1p is correctly added to the math imports.",
+      "risk": "low",
+      "duration_s": 22.519,
+      "usage": {
+        "input_tokens": 330525,
+        "output_tokens": 1145,
+        "total_tokens": 331670
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-780-clean",
+      "split": "clean",
+      "repo": "pallets/werkzeug",
+      "pr_number": 780,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds validation to the `dump_cookie()` function to raise a `ValueError` when a cookie exceeds 4093 bytes, preventing silent cookie loss. It defines a new `COOKIE_MAXSIZE` constant and includes a test case to verify the behavior at and beyond the limit.",
+      "risk": "low",
+      "duration_s": 22.253,
+      "usage": {
+        "input_tokens": 114560,
+        "output_tokens": 1535,
+        "total_tokens": 116095
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-5239-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 5239,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR catches AttributeError in requests/utils.py's super_len function to handle files obtained via Tarfile.extractfile(). The change adds AttributeError to the exception handler when calling o.fileno(), with supporting documentation and a test case. The logic is sound and handles the edge case correctly.",
+      "risk": "low",
+      "duration_s": 21.775,
+      "usage": {
+        "input_tokens": 115898,
+        "output_tokens": 1438,
+        "total_tokens": 117336
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-215-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 215,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR refactors the relativedelta class by consolidating month calculation logic, extracting a sign helper function, and improving test coverage. The refactoring maintains functional equivalence with the original code while improving readability. New tests cover edge cases for month-end dates and various inequality scenarios.",
+      "risk": "low",
+      "duration_s": 29.584,
+      "usage": {
+        "input_tokens": 75704,
+        "output_tokens": 2692,
+        "total_tokens": 78396
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-675-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 675,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "click/core.py",
+          "lines": {
+            "start": 1754,
+            "end": 1756
+          },
+          "severity": "medium",
+          "title": "Inconsistent None/falsy check differs from parent class",
+          "detail": "Line 1755 checks `if not var:` to detect when `self.type.get_metavar(self)` returns a falsy value. However, the parent class `Parameter.make_metavar()` at line 1311 uses `if metavar is None:` for the same check. This inconsistency means `Argument.make_metavar()` will incorrectly fall back to `self.name.upper()` if `get_metavar()` returns empty string or other falsy non-None values, while the parent class only falls back for `None`. This could cause different behavior between `Option` and `Argument` when a type's `get_metavar()` method intentionally returns a falsy but non-None value.",
+          "suggestion": "Change line 1755 to `if var is None:` to match the parent class behavior and be explicit about checking for None rather than any falsy value."
+        }
+      ],
+      "summary": "This PR modifies `Argument.make_metavar()` to first try getting a metavar from the type object via `self.type.get_metavar(self)` before falling back to the argument name in uppercase. The change introduces a behavioral inconsistency with the parent `Parameter` class's `make_metavar()` method regarding how falsy values are handled.",
+      "risk": "medium",
+      "duration_s": 25.16,
+      "usage": {
+        "input_tokens": 206416,
+        "output_tokens": 1888,
+        "total_tokens": 208304
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-1171-clean",
+      "split": "clean",
+      "repo": "pypa/packaging",
+      "pr_number": 1171,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds pickle support to Requirements, Markers, and Node classes in the packaging library by implementing __getstate__ and __setstate__ methods. The implementation handles three pickle format versions for backward compatibility (packaging 25.0, 26.0, and 26.1+), with appropriate error handling and comprehensive test coverage including legacy format validation via hardcoded pickle bytes.",
+      "risk": "low",
+      "duration_s": 32.278,
+      "usage": {
+        "input_tokens": 116235,
+        "output_tokens": 2352,
+        "total_tokens": 118587
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "attrs-363-clean",
+      "split": "clean",
+      "repo": "python-attrs/attrs",
+      "pr_number": 363,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds `__annotations__` attributes to generated `__init__` methods, allowing runtime introspection of parameter types. The implementation correctly collects type information from attribute definitions and selectively includes annotations only for attributes with `init=True`, no converter, and a defined type. All edge cases are handled appropriately and match test expectations.",
+      "risk": "low",
+      "duration_s": 39.293,
+      "usage": {
+        "input_tokens": 167312,
+        "output_tokens": 3479,
+        "total_tokens": 170791
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-72-clean",
+      "split": "clean",
+      "repo": "pallets/werkzeug",
+      "pr_number": 72,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "werkzeug/test.py",
+          "lines": {
+            "start": 88,
+            "end": 88
+          },
+          "severity": "critical",
+          "title": "str() wrapping corrupts encoded bytes in multipart encoding",
+          "detail": "When value is unicode (line 86-87), it gets encoded to bytes. Calling str() on those bytes in Python 2 produces a string representation like \"b'...'\" with literal 'b' and quote characters prepended, rather than the bytes themselves. This corrupts the multipart form data body by inserting unwanted characters. The original code correctly concatenated: '\\r\\n\\r\\n' + value (where value is already bytes after encoding). The str() wrapper should not be applied to already-encoded bytes.",
+          "suggestion": "Remove the str() wrapper and restore the original concatenation: write('\\r\\n\\r\\n' + value). If the intent is to handle non-string types, add explicit type checking before encoding rather than blindly calling str() on the result."
+        }
+      ],
+      "summary": "This PR changes line 88 in werkzeug/test.py to wrap the `value` variable with `str()` when writing multipart form data. However, this introduces a critical bug in the `stream_encode_multipart()` function when handling unicode strings: unicode values are encoded to bytes on line 87, and then calling `str()` on those bytes in Python 2 produces the string representation (e.g., \"b'...'\") rather than the actual bytes, corrupting the multipart message.",
+      "risk": "high",
+      "duration_s": 18.897,
+      "usage": {
+        "input_tokens": 49451,
+        "output_tokens": 1453,
+        "total_tokens": 50904
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-2693-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 2693,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds a MAX_COOKIE_SIZE configuration option and Response.max_cookie_size property to control when Werkzeug warns about large cookies. The implementation adds the config to Flask's default_config, implements a property that reads from the app config when in an app context and falls back to Werkzeug's default otherwise, updates documentation, and includes a comprehensive test. The changes are well-structured and follow Flask's existing patterns (similar to Request.max_content_length).",
+      "risk": "low",
+      "duration_s": 46.229,
+      "usage": {
+        "input_tokens": 256318,
+        "output_tokens": 3296,
+        "total_tokens": 259614
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-402-clean",
+      "split": "clean",
+      "repo": "pallets/jinja",
+      "pr_number": 402,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR corrects the documentation example in the `do_attr` filter's docstring from `foo[\"bar\"]` to `foo.bar` to accurately reflect that the filter performs attribute access (via `getattr`) rather than item/subscript access. The change is a documentation-only fix with no behavioral impact.",
+      "risk": "low",
+      "duration_s": 10.125,
+      "usage": {
+        "input_tokens": 28236,
+        "output_tokens": 567,
+        "total_tokens": 28803
+      },
+      "github_calls": 3,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-517-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 517,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR contains docstring additions and typo fixes across three files. Changes include correcting grammatical errors in user-facing error messages and documentation strings, adding a docstring to the `make_default_short_help` function, and minor rewording of parameter documentation. All changes are purely documentation-related with no modifications to executable code logic.",
+      "risk": "low",
+      "duration_s": 31.251,
+      "usage": {
+        "input_tokens": 199991,
+        "output_tokens": 1830,
+        "total_tokens": 201821
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-2943-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 2943,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a bug in the `clear_meta_and_links()` method where the cached hash from the original style was incorrectly copied to the new style object. The fix properly resets the hash to None, ensuring that when meta and link information (which are part of the hash computation) are cleared, the hash cache is invalidated and will be recomputed correctly.",
+      "risk": "low",
+      "duration_s": 16.961,
+      "usage": {
+        "input_tokens": 73745,
+        "output_tokens": 988,
+        "total_tokens": 74733
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-3427-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 3427,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds documentation warnings to the `adamic_adar_index` function about self-loops potentially causing zero-division errors. The change consists of two lines of documentation added to the function's docstring (lines 163-164) with no modifications to the underlying implementation. The documentation accurately warns users about a known limitation of the algorithm.",
+      "risk": "low",
+      "duration_s": 18.536,
+      "usage": {
+        "input_tokens": 30437,
+        "output_tokens": 1223,
+        "total_tokens": 31660
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-3189-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 3189,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds two fast-path return optimizations to the `normalize_path()` function in httpx/_urlparse.py. The changes return early when no path normalization is needed: first checking if the string contains no \".\" character, then after splitting, checking if neither \".\" nor \"..\" exist as path components. The logic is sound and the optimizations correctly avoid unnecessary processing without changing function semantics.",
+      "risk": "low",
+      "duration_s": 14.351,
+      "usage": {
+        "input_tokens": 33012,
+        "output_tokens": 1113,
+        "total_tokens": 34125
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-3179-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 3179,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a TypeError that occurs when calling json() on a Response with content=None. The fix adds a truthiness check for self.content before attempting to call len() on it, preventing the error. The change is minimal and appropriate, with a corresponding test case that validates the fix.",
+      "risk": "low",
+      "duration_s": 25.609,
+      "usage": {
+        "input_tokens": 185026,
+        "output_tokens": 1500,
+        "total_tokens": 186526
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-5696-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 5696,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR updates the docstring of the `analyze_symmetry` method in the ISMAGS class to clarify parameter documentation and fix a misleading reference. The changes are purely documentation-focused, adding a Parameters section, correcting the description of what graph is being analyzed, and fixing minor typos.",
+      "risk": "low",
+      "duration_s": 18.257,
+      "usage": {
+        "input_tokens": 92865,
+        "output_tokens": 1114,
+        "total_tokens": 93979
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-1014-clean",
+      "split": "clean",
+      "repo": "pallets/jinja",
+      "pr_number": 1014,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR allows `{%+` and `{#+` syntax to be valid but treated as no-ops when `lstrip_blocks == False`. The main fix moves the computation of regex patterns outside the conditional block and adds corresponding patterns for the `lstrip_blocks == False` case. The implementation correctly addresses issue #748 by ensuring `prefix_re['block']` and `prefix_re['comment']` are always assigned. Test coverage is added for the new behavior.",
+      "risk": "low",
+      "duration_s": 42.938,
+      "usage": {
+        "input_tokens": 121563,
+        "output_tokens": 4133,
+        "total_tokens": 125696
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-2635-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 2635,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "rich/pretty.py",
+          "lines": {
+            "start": 250,
+            "end": 276
+          },
+          "severity": "high",
+          "title": "Removed exception handling breaks error recovery in install() function",
+          "detail": "The original try/except block caught exceptions that could occur when calling get_ipython(), importing IPython modules, or setting up the formatter, allowing graceful fallback to sys.displayhook. The new if/else block only checks if 'get_ipython' exists in globals but does not catch exceptions within the block. Any error in get_ipython(), the IPython import, RichFormatter setup, or display_formatter assignment will now propagate uncaught instead of falling back to sys.displayhook = display_hook. This breaks robustness in environments where IPython is partially available or setup fails.",
+          "suggestion": "Use try/except to wrap the IPython setup code, or restructure to catch exceptions while checking globals: try:\\n    if \"get_ipython\" in globals():\\n        ip = get_ipython()\\n        ...\\n    else:\\n        sys.displayhook = display_hook\\nexcept Exception:\\n    sys.displayhook = display_hook"
+        }
+      ],
+      "summary": "This PR attempts to fix a syntax error when building with nuitka by replacing a try/except block with an if/else block checking for `get_ipython` in globals. However, the change introduces a critical logic defect: the new code no longer catches exceptions that occur during IPython setup, breaking the function's error handling and fallback mechanism.",
+      "risk": "high",
+      "duration_s": 22.741,
+      "usage": {
+        "input_tokens": 107693,
+        "output_tokens": 1754,
+        "total_tokens": 109447
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-3296-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 3296,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a bug where the `background_color` override on a Syntax object was not being applied to the padding areas. The fix changes the Syntax.__rich_console__ method to use `_get_base_style()` instead of `_theme.get_background_style()` when styling the Padding, ensuring the background color override is respected everywhere including padding. A regression test validates the fix.",
+      "risk": "low",
+      "duration_s": 19.835,
+      "usage": {
+        "input_tokens": 106533,
+        "output_tokens": 1266,
+        "total_tokens": 107799
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-860-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 860,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR simplifies the totient() function implementation by replacing the formula `n = n // p * (p - 1)` with the mathematically equivalent `n -= n // prime`. The change is a valid refactoring that produces correct results for the test cases (totient(9) = 6, totient(12) = 4). No defects were identified.",
+      "risk": "low",
+      "duration_s": 19.511,
+      "usage": {
+        "input_tokens": 104433,
+        "output_tokens": 1454,
+        "total_tokens": 105887
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-5014-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 5014,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds validation to require non-empty names for Flask blueprints by checking if the name parameter is falsy and raising ValueError with a clear error message. The implementation includes appropriate test coverage and changelog documentation.",
+      "risk": "low",
+      "duration_s": 22.276,
+      "usage": {
+        "input_tokens": 85566,
+        "output_tokens": 1444,
+        "total_tokens": 87010
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-4001-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 4001,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This pull request updates documentation in requests/api.py to clarify that the timeout parameter is measured in seconds. The change is purely documentation-focused with no functional code modifications or logic changes.",
+      "risk": "low",
+      "duration_s": 10.144,
+      "usage": {
+        "input_tokens": 13940,
+        "output_tokens": 476,
+        "total_tokens": 14416
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-681-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 681,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "dateutil/parser/_parser.py",
+          "lines": {
+            "start": 1128,
+            "end": 1136
+          },
+          "severity": "medium",
+          "title": "UnboundLocalError when tzdata has unexpected type",
+          "detail": "The removal of the else clause (previously at lines 1137-1139) that raised ValueError creates a logic error. If tzdata is an unexpected type (not a datetime.tzinfo, not None, not a text_type, and not an integer_type), the variable 'tzinfo' is never assigned to, causing 'return tzinfo' on line 1136 to raise UnboundLocalError. For example, parse('2017-02-03 12:40 BRST', tzinfos={'BRST': 3.14}) would fail with 'UnboundLocalError: local variable tzinfo referenced before assignment' instead of the previous helpful ValueError about invalid offset type.",
+          "suggestion": "Either restore the else clause to raise ValueError for invalid types, or initialize 'tzinfo = None' before the conditional chain to make None the default for unrecognized types."
+        }
+      ],
+      "summary": "This PR allows tzinfos dictionary values or callable returns to be None, enabling users to opt out of timezone handling for specific timezone names. The changes include updating _build_tzinfo to accept None as a valid tzinfo value and removing the else clause that raised ValueError. Two new test cases verify the feature works for both dictionary and callable tzinfos.",
+      "risk": "medium",
+      "duration_s": 37.851,
+      "usage": {
+        "input_tokens": 274056,
+        "output_tokens": 2255,
+        "total_tokens": 276311
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-324-clean",
+      "split": "clean",
+      "repo": "pallets/werkzeug",
+      "pr_number": 324,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "werkzeug/testsuite/datastructures.py",
+          "lines": {
+            "start": 75,
+            "end": 76
+          },
+          "severity": "high",
+          "title": "Pickle binary protocol corruption due to byte-level string replacement",
+          "detail": "Line 76 attempts to replace bytes within pickled binary data: `s.replace(b'werkzeug.datastructures', b'werkzeug')`. The pickle protocol encodes string lengths, and these two strings have different byte lengths (23 vs 8). Raw byte replacement will corrupt the pickle structure, causing pickle.loads() to fail or produce incorrect results. The original code replaced strings at the semantic level, but this byte-level replacement breaks the binary format.",
+          "suggestion": "Either revert to string replacement on the pickled representation, or use the proper pickle protocol methods to modify module references if that is the intended test behavior."
+        }
+      ],
+      "summary": "This PR modifies the test_pickle method in the datastructures test suite by converting string literals to byte literals. However, the change on line 76 introduces a critical defect: it attempts to do a raw byte replacement on pickle binary data, which will corrupt the pickle protocol structure since the byte sequences have different lengths ('werkzeug.datastructures' vs 'werkzeug'). This will cause the pickle.loads() call to fail.",
+      "risk": "high",
+      "duration_s": 21.526,
+      "usage": {
+        "input_tokens": 57514,
+        "output_tokens": 1778,
+        "total_tokens": 59292
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-2708-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 2708,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds the missing `SERVER_PROTOCOL` environment variable to the WSGI environ dictionary in httpx's WSGITransport, hardcoding it to \"HTTP/1.1\". A corresponding test validates that WSGI applications receive this required variable. The implementation is straightforward and correct.",
+      "risk": "low",
+      "duration_s": 22.145,
+      "usage": {
+        "input_tokens": 43510,
+        "output_tokens": 1321,
+        "total_tokens": 44831
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-3069-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 3069,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "requests/models.py",
+          "lines": {
+            "start": 108,
+            "end": 109
+          },
+          "severity": "low",
+          "title": "Typo in docstring: 'contentype' should be 'content_type'",
+          "detail": "The docstring has a typo where 'contentype' appears twice in the added documentation. It should be 'content_type' to match the naming convention used elsewhere in the codebase and to be consistent with the parameter name. This appears in the description of 3-tuple and 4-tuple formats on lines 108-109.",
+          "suggestion": "Change 'contentype' to 'content_type' in both places (lines 108-109)"
+        }
+      ],
+      "summary": "This PR updates docstrings in requests/api.py and requests/models.py to document the ability to add per-file headers in multipart POST requests by showing examples of 2-tuple, 3-tuple, and 4-tuple file formats. The changes are primarily documentation updates. A minor typo was found in the docstring where 'contentype' should be 'content_type'.",
+      "risk": "low",
+      "duration_s": 18.496,
+      "usage": {
+        "input_tokens": 52719,
+        "output_tokens": 1349,
+        "total_tokens": 54068
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-3371-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 3371,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "httpx/_urlparse.py",
+          "lines": {
+            "start": 43,
+            "end": 98
+          },
+          "severity": "critical",
+          "title": "Percent character (%) not excluded from safe character sets",
+          "detail": "The safe character sets (FRAG_SAFE, QUERY_SAFE, PATH_SAFE, USERNAME_SAFE, PASSWORD_SAFE, USERINFO_SAFE) do not exclude the percent character (0x25 / '%'). According to RFC 3986 and WHATWG URL standards, the percent character must always be percent-encoded when it appears as data to avoid ambiguity with existing percent-encoded sequences. The character 0x25 should be added to all exclusion tuples, e.g., `if i not in (0x20, 0x22, 0x23, 0x25, 0x3C, 0x3E)` for QUERY_SAFE. This causes userinfo components with literal '%' characters to not be properly escaped.",
+          "suggestion": "Add 0x25 (percent character) to the exclusion list in all safe character set definitions: FRAG_SAFE, QUERY_SAFE, PATH_SAFE, USERNAME_SAFE, PASSWORD_SAFE, and USERINFO_SAFE. For example, change line 50 from `if i not in (0x20, 0x22, 0x23, 0x3C, 0x3E)` to `if i not in (0x20, 0x22, 0x23, 0x25, 0x3C, 0x3E)` and apply similarly to all other safe sets."
+        },
+        {
+          "file": "tests/models/test_url.py",
+          "lines": {
+            "start": 617,
+            "end": 620
+          },
+          "severity": "high",
+          "title": "Test expectations changed to reflect incorrect percent-encoding behavior",
+          "detail": "The test `test_url_copywith_userinfo_subcomponents` at lines 617 and 620 expects the `%` character in the password to NOT be percent-encoded (changed from `%25` to `%`). Since the password is `'abc123@ %'`, the `%` character should be encoded as `%25` to avoid ambiguity with percent-encoding sequences. The changed test expectations at line 617 (expecting `%@` instead of `%25@`) and line 620 (expecting `%` instead of `%25`) reflect the bug introduced in the safe character sets rather than correct behavior.",
+          "suggestion": "Revert the test expectations at lines 617 and 620 back to encoding the percent character as %25, or fix the underlying safe character set definitions to properly exclude 0x25."
+        }
+      ],
+      "summary": "This PR updates URL percent-encoding sets to align with WHATWG specifications, replacing hardcoded safe character strings with named constants for path, query, fragment, and userinfo components. However, the implementation fails to exclude the percent character (%) from the safe character sets, which should always be percent-encoded to avoid ambiguity with existing percent-encoded sequences. This causes test expectations to change from correctly encoding % as %25 to leaving it unencoded.",
+      "risk": "high",
+      "duration_s": 31.855,
+      "usage": {
+        "input_tokens": 131522,
+        "output_tokens": 2457,
+        "total_tokens": 133979
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-539-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 539,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR refactors the `parse()` method in the parser module by extracting timezone-handling logic and naive datetime building logic into two separate helper methods: `_build_naive()` and `_build_tzaware()`. The refactoring preserves the original behavior while improving code organization and maintainability.",
+      "risk": "low",
+      "duration_s": 23.034,
+      "usage": {
+        "input_tokens": 56890,
+        "output_tokens": 2438,
+        "total_tokens": 59328
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "attrs-776-clean",
+      "split": "clean",
+      "repo": "python-attrs/attrs",
+      "pr_number": 776,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a double negative in documentation at lines 1228-1232 of src/attr/_make.py. The change converts \"won't create *neither*\" to \"will create *neither*\" in the docstring for the `attrs` decorator's `auto_detect` parameter. This is a grammatically valid fix using the \"neither...nor\" construction and introduces no code logic changes.",
+      "risk": "low",
+      "duration_s": 23.55,
+      "usage": {
+        "input_tokens": 199712,
+        "output_tokens": 1521,
+        "total_tokens": 201233
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    }
+  ]
+}
