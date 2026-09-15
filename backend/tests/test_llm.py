@@ -18,7 +18,8 @@ from tests.helpers.openai_stub import VALID_REVIEW, OpenAIStub
 @pytest.fixture
 def settings_env(monkeypatch):
     """Set LLM env vars and clear the settings cache around each test."""
-    for var in ("LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY", "AGENT_MODEL", "LLM_MODEL", "ANTHROPIC_API_KEY"):
+    for var in ("LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY", "AGENT_MODEL", "LLM_MODEL", "ANTHROPIC_API_KEY",
+                "LLM_TEMPERATURE", "LLM_PROMPT_CACHE"):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.chdir(__import__("tempfile").gettempdir())  # no stray .env
 
@@ -183,55 +184,72 @@ async def test_unrecoverable_parse_failure_raises_with_count(settings_env, monke
     assert (info.value.parse_failures, info.value.attempts) == (2, 2)
 
 
-# --- prompt caching ------------------------------------------------------------------------
+# --- prompt caching: rolling, analyze calls only ------------------------------------------------
 
-def _user_and_system(body: dict) -> tuple[dict, dict]:
-    msgs = body["messages"]
-    return next(m for m in msgs if m["role"] == "system"), next(m for m in msgs if m["role"] == "user")
+def _is_synth(body: dict) -> bool:
+    return [t["function"]["name"] for t in body.get("tools") or []] == ["ReviewResult"]
 
 
-async def test_cache_breakpoint_marks_the_context_brief_and_nothing_else(settings_env, monkeypatch):
+async def test_analyze_calls_carry_top_level_cache_control_and_synthesize_does_not(settings_env, monkeypatch):
     stub = OpenAIStub()
     await _review_with_stub(settings_env, monkeypatch, stub)
-    for req in stub.requests:  # every analyze round AND synthesize resend the same marked prefix
-        system, brief = _user_and_system(req["body"])
-        assert isinstance(system["content"], str)  # system is covered by the breakpoint after it
-        assert isinstance(brief["content"], list) and len(brief["content"]) == 1
-        assert brief["content"][0]["cache_control"] == {"type": "ephemeral"}
-        assert "Review pull request #7" in brief["content"][0]["text"]
-        others = [m for m in req["body"]["messages"] if m is not brief]
-        assert "cache_control" not in json.dumps(others)  # tool results etc. are untouched
-    briefs = {json.dumps(_user_and_system(r["body"])[1]) for r in stub.requests}
-    assert len(briefs) == 1  # byte-identical prefix on every call, or the cache never hits
+    analyze = [r["body"] for r in stub.requests if not _is_synth(r["body"])]
+    synth = [r["body"] for r in stub.requests if _is_synth(r["body"])]
+    assert len(analyze) == 2 and len(synth) == 1
+    for body in analyze:
+        assert body["cache_control"] == {"type": "ephemeral"}   # rolls to the last cacheable block
+    for body in synth:
+        assert "cache_control" not in body  # a different tool list can't read the cache: no write premium
+    # No explicit per-block breakpoints anywhere: combined with top-level they stop it rolling (probe).
+    for body in analyze + synth:
+        assert "cache_control" not in json.dumps(body["messages"])
 
 
-async def test_caching_changes_markers_only_never_the_text(settings_env, monkeypatch):
-    """Same case with LLM_PROMPT_CACHE on and off: every message's text is identical."""
-    def texts(stub):
-        out = []
-        for r in stub.requests:
-            for m in r["body"]["messages"]:
-                c = m.get("content")
-                out.append((m["role"], c if isinstance(c, str) or c is None else "".join(b["text"] for b in c)))
-        return out
-
+async def test_caching_never_changes_what_the_model_sees(settings_env, monkeypatch):
+    """Same case with LLM_PROMPT_CACHE on and off: messages and tools byte-identical."""
     on = OpenAIStub()
     await _review_with_stub(settings_env, monkeypatch, on)
     off = OpenAIStub()
     settings_env(LLM_PROMPT_CACHE="false")
     await _review_with_stub(settings_env, monkeypatch, off)
-    assert "cache_control" not in json.dumps([r["body"] for r in off.requests])
-    assert texts(on) == texts(off)
-    assert [r["body"].get("tools") for r in on.requests] == [r["body"].get("tools") for r in off.requests]
+    assert all("cache_control" not in r["body"] for r in off.requests)
+    strip = lambda rs: [{k: v for k, v in r["body"].items() if k != "cache_control"} for r in rs]  # noqa: E731
+    assert strip(on.requests) == strip(off.requests)
 
 
-def test_cacheable_text_with_chat_anthropic_formats_cache_control(settings_env):
-    """ChatAnthropic (direct provider) turns the same block into an Anthropic cache_control block."""
-    from langchain_anthropic.chat_models import _format_messages
+def test_chat_anthropic_direct_gets_top_level_cache_control(settings_env):
     from langchain_core.messages import HumanMessage, SystemMessage
 
-    from app.agent.llm import cacheable_text
+    from app.agent.llm import with_conversation_cache
 
-    settings_env()
-    _system, formatted = _format_messages([SystemMessage(content="sys"), HumanMessage(content=cacheable_text("brief"))])
-    assert formatted[0]["content"][0]["cache_control"] == {"type": "ephemeral"}
+    settings_env(LLM_PROVIDER="anthropic", ANTHROPIC_API_KEY="sk-ant-test")
+    model = build_llm(resolve_llm_config())
+    bound = with_conversation_cache(model, model)
+    payload = model._get_request_payload([SystemMessage("sys"), HumanMessage("brief")], **bound.kwargs)
+    assert payload["cache_control"] == {"type": "ephemeral"}
+    assert "cache_control" not in json.dumps(payload["messages"])
+
+
+# --- temperature ---------------------------------------------------------------------------------
+
+def test_temperature_defaults_to_zero_on_both_providers(settings_env):
+    settings_env(LLM_API_KEY="k", AGENT_MODEL="anthropic/x")
+    cfg = resolve_llm_config()
+    assert cfg.temperature == 0.0 and cfg.describe()["temperature"] == 0.0
+    assert build_llm(cfg).temperature == 0.0
+    settings_env(LLM_PROVIDER="anthropic")
+    assert build_llm(resolve_llm_config()).temperature == 0.0
+
+
+async def test_temperature_zero_is_sent_on_every_call(settings_env, monkeypatch):
+    stub = OpenAIStub()
+    await _review_with_stub(settings_env, monkeypatch, stub)
+    assert {r["body"].get("temperature") for r in stub.requests} == {0.0}
+
+
+def test_temperature_override_and_validation(settings_env):
+    settings_env(LLM_API_KEY="k", AGENT_MODEL="m", LLM_TEMPERATURE="0.7")
+    assert resolve_llm_config().temperature == 0.7
+    assert resolve_llm_config(temperature=0.0).temperature == 0.0
+    with pytest.raises(LLMConfigError, match="temperature"):
+        resolve_llm_config(temperature=1.5)

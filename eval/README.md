@@ -136,12 +136,37 @@ usage, GitHub call count, **blocked calls**, parse failures, error).
 
 ### Comparison rule
 
-**Two agent reports are comparable only if all four match: `dataset_sha256`, `meta.scoring`,
-`meta.provider` and `meta.model`.** A Haiku run and a Sonnet run, an OpenRouter run and a direct
-Anthropic run, or a dev run and a full run are different experiments. Put them side by side as
+**Two agent reports are comparable only if all five match: `dataset_sha256`, `meta.scoring`,
+`meta.provider`, `meta.model` and `meta.temperature`.** A Haiku run and a Sonnet run, an OpenRouter
+run and a direct Anthropic run, a dev run and a full run, or a temperature-1 run and a
+temperature-0 run are different experiments. Temperature defaults to 0: at non-zero temperature,
+case-level differences between two runs are sampling noise. Even at 0, Anthropic models are not
+bit-deterministic, so read a one- or two-case swing as noise. `meta.prompt_cache` is recorded too.
+It changes cost, never what the model sees, so it is not part of the rule. Put them side by side as
 such, never as a before/after of one change. The baseline is the fixed reference rather than a
 run. Hold an agent report against it when `dataset_sha256` and `meta.scoring` match; its provider
 is `none`.
+
+## Results so far
+
+**Dev split, anthropic/claude-haiku-4.5 via OpenRouter** (`reports/dev.json`, rescored under
+scoring v3 in `reports/dev-nocache-v3.json`). This run predates temperature 0.
+- **False positives on clean:** 17.1% reported (6/35).
+- **Detection:** 86.7% on injected, 60.0% on reverted.
+- **Localisation:** 19/19 of detected bugs.
+- **Parse errors:** 0.
+
+**The reported false-positive rate overstates the agent's mistakes. 3 of the 6 flags were
+genuine bugs:**
+- `rich-2635` and `dateutil-681` have matching upstream fixes.
+- `werkzeug-324` is a real, older defect that upstream later fixed.
+
+**The corrected false-positive rate is 8.6% (3/35), or 11.4% (4/35) if `werkzeug-324` isn't
+credited.** Of the 6 misses, 2 reported nothing and 4 flagged something else that was wrong. That
+second kind is the worse failure. See [`reports/dev-case-review.md`](reports/dev-case-review.md)
+for every verdict, the claim checked, and the upstream fix commits. The metric itself is not
+adjusted: "clean" means merged upstream, and read the flagged clean cases before tuning the FP
+rate towards zero.
 
 ## Rules for interpreting numbers
 

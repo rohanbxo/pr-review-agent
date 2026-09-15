@@ -87,7 +87,8 @@ def llm_env(tmp_path, monkeypatch):
     """Clean LLM settings (no stray .env), applied per test."""
     from app.config import get_settings
 
-    for var in ("LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY", "AGENT_MODEL", "LLM_MODEL", "ANTHROPIC_API_KEY"):
+    for var in ("LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY", "AGENT_MODEL", "LLM_MODEL", "ANTHROPIC_API_KEY",
+                "LLM_TEMPERATURE", "LLM_PROMPT_CACHE"):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.chdir(tmp_path)
 
@@ -155,6 +156,8 @@ def test_configured_mode_end_to_end_with_stub_openai_server(tmp_path, llm_env, m
     assert rep["meta"]["provider"] == "openai_compatible"
     assert rep["meta"]["model"] == "anthropic/claude-sonnet-test"
     assert rep["meta"]["base_url"] == "https://openrouter.ai/api/v1"
+    assert rep["meta"]["temperature"] == 0.0 and rep["meta"]["prompt_cache"] is True
+    assert {r["body"]["temperature"] for r in stub.requests} == {0.0}
     assert "sk-or-test" not in out.read_text(encoding="utf-8")
 
     assert list(rep)[:3] == ["meta", "parse_errors", "false_positive_rate"]
@@ -184,6 +187,10 @@ def test_provider_and_model_overrides_are_recorded(tmp_path, llm_env, monkeypatc
                    "--model", "claude-haiku-4-5-20251001"]) == 0
     meta = json.loads(out.read_text(encoding="utf-8"))["meta"]
     assert (meta["provider"], meta["model"], meta["base_url"]) == ("anthropic", "claude-haiku-4-5-20251001", None)
+    assert meta["temperature"] == 0.0
+    out2 = tmp_path / "haiku-t07.json"
+    assert R.main(["--dataset", str(ds), "--report", str(out2), "--provider", "anthropic", "--temperature", "0.7"]) == 0
+    assert json.loads(out2.read_text(encoding="utf-8"))["meta"]["temperature"] == 0.7
     assert captured["llm_config"].provider == "anthropic"
 
 

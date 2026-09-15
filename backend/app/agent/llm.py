@@ -40,18 +40,23 @@ class LLMConfig:
     model: str
     base_url: str | None
     api_key: str
+    temperature: float = 0.0
 
     def describe(self) -> dict[str, Any]:
         """Safe to log and to write into reports: never includes the key."""
         return {"provider": self.provider, "model": self.model, "base_url": self.base_url,
-                "api_key_set": bool(self.api_key)}
+                "temperature": self.temperature, "api_key_set": bool(self.api_key)}
 
 
 def resolve_llm_config(
-    *, provider: str | None = None, model: str | None = None, require_key: bool = True,
+    *, provider: str | None = None, model: str | None = None, temperature: float | None = None,
+    require_key: bool = True,
 ) -> LLMConfig:
-    """Settings, optionally overridden per call (eval ``--provider`` / ``--model``)."""
+    """Settings, optionally overridden per call (eval ``--provider`` / ``--model`` / ``--temperature``)."""
     s = get_settings()
+    temp = s.llm_temperature if temperature is None else temperature
+    if not 0.0 <= temp <= 1.0:
+        raise LLMConfigError(f"temperature must be within [0, 1], got {temp}")
     prov = provider or s.llm_provider
     if prov not in PROVIDERS:
         raise LLMConfigError(f"unknown LLM provider {prov!r}; expected one of {', '.join(PROVIDERS)}")
@@ -71,7 +76,8 @@ def resolve_llm_config(
     if require_key and not key:
         env = "LLM_API_KEY" + (" (or ANTHROPIC_API_KEY)" if prov == "anthropic" else "")
         raise LLMConfigError(f"{env} is not set for provider {prov}")
-    return LLMConfig(provider=prov, model=chosen, base_url=base_url, api_key=key)  # type: ignore[arg-type]
+    return LLMConfig(provider=prov, model=chosen, base_url=base_url, api_key=key,  # type: ignore[arg-type]
+                     temperature=temp)
 
 
 def configured_model_label() -> str:
@@ -100,6 +106,7 @@ def build_llm(cfg: LLMConfig) -> BaseChatModel:
             model=cfg.model,
             base_url=cfg.base_url,
             api_key=cfg.api_key,
+            temperature=cfg.temperature,
             max_tokens=_MAX_TOKENS,
             max_retries=_MAX_RETRIES,
             timeout=_TIMEOUT_S,
@@ -111,6 +118,7 @@ def build_llm(cfg: LLMConfig) -> BaseChatModel:
     return ChatAnthropic(
         model=cfg.model,
         api_key=cfg.api_key or None,
+        temperature=cfg.temperature,
         max_tokens=_MAX_TOKENS,
         max_retries=_MAX_RETRIES,
         default_request_timeout=_TIMEOUT_S,
@@ -122,18 +130,39 @@ def get_llm() -> BaseChatModel:
     return build_llm(resolve_llm_config())
 
 
-def cacheable_text(text: str) -> str | list[dict[str, Any]]:
-    """Message content ending in a prompt-cache breakpoint (``cache_control: ephemeral``).
+CACHE_CONTROL = {"type": "ephemeral"}
 
-    The text is unchanged; only a marker is added. Anthropic caches the request prefix in the
-    order tools -> system -> messages up to the last breakpoint, so one breakpoint on the initial
-    context brief caches the tool definitions, the system prompt and the brief for every later
-    tool round. ChatAnthropic accepts the block natively; ChatOpenAI passes it through to
-    OpenRouter, which forwards it to Anthropic. With LLM_PROMPT_CACHE=false the plain string is
-    returned, i.e. the exact pre-caching request."""
+
+def with_conversation_cache(runnable: Runnable, llm: BaseChatModel) -> Runnable:
+    """Bind top-level ``cache_control`` so the provider caches the WHOLE request prefix up to the
+    last cacheable block -- tools, system, brief and every tool result so far. Each tool round then
+    reads everything before it from cache and writes only what it added. Nothing the model sees
+    changes: no message content is edited, only a request-level field is added.
+
+    Verified on OpenRouter -> anthropic/claude-haiku-4.5 (Amazon Bedrock) by probe, 2026-09-16:
+    * top-level ``cache_control`` alone rolls: call 2 read all 23,159 tokens of call 1, wrote 1,866;
+    * top-level combined with an explicit block breakpoint does NOT roll (only the explicit block
+      was cached), so no explicit breakpoints are used anywhere;
+    * a request with a different tool list (synthesize) reads nothing from this cache, so bind
+      this to the analyze calls only -- on synthesize it would buy a 1.25x write nobody reads.
+
+    ChatOpenAI sends it via ``extra_body`` (OpenRouter's top-level field). ChatAnthropic accepts a
+    ``cache_control`` call kwarg: top-level on the direct API, expanded to the last eligible block
+    on other transports. Other chat models (test fakes) are returned unchanged.
+    LLM_PROMPT_CACHE=false returns ``runnable`` unchanged, i.e. the exact uncached request."""
     if not get_settings().llm_prompt_cache:
-        return text
-    return [{"type": "text", "text": text, "cache_control": {"type": "ephemeral"}}]
+        return runnable
+    try:
+        from langchain_openai import ChatOpenAI
+    except ImportError:  # pragma: no cover
+        ChatOpenAI = None  # type: ignore[assignment]
+    from langchain_anthropic import ChatAnthropic
+
+    if ChatOpenAI is not None and isinstance(llm, ChatOpenAI):
+        return runnable.bind(extra_body={"cache_control": CACHE_CONTROL})
+    if isinstance(llm, ChatAnthropic):
+        return runnable.bind(cache_control=CACHE_CONTROL)
+    return runnable
 
 
 def message_text(message: Any) -> str:

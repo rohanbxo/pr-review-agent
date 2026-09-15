@@ -61,9 +61,12 @@ class Settings(BaseSettings):
     # (OpenRouter: "anthropic/<model>"), so openai_compatible has no default -- see app/agent/llm.py.
     agent_model: str = Field(default="", validation_alias=AliasChoices("AGENT_MODEL", "LLM_MODEL", "agent_model"))
     llm_max_tool_rounds: int = 12
-    # Mark the stable prefix (tools + system prompt + initial context brief) cacheable. Changes
-    # cost, never what the model sees. Honoured by Anthropic models directly and via OpenRouter.
+    # Cache the growing conversation on analyze calls (top-level cache_control; see
+    # app/agent/llm.py:with_conversation_cache). Changes cost, never what the model sees.
     llm_prompt_cache: bool = True
+    # 0 by default: at non-zero temperature case-level differences between runs are sampling
+    # noise and no A/B is interpretable. Recorded in every eval report (meta.temperature).
+    llm_temperature: float = 0.0
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
     langfuse_host: str = "http://langfuse-web:3000"

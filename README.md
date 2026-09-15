@@ -215,8 +215,8 @@ python -m eval.dev_split --verify && python -m eval.run_eval --dataset eval/data
 Every report opens with a `parse_errors` block. If synthesis output fails to parse often, every
 other number is noise.
 
-**Two agent reports compare only if `dataset_sha256`, `meta.scoring`, `meta.provider` and
-`meta.model` all match.** So a Haiku run is never silently compared with a Sonnet run, and a
+**Two agent reports compare only if `dataset_sha256`, `meta.scoring`, `meta.provider`,
+`meta.model` and `meta.temperature` all match.** Temperature defaults to 0. So a Haiku run is never silently compared with a Sonnet run, and a
 60-case dev run never with the full run. The dev subset's 35 clean cases give roughly ±8% slop on
 the FP rate: good for "did this change help", not for a headline number.
 

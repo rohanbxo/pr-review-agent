@@ -304,7 +304,8 @@ def project_git_sha() -> str | None:
 
 def build_report(results: list[dict], *, mode: str, provider: str, model: str, base_url: str | None,
                  dataset: Path, dataset_sha: str, all_cases: list[dict], scoring: M.ScoringConfig,
-                 args: argparse.Namespace) -> dict:
+                 args: argparse.Namespace, temperature: float | None = None, prompt_cache: bool | None = None
+                 ) -> dict:
     metrics = M.compute_report_metrics(results, scoring)
     meta = {
         "llm": mode,  # "configured" | "fake" | "baseline"
@@ -312,6 +313,11 @@ def build_report(results: list[dict], *, mode: str, provider: str, model: str, b
         # match (eval/README.md). Recorded for every mode, never inferred later.
         "provider": provider,
         "model": model,
+        # Sampling temperature actually sent (None when no model is called). Part of the comparison
+        # rule: at non-zero temperature case-level differences are sampling noise.
+        "temperature": temperature,
+        # Whether the rolling prompt cache was on. Cost-only; recorded so a cost delta is attributable.
+        "prompt_cache": prompt_cache,
         "base_url": base_url,
         "dataset": str(dataset),
         "dataset_sha256": dataset_sha,
@@ -379,7 +385,8 @@ def summary_table(report: dict) -> str:
     sc, pe = m["scoring"], report["parse_errors"]
     flag = "!!! " if pe["cases_with_parse_failure"] else ""
     lines = [
-        f"PR review eval  llm={m['llm']}  provider={m['provider']}  model={m['model']}",
+        f"PR review eval  llm={m['llm']}  provider={m['provider']}  model={m['model']}  "
+        f"temperature={m.get('temperature')}  prompt_cache={m.get('prompt_cache')}",
         f"{flag}0. Synthesis parse errors: {pe['cases_with_parse_failure']}/{pe['cases_run']} cases "
         f"({_pct(pe['case_rate'])}); repaired on retry {pe['repaired_cases']}, unrecovered "
         f"{pe['unrecovered_cases']}; failed attempts {pe['failed_attempts']}"
@@ -441,6 +448,8 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--provider", choices=["anthropic", "openai_compatible"], default=None,
                     help="override LLM_PROVIDER for this run")
     ap.add_argument("--model", default=None, help="override AGENT_MODEL for this run")
+    ap.add_argument("--temperature", type=float, default=None,
+                    help="override LLM_TEMPERATURE (default 0) for this run; recorded in meta.temperature")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--splits", nargs="*", default=None, choices=["injected", "reverted", "clean", "injection"])
@@ -490,17 +499,23 @@ def main(argv: list[str] | None = None) -> int:
 
     llm_config = None
     base_url: str | None = None
+    temperature: float | None = None
+    prompt_cache: bool | None = None
     if mode == "configured":
         from app.agent.llm import LLMConfigError, resolve_llm_config
 
         try:
-            llm_config = resolve_llm_config(provider=args.provider, model=args.model)
+            llm_config = resolve_llm_config(provider=args.provider, model=args.model, temperature=args.temperature)
         except LLMConfigError as exc:
             print(f"error: {exc}. The agent eval needs a real model; no report was written.\n"
                   "  Offline plumbing check: python -m eval.run_eval --llm fake --limit 3\n"
                   "  No-LLM baseline:        python -m eval.run_eval --baseline", file=sys.stderr)
             return 2
         provider, model, base_url = llm_config.provider, llm_config.model, llm_config.base_url
+        temperature = llm_config.temperature
+        from app.config import get_settings
+
+        prompt_cache = get_settings().llm_prompt_cache
     elif mode == "fake":
         provider, model = "fake", "fake-review (stub)"
     else:
@@ -522,7 +537,8 @@ def main(argv: list[str] | None = None) -> int:
               "Remaining cases were cancelled and NO report was written.", file=sys.stderr)
         return 3
     report = build_report(results, mode=mode, provider=provider, model=model, base_url=base_url,
-                          dataset=args.dataset, dataset_sha=sha, all_cases=all_cases, scoring=scoring, args=args)
+                          dataset=args.dataset, dataset_sha=sha, all_cases=all_cases, scoring=scoring, args=args,
+                          temperature=temperature, prompt_cache=prompt_cache)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(summary_table(report))

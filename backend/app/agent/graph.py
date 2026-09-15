@@ -33,7 +33,7 @@ from langgraph.graph import END, START, StateGraph, add_messages
 from pydantic import ValidationError
 
 from app.agent.github_client import CallRecord, ReadOnlyGitHubClient
-from app.agent.llm import cacheable_text, structured_output
+from app.agent.llm import structured_output, with_conversation_cache
 from app.agent.prompts import (
     REPAIR_INSTRUCTION,
     SYNTHESIZE_INSTRUCTION,
@@ -145,7 +145,9 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
     pr_ref = PRRef(repo="", pr_number=0)
     tools = build_tools(client, pr_ref)
     tools_by_name = {t.name: t for t in tools}
-    analyst = llm.bind_tools(tools)
+    # Rolling prompt cache on analyze only: synthesize binds a different tool list, which cannot
+    # read this cache (verified), so caching it would only pay the write premium.
+    analyst = with_conversation_cache(llm.bind_tools(tools), llm)
 
     async def fetch_context(state: ReviewState) -> dict:
         pr_ref.repo, pr_ref.pr_number = state["repo"], state["pr_number"]
@@ -166,9 +168,7 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
             "pr": {k: v for k, v in summary.items() if k != "body"},
             "changed_files": pr_ref.changed_files,
             "tool_rounds": 0,
-            # Cache breakpoint on the brief: tools + system + brief are the stable prefix every
-            # later analyze round resends. Same text either way (app.agent.llm.cacheable_text).
-            "messages": [SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=cacheable_text(context))],
+            "messages": [SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=context)],
         }
 
     async def analyze(state: ReviewState, config: RunnableConfig) -> dict:
