@@ -47,7 +47,7 @@ caveats.
 ## Run
 
 ```bash
-# 1. Baseline first. No LLM: one `medium` finding per changed file, on the file's first hunk.
+# 1. Baseline first. No LLM: one `medium` finding per changed file, spanning the whole file.
 $PY -m eval.run_eval --baseline --dataset eval/data/v1.jsonl --report eval/reports/baseline.json
 
 # 2. The agent (needs ANTHROPIC_API_KEY; fails fast and writes nothing without it).
@@ -59,7 +59,8 @@ $PY -m eval.run_eval --llm fake --limit 3 --report eval/reports/smoke-fake.json
 ```
 
 Other flags: `--splits injected reverted`, `--limit N` (round-robin across splits),
-`--tolerance N`, `--case-timeout S`, `--max-tool-rounds N`.
+`--case-timeout S`, `--max-tool-rounds N`, and the scoring thresholds `--tolerance N` (default 5),
+`--narrow-max-lines N` (default 30), `--narrow-span-fraction F` (default 0.25).
 
 ## Reading the report
 
@@ -68,19 +69,24 @@ one without the others:
 
 1. **`false_positive_rate`** — share of `clean` cases with any finding at `medium`+. This decides
    adoption: a reviewer that cries wolf gets muted.
-2. **`detection`** — overall, `by_split`, `by_bug_kind`. A detection is a `medium`+ finding whose
-   file matches the expected file and whose line range overlaps the expected range within the
-   tolerance.
-3. **`localisation`** — `file_match_rate` vs `line_match_rate`, and `file_only_share`: of the
-   bug cases where some finding named the right file, the share where no finding landed within
-   tolerance (how much of a file-level "hit" would be a whole-file shrug).
+2. **`detection`** — `detection_rate` overall, `by_split`, `by_bug_kind`, as a share of **all**
+   bug cases. A finding detects the bug if it is `medium`+, names the expected file, and its line
+   range overlaps the expected range within `tolerance_lines` (5).
+3. **`localisation`** — `localisation_rate_of_detected` overall, `by_split`, `by_bug_kind`, as a
+   share of **detected** bugs (the denominator is `detected`; `localised_share_of_all_bugs` is
+   also given). A detecting finding localises the bug if its range is also narrow:
+   `width <= max(bug_width, min(narrow_max_lines, narrow_span_fraction × changed_line_span))`,
+   where `changed_line_span` is the head-line span of the lines the expected file's patch changes.
+   Thirty lines on a 40-line change is a shrug; on a 3000-line change it is a real pin. The floor
+   at the bug's own width means a finding that exactly covers the bug always counts.
 4. **`cost`** — mean and p95 seconds per review, mean tokens (total / input / output).
 
 Plus `errors` (an errored case counts as a *miss* on bug splits and as a *false positive* on
 `clean` — a review that did not complete is not a clean pass) and `cases` (per-case findings,
 usage, GitHub call count, **blocked calls**, error). `meta` records `llm`, `model`,
-`dataset_sha256`, split counts, tolerance, git SHA (if any) and timestamp. Only compare reports
-with the same `dataset_sha256` and tolerance.
+`dataset_sha256`, split counts, git SHA (if any), timestamp, and **`meta.scoring`**: every
+threshold and rule that produced the numbers, with a `scoring_version`. Only compare reports whose
+`dataset_sha256` and `meta.scoring` match.
 
 ## Rules for interpreting numbers
 
@@ -91,9 +97,10 @@ with the same `dataset_sha256` and tolerance.
 - **Detection rate alone is a vanity metric.** An agent that reports eight findings per PR
   catches most bugs and is unusable. Detection is only meaningful next to the FP rate.
 - **If the agent does not clearly beat the baseline, the LLM is not earning its cost.** The
-  baseline has a 100% FP rate and a non-trivial detection rate (bugs often sit in a file's first
-  hunk). The agent must hold a far lower FP rate *and* match or beat the baseline's detection on
-  `reverted` — otherwise a `git diff --stat` does the same job for free.
+  baseline flags every changed file, whole file, as `medium`. By construction it has **100%
+  detection, 100% FP on `clean`, and 0% localisation** (`eval/reports/baseline.json`). Detection
+  alone can never beat it. The agent earns its cost only through a far lower FP rate *and* a
+  localisation rate well above 0% — otherwise `git diff --stat` does the same job for free.
 - `clean` means "merged upstream", not "verified bug-free". Some clean PRs contain real bugs
   later fixed; a small FP rate floor is expected. Read the flagged clean cases before tuning to
   zero.
@@ -103,10 +110,11 @@ with the same `dataset_sha256` and tolerance.
 Findings are compared on file + line-range overlap, widened by 5 lines each side.
 Tolerance **0** measures line-number formatting (off-by-one in how the model counts, a range
 that starts at the `if` rather than the comparison) instead of whether it found the bug.
-Tolerance **50** lets a whole-function or whole-file shrug score a hit — at that point the
-baseline "flag every file" wins by construction. 5 lines is roughly "the same statement or its
-immediate neighbours". It is exposed as `--tolerance` so you can check a result is not an
-artefact of the choice, but reports are only comparable at the same value (default 5).
+Tolerance **50** would let a nearby shrug count. 5 lines is roughly "the same statement or its
+immediate neighbours". Tolerance only governs *detection*, the overlap test. A wide finding
+overlaps anything, which is why whole-file shrugs are handled separately by the narrow-range test
+in *localisation*, not by tightening tolerance. All three thresholds are flags, so you can check a
+result is not an artefact of the choice, but reports are only comparable at the same values.
 
 ## How the pieces keep the eval honest
 
@@ -116,10 +124,12 @@ artefact of the choice, but reports are only comparable at the same value (defau
 - **Bugs sit inside the reviewed change.** Only `+` lines of the PR's diff are eligible; the
   file's patch and head content are regenerated after mutation and `expected.lines` are
   head-file line numbers.
-- **Reverted cases do not leak the answer, and are not trivially localisable.** A bare inverse
-  of a small fix is a few-line diff that "flag the first hunk" localises for free (an unpadded
-  build scored the baseline 25/25 on `reverted`). Each case therefore carries the fixed file
-  forward through real later development (10–300 changed lines) and undoes the fix inside it.
+- **Reverted cases do not leak the answer, and are realistic in size.** A bare inverse of a
+  small fix is a few-line diff: a reviewer is handed exactly the bug and nothing else, which is
+  not what real PRs look like. Each case therefore carries the fixed file forward through real
+  later development (10–300 changed lines) and undoes the fix inside it. (This was first
+  justified by a baseline score of 25/25 → 4/25. That drop was mostly an artefact of the old
+  first-hunk baseline, not of difficulty. The padding stays on realism grounds.)
   Only the source file is included (not the fix's regression test or changelog), the title is a
   neutral `Update <file>`, and the fix commit is recorded under `source`, which the mock
   transport never serves.

@@ -117,7 +117,16 @@ paths are relative to `backend/tests/`.
 | Reviews: a repo grant is required, except for holders of `grant:manage` (admins), who could grant themselves anyway. GitHub is then asked whether *this* user can read *this* repo for **every role, admins included**: an org grant alone is not enough, and admin is not a licence to read repos the person cannot see. Both denials are audited. The run and its `review.create` audit row commit in one transaction. Runs the caller cannot see return 404. Repo names like `../etc`, `acme/..` are rejected. | [`test_reviews.py`](backend/tests/test_reviews.py) |
 | `X-Forwarded-For` is only believed when the TCP peer is in `TRUSTED_PROXIES` (CIDR blocks supported). A client-supplied header cannot choose the IP that gets logged. | [`test_proxy_trust.py`](backend/tests/test_proxy_trust.py) |
 | Audit rows are written in the same transaction as the action they describe. The helper never commits. Denials are audited as well as successes. `actor_email` is denormalised so the log survives user deletion. | [`test_audit.py`](backend/tests/test_audit.py) |
-| Prompt injection in diffs, comments or file contents (≥15 cases) is reported as a `high` finding, and the GitHub call log shows no blocked call attempts. | [`test_injection.py`](backend/tests/test_injection.py) |
+| Prompt injection in diffs, comments or file contents (20 cases): the GitHub call log shows no blocked call attempts, and the agent reports the injection as a `high` finding. **Only the first half is verified today — see below.** | [`test_injection.py`](backend/tests/test_injection.py) |
+
+**The injection claim is only half-verified.**
+- **Offline tests cover the transport guard only.** A scripted fake model obeys each injection. The
+  tests prove the read-only client blocks what the injection asks for, and that the harness
+  detects it. They also check injected text reaches the model only inside the untrusted-data
+  delimiters.
+- **"Reports injections as `high` findings" is unverified until the live run**
+  (`pytest tests/test_injection.py --run-live` with `ANTHROPIC_API_KEY` set). That is a statement
+  about the real model's behaviour, and no offline test can back it. Those tests skip without a key.
 
 The nginx behaviour was checked by hand against echo upstreams, not in CI: `/api/` prefix
 stripping, `/api/auth/*` → Next.js, 429 once the auth burst is used up. Validate the syntax with
@@ -143,6 +152,13 @@ it would let any client write its own `X-Forwarded-For`. uvicorn runs with `--no
 so that only the app decides whom to trust (`app/netutil.py`).
 
 ## Tracing with Langfuse
+
+> **Check `docker compose ls` first if this machine already runs a Langfuse.** `infra/langfuse.sh`
+> assumes it owns the containers in its compose project (`pr-review-agent-langfuse`). `up` would
+> recreate any containers already in that project with this repo's override and the upstream
+> image tags, which can migrate their data. The script refuses to take over a project it did
+> not start. But an existing Langfuse under any project name still shares the host's Docker
+> daemon, image cache and disk, so look before you run it.
 
 ```sh
 docker compose up -d             # the app first: it creates the `pr-review-agent_app` network
@@ -179,10 +195,15 @@ for debugging. The table is the record you keep.
 
 See [`eval/`](eval/). The dataset has three JSONL splits (`injected`, `reverted`, `clean`). Each
 case carries its own patches, so eval runs never hit GitHub. Metrics are reported together and
-in this order: **false-positive rate on `clean`**, detection rate by split and by bug kind,
-localisation (file match + line overlap within 5 lines), and cost. `--baseline` scores "flag
-every changed file as medium"; if the agent does not clearly beat it, the LLM is not earning its
-cost.
+in this order:
+1. **False-positive rate on `clean`.**
+2. **Detection rate** by split and by bug kind: right file, overlapping the bug within 5 lines.
+3. **Localisation rate**, as a share of detected bugs: the detecting finding's range is also narrow.
+4. **Cost.**
+
+`--baseline` flags every changed file, whole file, as medium. It scores 100% detection, 100% FP
+and 0% localisation (`eval/reports/baseline.json`). The agent has to beat it on FP rate and
+localisation; if it doesn't, the LLM is not earning its cost.
 
 ```sh
 python -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json

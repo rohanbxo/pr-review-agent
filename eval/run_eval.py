@@ -6,8 +6,9 @@
 
 Agent mode runs the REAL graph (``app.agent.graph.review_pull_request``) through the REAL
 read-only client (allowlist included) over ``app.agent.fixtures.mock_transport_for_case`` -- no
-GitHub traffic. ``--baseline`` uses no LLM: one ``medium`` finding per changed file anchored to
-the file's first hunk. See eval/README.md.
+GitHub traffic. ``--baseline`` uses no LLM: one ``medium`` finding per changed file spanning the
+whole file -- it detects every bug and localises none, which is the bar the agent must clear.
+See eval/README.md.
 """
 
 from __future__ import annotations
@@ -65,21 +66,31 @@ def select_cases(cases: list[dict], splits: list[str] | None, limit: int | None)
 
 
 # --------------------------------------------------------------------------- baseline
-def first_hunk_range(patch: str | None) -> dict:
-    m = re.search(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", patch or "", flags=re.M)
-    if not m:
-        return {"start": 1, "end": 1}
-    start = max(1, int(m.group(1)))
-    length = int(m.group(2)) if m.group(2) is not None else 1
-    return {"start": start, "end": max(start, start + length - 1)}
+def whole_file_range(file: dict) -> dict:
+    """Line 1 through the last line of the head file (or of the last hunk if content is absent)."""
+    if file.get("content") is not None:
+        return {"start": 1, "end": max(1, len(file["content"].splitlines()))}
+    ends = [int(m.group(1)) + int(m.group(2) if m.group(2) is not None else 1) - 1
+            for m in re.finditer(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", file.get("patch") or "", flags=re.M)]
+    return {"start": 1, "end": max([1, *ends])}
 
 
 def baseline_findings(case: dict) -> list[dict]:
     return [
-        {"file": f["filename"], "lines": first_hunk_range(f.get("patch")), "severity": "medium",
-         "title": "Changed file", "detail": "Baseline: every changed file is flagged.", "suggestion": None}
+        {"file": f["filename"], "lines": whole_file_range(f), "severity": "medium",
+         "title": "Changed file", "detail": "Baseline: every changed file is flagged, whole file.",
+         "suggestion": None}
         for f in case.get("files") or [] if f.get("status") != "removed"
     ]
+
+
+def expected_changed_line_span(case: dict) -> int | None:
+    expected = case.get("expected")
+    if not expected:
+        return None
+    f = next((f for f in case.get("files") or []
+              if M.normalise_path(f["filename"]) == M.normalise_path(expected.get("file"))), None)
+    return M.changed_line_span(f.get("patch")) if f else 0
 
 
 # --------------------------------------------------------------------------- fake LLM
@@ -127,7 +138,8 @@ def make_fake_llm(case: dict):
 # --------------------------------------------------------------------------- runners
 def _result_stub(case: dict) -> dict:
     return {"id": case["id"], "split": case["split"], "repo": case["repo"], "pr_number": case["pr_number"],
-            "expected": case.get("expected"), "findings": [], "summary": None, "risk": None,
+            "expected": case.get("expected"), "expected_changed_line_span": expected_changed_line_span(case),
+            "findings": [], "summary": None, "risk": None,
             "duration_s": None, "usage": None, "github_calls": 0, "blocked_calls": [],
             "dropped_findings": 0, "error": None}
 
@@ -208,8 +220,8 @@ def project_git_sha() -> str | None:
 
 
 def build_report(results: list[dict], *, mode: str, model: str | None, dataset: Path, dataset_sha: str,
-                 all_cases: list[dict], tolerance: int, args: argparse.Namespace) -> dict:
-    metrics = M.compute_report_metrics(results, tolerance)
+                 all_cases: list[dict], scoring: M.ScoringConfig, args: argparse.Namespace) -> dict:
+    metrics = M.compute_report_metrics(results, scoring)
     meta = {
         "llm": mode,  # "anthropic" | "fake" | "baseline"
         "model": model,
@@ -219,7 +231,8 @@ def build_report(results: list[dict], *, mode: str, model: str | None, dataset: 
         "evaluated_counts": dict(Counter(r["split"] for r in results)),
         "evaluated_by_bug_kind": dict(Counter((r.get("expected") or {}).get("bug_kind") or "none"
                                               for r in results)),
-        "tolerance_lines": tolerance,
+        # Every threshold that shaped the numbers. Compare two reports only if these match.
+        "scoring": metrics["scoring"],
         "limit": args.limit,
         "splits": args.splits,
         "concurrency": args.concurrency,
@@ -232,7 +245,7 @@ def build_report(results: list[dict], *, mode: str, model: str | None, dataset: 
         report["WARNING"] = ("llm=fake: offline plumbing smoke test with a stub model that returns an "
                              "empty review. These numbers say NOTHING about review quality.")
     report["meta"] = meta
-    for key in ("false_positive_rate", "detection", "localisation", "cost", "errors"):
+    for key in ("false_positive_rate", "detection", "localisation", "cost", "errors"):  # SPEC order
         report[key] = metrics[key]
     report["cases"] = results
     return report
@@ -245,8 +258,11 @@ def _pct(x) -> str:
 def summary_table(report: dict) -> str:
     m, fp, det, loc, cost = (report["meta"], report["false_positive_rate"], report["detection"],
                              report["localisation"], report["cost"])
+    sc = m["scoring"]
     lines = [
-        f"PR review eval  llm={m['llm']}  model={m['model']}  tolerance={m['tolerance_lines']} lines",
+        f"PR review eval  llm={m['llm']}  model={m['model']}",
+        f"scoring v{sc['scoring_version']}: tolerance={sc['tolerance_lines']} lines, narrow <= "
+        f"max(bug width, min({sc['narrow_max_lines']}, {sc['narrow_span_fraction']} x changed-line span))",
         f"dataset {m['dataset']}  sha256={m['dataset_sha256'][:12]}  evaluated={m['evaluated_counts']}",
         "",
         "1. False-positive rate on clean (any medium+ finding)",
@@ -254,20 +270,22 @@ def summary_table(report: dict) -> str:
         f"{fp['errored_counted_as_fp']}; mean medium+ findings/clean case: "
         f"{fp['mean_medium_plus_findings_per_clean_case']})",
         "",
-        "2. Detection rate (medium+ finding, file + lines within tolerance)",
+        "2. Detection rate, share of ALL bugs (medium+, right file, overlaps bug within tolerance)",
         f"   {'group':28s} {'rate':>6s} {'hit':>5s} {'cases':>6s} {'errored':>8s}",
-        f"   {'overall':28s} {_pct(det['overall']['rate'])} {det['overall']['detected']:5d} "
-        f"{det['overall']['cases']:6d} {det['overall']['errored']:8d}",
     ]
-    for label, group in [("split", det["by_split"]), ("kind", det["by_bug_kind"])]:
+    for label, group in [("", {"overall": det["overall"]}), ("split: ", det["by_split"]),
+                         ("kind: ", det["by_bug_kind"])]:
         for name, g in group.items():
-            lines.append(f"   {label + ': ' + name:28s} {_pct(g['rate'])} {g['detected']:5d} "
+            lines.append(f"   {label + name:28s} {_pct(g['detection_rate'])} {g['detected']:5d} "
                          f"{g['cases']:6d} {g['errored']:8d}")
+    lines += ["", "3. Localisation rate, share of DETECTED bugs (detection AND narrow range)",
+              f"   {'group':28s} {'rate':>6s} {'loc':>5s} {'det':>6s}"]
+    for label, group in [("", {"overall": loc["overall"]}), ("split: ", loc["by_split"]),
+                         ("kind: ", loc["by_bug_kind"])]:
+        for name, g in group.items():
+            lines.append(f"   {label + name:28s} {_pct(g['localisation_rate_of_detected'])} "
+                         f"{g['localised']:5d} {g['detected']:6d}")
     lines += [
-        "",
-        "3. Localisation (bug cases)",
-        f"   file match {_pct(loc['file_match_rate'])}  line match {_pct(loc['line_match_rate'])}  "
-        f"file-only share of file matches {_pct(loc['file_only_share'])}",
         "",
         "4. Cost",
         f"   mean {cost['mean_seconds']}s  p95 {cost['p95_seconds']}s  mean tokens {cost['mean_total_tokens']}",
@@ -291,7 +309,12 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--splits", nargs="*", default=None, choices=["injected", "reverted", "clean", "injection"])
-    ap.add_argument("--tolerance", type=int, default=M.DEFAULT_TOLERANCE)
+    ap.add_argument("--tolerance", type=int, default=M.DEFAULT_TOLERANCE,
+                    help="detection: max line gap between finding and bug ranges")
+    ap.add_argument("--narrow-max-lines", type=int, default=M.DEFAULT_NARROW_MAX_LINES,
+                    help="localisation: absolute cap on a finding's width")
+    ap.add_argument("--narrow-span-fraction", type=float, default=M.DEFAULT_NARROW_SPAN_FRACTION,
+                    help="localisation: cap as a fraction of the file's changed-line span")
     ap.add_argument("--case-timeout", type=float, default=600.0)
     ap.add_argument("--max-tool-rounds", type=int, default=None)
     return ap.parse_args(argv)
@@ -299,6 +322,12 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    try:
+        scoring = M.ScoringConfig(tolerance_lines=args.tolerance, narrow_max_lines=args.narrow_max_lines,
+                                  narrow_span_fraction=args.narrow_span_fraction)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     mode = "baseline" if args.baseline else args.llm
     if args.report is None:
         args.report = REPORTS / {"baseline": "baseline.json", "fake": "smoke-fake.json",
@@ -337,7 +366,7 @@ def main(argv: list[str] | None = None) -> int:
     results = asyncio.run(run_all(cases, mode=mode, concurrency=args.concurrency,
                                   timeout_s=args.case_timeout, max_tool_rounds=args.max_tool_rounds))
     report = build_report(results, mode=mode, model=model, dataset=args.dataset, dataset_sha=sha,
-                          all_cases=all_cases, tolerance=args.tolerance, args=args)
+                          all_cases=all_cases, scoring=scoring, args=args)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(summary_table(report))

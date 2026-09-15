@@ -7,13 +7,17 @@ def F(file="a.py", start=10, end=None, severity="medium"):
     return {"file": file, "lines": {"start": start, "end": end or start}, "severity": severity}
 
 
-def R(split, findings=(), expected=None, error=None, duration=None, usage=None, id="x"):
+def R(split, findings=(), expected=None, error=None, duration=None, usage=None, id="x", span=100):
     return {"id": id, "split": split, "findings": list(findings), "expected": expected,
+            "expected_changed_line_span": span if expected else None,
             "error": error, "duration_s": duration, "usage": usage}
 
 
 def E(file="a.py", start=20, end=None, kind="flipped_comparison"):
     return {"bug_kind": kind, "file": file, "lines": {"start": start, "end": end or start}}
+
+
+CFG = M.ScoringConfig()
 
 
 def test_ranges_overlap_with_tolerance():
@@ -26,23 +30,81 @@ def test_ranges_overlap_with_tolerance():
         M.ranges_overlap(1, 1, 1, 1, -1)
 
 
-def test_default_tolerance_is_five():
-    assert M.DEFAULT_TOLERANCE == 5
-    assert M.localise(F(start=15), E(start=20)) == "line"
-    assert M.localise(F(start=14), E(start=20)) == "file"
-    assert M.localise(F(start=14), E(start=20), tolerance=6) == "line"
+def test_defaults():
+    assert (CFG.tolerance_lines, CFG.narrow_max_lines, CFG.narrow_span_fraction) == (5, 30, 0.25)
+    assert M.detects(F(start=15), E(start=20), CFG)
+    assert not M.detects(F(start=14), E(start=20), CFG)
+    assert M.detects(F(start=14), E(start=20), M.ScoringConfig(tolerance_lines=6))
 
 
-def test_localise_file_matching():
-    assert M.localise(F(file="./src/a.py"), E(file="src/a.py", start=10)) == "line"
-    assert M.localise(F(file="b.py"), E(start=10)) is None
-    assert M.localise(F(), None) is None
+def test_detects_file_matching():
+    assert M.detects(F(file="./src/a.py"), E(file="src/a.py", start=10), CFG)
+    assert not M.detects(F(file="b.py"), E(start=10), CFG)
+    assert not M.detects(F(), None, CFG)
 
 
 def test_severity_threshold():
     assert not M.is_medium_plus(F(severity="low"))
     assert all(M.is_medium_plus(F(severity=s)) for s in ("medium", "high", "critical", "HIGH"))
     assert not M.is_medium_plus({"severity": "bogus"})
+
+
+@pytest.mark.parametrize("bug_width,span,limit", [
+    (1, 3000, 30.0),    # large change: the 30-line cap binds
+    (1, 40, 10.0),      # 25% of a 40-line change
+    (1, 1, 1.0),        # one-line change: floored at the bug width, not 0.25
+    (12, 20, 12.0),     # multi-line bug wider than 25% of span: an exact pin still counts
+    (1, 0, 1.0),
+])
+def test_narrow_limit(bug_width, span, limit):
+    assert CFG.narrow_limit(bug_width, span) == limit
+
+
+def test_scoring_config_validates_and_serialises():
+    for bad in ({"tolerance_lines": -1}, {"narrow_max_lines": 0}, {"narrow_span_fraction": 0},
+                {"narrow_span_fraction": 1.5}):
+        with pytest.raises(ValueError):
+            M.ScoringConfig(**bad)
+    d = M.ScoringConfig(narrow_max_lines=20).as_dict()
+    assert d["narrow_max_lines"] == 20 and d["tolerance_lines"] == 5 and d["scoring_version"] == 2
+    assert "localisation_rule" in d and "detection_rule" in d
+
+
+def test_whole_file_finding_detects_but_does_not_localise():
+    out = M.case_outcome(R("injected", [F(start=1, end=400)], expected=E(start=120), span=60))
+    assert out["detected"] and not out["localised"]
+
+
+def test_narrow_finding_localises_and_limit_scales_with_span():
+    e = E(start=120)
+    eight = F(start=118, end=125)                                                         # width 8
+    assert M.case_outcome(R("injected", [eight], expected=e, span=40))["localised"]       # limit 10
+    assert not M.case_outcome(R("injected", [eight], expected=e, span=20))["localised"]   # limit 5
+    wide = F(start=100, end=135)                                   # width 36 > 30 cap, even on a huge change
+    assert not M.case_outcome(R("injected", [wide], expected=e, span=3000))["localised"]
+
+
+def test_localisation_requires_the_same_finding_to_detect():
+    narrow_elsewhere = F(start=300, end=301)   # narrow, but does not overlap the bug
+    whole = F(start=1, end=400)                # overlaps, but not narrow
+    out = M.case_outcome(R("injected", [narrow_elsewhere, whole], expected=E(start=120), span=100))
+    assert out["detected"] and not out["localised"]
+
+
+def test_missing_span_is_an_error_not_a_guess():
+    r = R("injected", [F(start=20)], expected=E(start=20))
+    r["expected_changed_line_span"] = None
+    with pytest.raises(ValueError):
+        M.case_outcome(r)
+
+
+def test_changed_line_span():
+    patch = "@@ -3,2 +3,3 @@\n x\n+y\n z\n@@ -40 +41,2 @@\n q\n+r"
+    assert M.changed_head_lines(patch) == {4, 42}
+    assert M.changed_line_span(patch) == 39
+    assert M.changed_head_lines("@@ -5,3 +5,1 @@\n a\n-b\n-c") == {5, 6}  # deletion: both neighbours
+    assert M.changed_line_span(None) == 0
+    assert M.changed_head_lines("@@ -1 +1 @@\n-a\n\\ No newline at end of file\n+b") == {1}
 
 
 def test_false_positive_rate():
@@ -66,33 +128,44 @@ def test_detection_by_split_and_kind():
         R("injected", [F(start=21)], expected=E(start=20)),                           # hit
         R("injected", [F(start=21, severity="low")], expected=E(start=20)),           # low: miss
         R("injected", [F(file="b.py", start=20)], expected=E(start=20, kind="transposed_args")),  # wrong file
-        R("reverted", [F(start=100)], expected=E(start=20, kind="reverted_fix")),     # file only: miss
+        R("reverted", [F(start=100)], expected=E(start=20, kind="reverted_fix")),     # right file, far: miss
         R("reverted", [F(start=18, end=19)], expected=E(start=20, end=25, kind="reverted_fix"), error="x"),
         R("clean", [F()]),
     ]
     d = M.detection(results)
-    assert d["overall"] == {"rate": 0.2, "detected": 1, "cases": 5, "errored": 1}
+    assert d["overall"] == {"detection_rate": 0.2, "detected": 1, "cases": 5, "errored": 1}
     assert list(d["by_split"]) == ["injected", "reverted"]
     assert d["by_split"]["injected"]["detected"] == 1 and d["by_split"]["injected"]["cases"] == 3
-    assert d["by_split"]["reverted"]["rate"] == 0.0
-    assert d["by_bug_kind"]["flipped_comparison"] == {"rate": 0.5, "detected": 1, "cases": 2, "errored": 0}
+    assert d["by_split"]["reverted"]["detection_rate"] == 0.0
+    assert d["by_bug_kind"]["flipped_comparison"] == {"detection_rate": 0.5, "detected": 1, "cases": 2,
+                                                      "errored": 0}
     assert d["by_bug_kind"]["transposed_args"]["detected"] == 0
     assert d["by_bug_kind"]["reverted_fix"]["errored"] == 1
 
 
-def test_localisation_file_only_share():
+def test_localisation_is_a_share_of_detected_not_of_all_bugs():
     results = [
-        R("injected", [F(start=20)], expected=E(start=20)),                 # line
-        R("injected", [F(start=90), F(start=22)], expected=E(start=20)),    # line (any finding)
-        R("injected", [F(start=90)], expected=E(start=20)),                 # file only
-        R("injected", [F(file="z.py")], expected=E(start=20)),              # none
+        R("injected", [F(start=20)], expected=E(start=20)),                 # detected + localised
+        R("injected", [F(start=1, end=500)], expected=E(start=20)),         # detected only (shrug)
+        R("injected", [F(file="z.py")], expected=E(start=20)),              # missed
+        R("injected", [], expected=E(start=20)),                            # missed
+        R("reverted", [F(start=1, end=500)], expected=E(start=20, kind="reverted_fix")),
     ]
     loc = M.localisation(results)
-    assert loc["tolerance_lines"] == 5
-    assert (loc["line_match"], loc["file_only"], loc["file_match"]) == (2, 1, 3)
-    assert loc["file_only_share"] == round(1 / 3, 4)
-    assert loc["line_match_rate"] == 0.5
-    assert M.localisation(results, tolerance=100)["file_only"] == 0
+    inj = loc["by_split"]["injected"]
+    assert (inj["localised"], inj["detected"], inj["cases"]) == (1, 2, 4)
+    assert inj["localisation_rate_of_detected"] == 0.5    # 1 of 2 detected, not 1 of 4
+    assert inj["localised_share_of_all_bugs"] == 0.25
+    assert loc["by_split"]["reverted"]["localisation_rate_of_detected"] == 0.0
+    nothing_detected = M.localisation([R("injected", [], expected=E())])
+    assert nothing_detected["overall"]["localisation_rate_of_detected"] is None
+
+
+def test_thresholds_change_the_localisation_verdict():
+    shrug = [R("injected", [F(start=1, end=90)], expected=E(start=20), span=100)]
+    assert M.localisation(shrug)["overall"]["localised"] == 0
+    loose = M.ScoringConfig(narrow_max_lines=1000, narrow_span_fraction=1.0)
+    assert M.localisation(shrug, loose)["overall"]["localised"] == 1
 
 
 def test_cost():
@@ -113,7 +186,10 @@ def test_percentile_nearest_rank():
     assert M.percentile([], 95) is None
 
 
-def test_report_groups_in_mandated_order():
-    rep = M.compute_report_metrics([R("clean"), R("injected", [F()], expected=E(start=10))])
+def test_report_groups_in_mandated_order_and_records_scoring():
+    cfg = M.ScoringConfig(tolerance_lines=3, narrow_max_lines=12, narrow_span_fraction=0.5)
+    rep = M.compute_report_metrics([R("clean"), R("injected", [F()], expected=E(start=10))], cfg)
     assert list(rep)[:4] == ["false_positive_rate", "detection", "localisation", "cost"]
     assert rep["errors"]["count"] == 0
+    assert (rep["scoring"]["tolerance_lines"], rep["scoring"]["narrow_max_lines"],
+            rep["scoring"]["narrow_span_fraction"]) == (3, 12, 0.5)

@@ -63,8 +63,8 @@ Candidate fix commits: single-parent, subject matching `fix|fixes|fixed|bug|bugf
 non-test source file with 1–40 changed lines there, with a real (non-docstring) AST change;
 commits that also touch tests are preferred.
 
-A bare inverse of such a fix is a diff of a handful of lines, which a "flag the first hunk"
-baseline localises for free. So each case is **padded with real later development**: take the
+A bare inverse of such a fix is a diff of a handful of lines: the reviewer is handed the bug and
+nothing else, which real PRs never do. So each case is **padded with real later development**: take the
 file at the first later first-parent commit L where F..L changed 10–300 lines, undo the fix
 inside L (each fix block with 2 lines of context must still occur exactly once), and require the
 result to parse and add no pyflakes message. The case is then `base = fix commit F`,
