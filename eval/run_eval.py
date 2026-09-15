@@ -261,13 +261,20 @@ async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: 
         llm_factory = lambda _case: shared  # noqa: E731
 
     sem = asyncio.Semaphore(max(1, concurrency))
+    aborted = asyncio.Event()
     done = 0
 
     async def one(case):
         nonlocal done
         async with sem:
-            r = await run_agent_case(case, llm_factory, timeout_s, max_tool_rounds,
-                                     max_infra_retries=max_infra_retries, backoff_s=backoff_s)
+            if aborted.is_set():  # an account error already invalidated the run: start nothing new
+                raise asyncio.CancelledError
+            try:
+                r = await run_agent_case(case, llm_factory, timeout_s, max_tool_rounds,
+                                         max_infra_retries=max_infra_retries, backoff_s=backoff_s)
+            except ProviderAccountError:
+                aborted.set()
+                raise
         done += 1
         status = (("INFRA ERROR " if r["infra_error"] else "ERROR ") + r["error"][:300] if r["error"]
                   else f"{len(r['findings'])} findings")
