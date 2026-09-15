@@ -155,7 +155,8 @@ async def test_chat_openai_end_to_end_through_graph(settings_env, monkeypatch):
     assert [f.file for f in outcome.result.findings] == ["src/a.py"]
     # analyze (tool call) + analyze (answer) + synthesize = 3 completions, usage summed from the responses
     assert len(stub.requests) == 3
-    assert outcome.usage == {"input_tokens": 300, "output_tokens": 60, "total_tokens": 360}
+    assert outcome.usage == {"input_tokens": 300, "output_tokens": 60, "total_tokens": 360,
+                             "cache_read_input_tokens": 180, "cache_creation_input_tokens": 30, "cost_usd": 0.003}
     first, synth = stub.requests[0], stub.requests[-1]
     assert first["url"] == "https://openrouter.ai/api/v1/chat/completions"
     assert first["authorization"] == "Bearer sk-or-test"
@@ -180,3 +181,57 @@ async def test_unrecoverable_parse_failure_raises_with_count(settings_env, monke
     with pytest.raises(SynthesisError) as info:
         await _review_with_stub(settings_env, monkeypatch, stub)
     assert (info.value.parse_failures, info.value.attempts) == (2, 2)
+
+
+# --- prompt caching ------------------------------------------------------------------------
+
+def _user_and_system(body: dict) -> tuple[dict, dict]:
+    msgs = body["messages"]
+    return next(m for m in msgs if m["role"] == "system"), next(m for m in msgs if m["role"] == "user")
+
+
+async def test_cache_breakpoint_marks_the_context_brief_and_nothing_else(settings_env, monkeypatch):
+    stub = OpenAIStub()
+    await _review_with_stub(settings_env, monkeypatch, stub)
+    for req in stub.requests:  # every analyze round AND synthesize resend the same marked prefix
+        system, brief = _user_and_system(req["body"])
+        assert isinstance(system["content"], str)  # system is covered by the breakpoint after it
+        assert isinstance(brief["content"], list) and len(brief["content"]) == 1
+        assert brief["content"][0]["cache_control"] == {"type": "ephemeral"}
+        assert "Review pull request #7" in brief["content"][0]["text"]
+        others = [m for m in req["body"]["messages"] if m is not brief]
+        assert "cache_control" not in json.dumps(others)  # tool results etc. are untouched
+    briefs = {json.dumps(_user_and_system(r["body"])[1]) for r in stub.requests}
+    assert len(briefs) == 1  # byte-identical prefix on every call, or the cache never hits
+
+
+async def test_caching_changes_markers_only_never_the_text(settings_env, monkeypatch):
+    """Same case with LLM_PROMPT_CACHE on and off: every message's text is identical."""
+    def texts(stub):
+        out = []
+        for r in stub.requests:
+            for m in r["body"]["messages"]:
+                c = m.get("content")
+                out.append((m["role"], c if isinstance(c, str) or c is None else "".join(b["text"] for b in c)))
+        return out
+
+    on = OpenAIStub()
+    await _review_with_stub(settings_env, monkeypatch, on)
+    off = OpenAIStub()
+    settings_env(LLM_PROMPT_CACHE="false")
+    await _review_with_stub(settings_env, monkeypatch, off)
+    assert "cache_control" not in json.dumps([r["body"] for r in off.requests])
+    assert texts(on) == texts(off)
+    assert [r["body"].get("tools") for r in on.requests] == [r["body"].get("tools") for r in off.requests]
+
+
+def test_cacheable_text_with_chat_anthropic_formats_cache_control(settings_env):
+    """ChatAnthropic (direct provider) turns the same block into an Anthropic cache_control block."""
+    from langchain_anthropic.chat_models import _format_messages
+    from langchain_core.messages import HumanMessage, SystemMessage
+
+    from app.agent.llm import cacheable_text
+
+    settings_env()
+    _system, formatted = _format_messages([SystemMessage(content="sys"), HumanMessage(content=cacheable_text("brief"))])
+    assert formatted[0]["content"][0]["cache_control"] == {"type": "ephemeral"}

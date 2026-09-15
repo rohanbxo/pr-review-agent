@@ -122,6 +122,28 @@ def get_llm() -> BaseChatModel:
     return build_llm(resolve_llm_config())
 
 
+def cacheable_text(text: str) -> str | list[dict[str, Any]]:
+    """Message content ending in a prompt-cache breakpoint (``cache_control: ephemeral``).
+
+    The text is unchanged; only a marker is added. Anthropic caches the request prefix in the
+    order tools -> system -> messages up to the last breakpoint, so one breakpoint on the initial
+    context brief caches the tool definitions, the system prompt and the brief for every later
+    tool round. ChatAnthropic accepts the block natively; ChatOpenAI passes it through to
+    OpenRouter, which forwards it to Anthropic. With LLM_PROMPT_CACHE=false the plain string is
+    returned, i.e. the exact pre-caching request."""
+    if not get_settings().llm_prompt_cache:
+        return text
+    return [{"type": "text", "text": text, "cache_control": {"type": "ephemeral"}}]
+
+
+def message_text(message: Any) -> str:
+    """The text of a message whether its content is a string or a list of content blocks."""
+    content = getattr(message, "content", message)
+    if isinstance(content, str):
+        return content
+    return "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in content or [])
+
+
 def structured_output(llm: BaseChatModel, schema: type) -> Runnable:
     """``with_structured_output(schema, include_raw=True)`` with the same method on every provider.
 

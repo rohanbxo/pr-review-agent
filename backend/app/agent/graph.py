@@ -33,7 +33,7 @@ from langgraph.graph import END, START, StateGraph, add_messages
 from pydantic import ValidationError
 
 from app.agent.github_client import CallRecord, ReadOnlyGitHubClient
-from app.agent.llm import structured_output
+from app.agent.llm import cacheable_text, structured_output
 from app.agent.prompts import (
     REPAIR_INSTRUCTION,
     SYNTHESIZE_INSTRUCTION,
@@ -46,7 +46,13 @@ from app.config import get_settings
 
 __all__ = ["StepEvent", "ReviewOutcome", "SynthesisError", "build_graph", "review_pull_request"]
 
-_EMPTY_USAGE = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+_EMPTY_USAGE: dict[str, Any] = {
+    "input_tokens": 0, "output_tokens": 0, "total_tokens": 0,
+    # input_tokens INCLUDES cached tokens; these break it down (0 when the provider reports none).
+    "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0,
+    # As reported by the provider in the response (OpenRouter usage.cost); 0.0 if not reported.
+    "cost_usd": 0.0,
+}
 
 
 class SynthesisError(RuntimeError):
@@ -83,13 +89,25 @@ def _merge_usage(a: dict | None, b: dict | None) -> dict:
     out = dict(_EMPTY_USAGE)
     for src in (a or {}, b or {}):
         for k in out:
-            out[k] += int(src.get(k) or 0)
+            if k == "cost_usd":
+                out[k] = round(out[k] + float(src.get(k) or 0.0), 8)
+            else:
+                out[k] += int(src.get(k) or 0)
     return out
 
 
-def usage_of(msg: Any) -> dict[str, int]:
+def usage_of(msg: Any) -> dict[str, Any]:
     um = getattr(msg, "usage_metadata", None) or {}
-    return {k: int(um.get(k) or 0) for k in _EMPTY_USAGE}
+    details = um.get("input_token_details") or {}
+    token_usage = (getattr(msg, "response_metadata", None) or {}).get("token_usage") or {}
+    return {
+        "input_tokens": int(um.get("input_tokens") or 0),
+        "output_tokens": int(um.get("output_tokens") or 0),
+        "total_tokens": int(um.get("total_tokens") or 0),
+        "cache_read_input_tokens": int(details.get("cache_read") or 0),
+        "cache_creation_input_tokens": int(details.get("cache_creation") or 0),
+        "cost_usd": float(token_usage.get("cost") or 0.0),
+    }
 
 
 class ReviewState(TypedDict, total=False):
@@ -148,7 +166,9 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
             "pr": {k: v for k, v in summary.items() if k != "body"},
             "changed_files": pr_ref.changed_files,
             "tool_rounds": 0,
-            "messages": [SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=context)],
+            # Cache breakpoint on the brief: tools + system + brief are the stable prefix every
+            # later analyze round resends. Same text either way (app.agent.llm.cacheable_text).
+            "messages": [SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=cacheable_text(context))],
         }
 
     async def analyze(state: ReviewState, config: RunnableConfig) -> dict:

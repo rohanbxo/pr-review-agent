@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     # (OpenRouter: "anthropic/<model>"), so openai_compatible has no default -- see app/agent/llm.py.
     agent_model: str = Field(default="", validation_alias=AliasChoices("AGENT_MODEL", "LLM_MODEL", "agent_model"))
     llm_max_tool_rounds: int = 12
+    # Mark the stable prefix (tools + system prompt + initial context brief) cacheable. Changes
+    # cost, never what the model sees. Honoured by Anthropic models directly and via OpenRouter.
+    llm_prompt_cache: bool = True
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""
     langfuse_host: str = "http://langfuse-web:3000"

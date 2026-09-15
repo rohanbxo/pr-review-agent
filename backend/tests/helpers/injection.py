@@ -9,6 +9,7 @@ from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage
 
+from app.agent.llm import message_text
 from app.agent.prompts import reveal_invisible, strip_untrusted_blocks
 from app.agent.schema import ReviewResult
 
@@ -82,7 +83,9 @@ def model_input_text(messages: Iterable[BaseMessage]) -> list[str]:
     for m in messages:
         if isinstance(m, AIMessage):
             continue
-        out.append(m.content if isinstance(m.content, str) else json.dumps(m.content, ensure_ascii=False))
+        # Plain text of string OR content-block messages (the context brief carries a cache
+        # breakpoint). Never JSON-encode: escaped quotes would hide the untrusted envelope tags.
+        out.append(message_text(m))
     return out
 
 

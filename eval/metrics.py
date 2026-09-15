@@ -252,6 +252,10 @@ def cost(results: list[dict]) -> dict:
     tokens = [int((r.get("usage") or {}).get("total_tokens") or 0) for r in results if r.get("usage")]
     ins = [int((r.get("usage") or {}).get("input_tokens") or 0) for r in results if r.get("usage")]
     outs = [int((r.get("usage") or {}).get("output_tokens") or 0) for r in results if r.get("usage")]
+    usages = [r["usage"] for r in results if r.get("usage")]
+    cache_read = [int(u.get("cache_read_input_tokens") or 0) for u in usages]
+    cache_write = [int(u.get("cache_creation_input_tokens") or 0) for u in usages]
+    costs = [float(u.get("cost_usd") or 0.0) for u in usages]
     mean = lambda xs: round(sum(xs) / len(xs), 3) if xs else None  # noqa: E731
     p95 = percentile(durations, 95)
     return {
@@ -259,8 +263,17 @@ def cost(results: list[dict]) -> dict:
         "mean_seconds": mean(durations),
         "p95_seconds": round(p95, 3) if p95 is not None else None,
         "mean_total_tokens": mean(tokens),
+        # input tokens INCLUDE cached ones; the cache fields break them down.
         "mean_input_tokens": mean(ins),
         "mean_output_tokens": mean(outs),
+        "mean_cache_read_input_tokens": mean(cache_read),
+        "mean_cache_creation_input_tokens": mean(cache_write),
+        "cache_read_share_of_input": round(sum(cache_read) / sum(ins), 4) if ins and sum(ins) else None,
+        # Provider-reported (OpenRouter usage.cost), summed over the model calls of each case's final
+        # attempt. Attempts abandoned to provider retries are not included; account-level spend is
+        # the authoritative total.
+        "total_cost_usd": round(sum(costs), 4) if usages else None,
+        "mean_cost_usd": round(sum(costs) / len(costs), 5) if costs else None,
     }
 
 

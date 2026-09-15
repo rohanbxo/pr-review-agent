@@ -203,3 +203,16 @@ def test_report_groups_in_mandated_order_and_records_scoring():
     assert rep["errors"]["count"] == 0
     assert (rep["scoring"]["tolerance_lines"], rep["scoring"]["narrow_max_lines"],
             rep["scoring"]["narrow_span_fraction"]) == (3, 12, 0.5)
+
+
+def test_cost_breaks_down_cache_and_provider_cost():
+    u = lambda i, cr, cw, c: {"input_tokens": i, "output_tokens": 10, "total_tokens": i + 10,  # noqa: E731
+                              "cache_read_input_tokens": cr, "cache_creation_input_tokens": cw, "cost_usd": c}
+    results = [R("clean", duration=1.0, usage=u(1000, 800, 100, 0.01)),
+               R("clean", duration=2.0, usage=u(3000, 0, 2000, 0.03))]
+    c = M.cost(results)
+    assert (c["mean_cache_read_input_tokens"], c["mean_cache_creation_input_tokens"]) == (400, 1050)
+    assert c["cache_read_share_of_input"] == 0.2
+    assert (c["total_cost_usd"], c["mean_cost_usd"]) == (0.04, 0.02)
+    legacy = M.cost([R("clean", duration=1.0, usage={"input_tokens": 5, "output_tokens": 1, "total_tokens": 6})])
+    assert legacy["mean_cache_read_input_tokens"] == 0 and legacy["total_cost_usd"] == 0.0

@@ -64,7 +64,9 @@ class OpenAIStub:
         return {
             "id": f"chatcmpl-stub-{next(self._ids)}", "object": "chat.completion", "created": 0, "model": model,
             "choices": [{"index": 0, "finish_reason": finish, "message": message}],
-            "usage": {"prompt_tokens": 100, "completion_tokens": 20, "total_tokens": 120},
+            # Shaped like OpenRouter's usage for an Anthropic model with a warm prompt cache.
+            "usage": {"prompt_tokens": 100, "completion_tokens": 20, "total_tokens": 120, "cost": 0.001,
+                      "prompt_tokens_details": {"cached_tokens": 60, "cache_write_tokens": 10}},
         }
 
     def _tool_call(self, name: str, arguments: str) -> dict:

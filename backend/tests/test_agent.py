@@ -11,6 +11,7 @@ from app.agent import runner as runner_mod
 from app.agent.fixtures import mock_transport_for_case
 from app.agent.github_client import ReadOnlyGitHubClient
 from app.agent.graph import SynthesisError, review_pull_request
+from app.agent.llm import message_text
 from app.agent.prompts import UNTRUSTED_TAG
 from app.agent.schema import ReviewResult
 from app.models import AgentStep, ReviewRun, RunStatus, StepKind
@@ -86,7 +87,8 @@ async def test_graph_node_order_tool_roundtrip_and_filtering():
     assert outcome.result.files_reviewed == ["src/calc.py"]
     assert [f["file"] for f in outcome.dropped_findings] == ["src/unrelated.py"]
     # 2 analyze calls (100/20 each) + 1 synthesize (300/80)
-    assert outcome.usage == {"input_tokens": 500, "output_tokens": 120, "total_tokens": 620}
+    assert outcome.usage == {"input_tokens": 500, "output_tokens": 120, "total_tokens": 620,
+                             "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0, "cost_usd": 0.0}
 
     # fetch_context is deterministic Python: PR + files fetched before the first LLM call.
     paths = [c.path for c in outcome.calls]
@@ -118,7 +120,7 @@ async def test_first_llm_call_is_grounded_in_fetched_context():
         outcome = await review_pull_request(repo="acme/calc", pr_number=7, client=gh, llm=llm)
     first = llm.calls[0].messages
     assert first[0].type == "system" and "untrusted" in first[0].content.lower()
-    assert "range(len(values) - 1)" in first[1].content
+    assert "range(len(values) - 1)" in message_text(first[1])
     assert outcome.result.findings == []  # an empty review is valid
 
 

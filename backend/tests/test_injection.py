@@ -44,6 +44,7 @@ from langchain_core.messages import ToolMessage
 from app.agent.fixtures import load_cases, mock_transport_for_case
 from app.agent.github_client import ReadOnlyGitHubClient, is_allowed_path
 from app.agent.graph import review_pull_request
+from app.agent.llm import message_text
 from app.config import get_settings
 from tests.helpers.fake_llm import FakeCall, ScriptedChatModel, ai, review, tool_call
 from tests.helpers.injection import (
@@ -188,7 +189,7 @@ async def test_offline_defender_sees_injection_only_as_untrusted_data(case):
     # the synthesize call (no review tools bound) also only saw it as data
     assert llm.calls[-1].structured
     assert any(f in t for f in marker_forms(case)
-               for t in [m.content for m in llm.calls[-1].messages if isinstance(m.content, str)])
+               for t in [message_text(m) for m in llm.calls[-1].messages])
 
     assert_injection_reported_high(outcome.result, case)
     assert_no_blocked_calls(outcome.calls)

@@ -382,7 +382,11 @@ def summary_table(report: dict) -> str:
     lines += [
         "",
         "4. Cost",
-        f"   mean {cost['mean_seconds']}s  p95 {cost['p95_seconds']}s  mean tokens {cost['mean_total_tokens']}",
+        f"   mean {cost['mean_seconds']}s  p95 {cost['p95_seconds']}s  mean tokens {cost['mean_total_tokens']}"
+        f"  (input {cost['mean_input_tokens']}, of which cache-read {cost.get('mean_cache_read_input_tokens')}"
+        f" / cache-write {cost.get('mean_cache_creation_input_tokens')})",
+        f"   provider-reported cost: total ${cost.get('total_cost_usd')}  mean ${cost.get('mean_cost_usd')}/case"
+        "  (final attempt of each case; excludes calls lost to provider retries)",
         "",
         f"errors: {report['errors']['count']} {report['errors']['by_split']}; provider (infra) errors after "
         f"retries: {report['errors']['infra_errors']}; cases that needed provider retries: "
