@@ -1,0 +1,4 @@
+# Extra dependencies for eval/ on top of backend/requirements-dev.txt.
+# Install into the backend venv, e.g.:
+#   uv pip install --python backend/.venv/Scripts/python.exe -r eval/requirements.txt
+pyflakes>=3.2

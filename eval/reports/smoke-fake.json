@@ -1,0 +1,173 @@
+{
+  "WARNING": "llm=fake: offline plumbing smoke test with a stub model that returns an empty review. These numbers say NOTHING about review quality.",
+  "meta": {
+    "llm": "fake",
+    "model": "fake-review (stub)",
+    "dataset": "eval\\data\\v1.jsonl",
+    "dataset_sha256": "15e03b5c4f656ac1f7fd7b4271f80bda649da88f9abe88a6c9d157c6ddff466c",
+    "dataset_counts": {
+      "injected": 40,
+      "reverted": 25,
+      "clean": 150
+    },
+    "evaluated_counts": {
+      "injected": 1,
+      "reverted": 1,
+      "clean": 1
+    },
+    "evaluated_by_bug_kind": {
+      "flipped_comparison": 1,
+      "reverted_fix": 1,
+      "none": 1
+    },
+    "tolerance_lines": 5,
+    "limit": 3,
+    "splits": null,
+    "concurrency": 4,
+    "git_sha": null,
+    "timestamp": "2026-09-15T11:09:16+00:00",
+    "python": "3.12.13"
+  },
+  "false_positive_rate": {
+    "rate": 0.0,
+    "false_positives": 0,
+    "cases": 1,
+    "errored_counted_as_fp": 0,
+    "mean_medium_plus_findings_per_clean_case": 0.0
+  },
+  "detection": {
+    "overall": {
+      "rate": 0.0,
+      "detected": 0,
+      "cases": 2,
+      "errored": 0
+    },
+    "by_split": {
+      "injected": {
+        "rate": 0.0,
+        "detected": 0,
+        "cases": 1,
+        "errored": 0
+      },
+      "reverted": {
+        "rate": 0.0,
+        "detected": 0,
+        "cases": 1,
+        "errored": 0
+      }
+    },
+    "by_bug_kind": {
+      "flipped_comparison": {
+        "rate": 0.0,
+        "detected": 0,
+        "cases": 1,
+        "errored": 0
+      },
+      "reverted_fix": {
+        "rate": 0.0,
+        "detected": 0,
+        "cases": 1,
+        "errored": 0
+      }
+    }
+  },
+  "localisation": {
+    "tolerance_lines": 5,
+    "cases": 2,
+    "file_match": 0,
+    "file_match_rate": 0.0,
+    "line_match": 0,
+    "line_match_rate": 0.0,
+    "file_only": 0,
+    "file_only_share": null
+  },
+  "cost": {
+    "cases_timed": 3,
+    "mean_seconds": 0.062,
+    "p95_seconds": 0.074,
+    "mean_total_tokens": 0.0,
+    "mean_input_tokens": 0.0,
+    "mean_output_tokens": 0.0
+  },
+  "errors": {
+    "count": 0,
+    "by_split": {},
+    "cases": []
+  },
+  "cases": [
+    {
+      "id": "rich-2343-flipped_comparison",
+      "split": "injected",
+      "repo": "Textualize/rich",
+      "pr_number": 2343,
+      "expected": {
+        "bug_kind": "flipped_comparison",
+        "file": "rich/console.py",
+        "lines": {
+          "start": 1966,
+          "end": 1966
+        }
+      },
+      "findings": [],
+      "summary": "fake LLM: no review performed",
+      "risk": "low",
+      "duration_s": 0.074,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "error": null
+    },
+    {
+      "id": "click-9da1791476-reverted",
+      "split": "reverted",
+      "repo": "pallets/click",
+      "pr_number": 705204,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "click/core.py",
+        "lines": {
+          "start": 1404,
+          "end": 1405
+        }
+      },
+      "findings": [],
+      "summary": "fake LLM: no review performed",
+      "risk": "low",
+      "duration_s": 0.062,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "error": null
+    },
+    {
+      "id": "rich-1335-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 1335,
+      "expected": null,
+      "findings": [],
+      "summary": "fake LLM: no review performed",
+      "risk": "low",
+      "duration_s": 0.051,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "error": null
+    }
+  ]
+}

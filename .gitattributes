@@ -1,0 +1,4 @@
+# LF everywhere: shell scripts and Dockerfiles run in Linux containers, and eval fixtures are hash-pinned.
+* text=auto eol=lf
+*.ico binary
+*.png binary

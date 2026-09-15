@@ -1,0 +1,42 @@
+{
+  "seed": "pr-review-eval-v1",
+  "targets": {
+    "injected": 40,
+    "reverted": 25,
+    "clean": 150
+  },
+  "repos": {
+    "psf/requests": "dae7ef63b4df6eded86637f251fc4e3a06c3b479",
+    "pallets/flask": "d73fa1cdcbd8b1465c151db8924ba58b1dd14e35",
+    "pallets/click": "6aabf099bfdd4c1e75fe8d0e0d4241372b988ab1",
+    "encode/httpx": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+    "python-attrs/attrs": "8f767776326faaed11e6c2974798787f6e19b343",
+    "pypa/packaging": "10590c194edb33c82f84a127883d6097c56b7840",
+    "tiangolo/typer": "a80f6e5ecd74f32b983cca336a2f3cba98d9853a",
+    "marshmallow-code/marshmallow": "c54aa7292a09259e186fa8c20559c5df8aeb27f3",
+    "pallets/werkzeug": "6a604e005d95af8129ee314863be8ad6b240dead",
+    "pallets/jinja": "5ef70112a1ff19c05324ff889dd30405b1002044",
+    "more-itertools/more-itertools": "b2f3aff7633057d234ec9186c18a53f4df306d08",
+    "dateutil/dateutil": "48bd1af97e71baf8e96fce5b663d589caac8f147",
+    "Textualize/rich": "9d8f9a372cc5916fd4781fec207ced7ddac2f08f",
+    "pyparsing/pyparsing": "efd56db4e59f36b1673ce0eb0823e3afaa9d1201",
+    "networkx/networkx": "4e74880b0da01977da79915167c64e5c2af38b47"
+  },
+  "counts": {
+    "injected": 40,
+    "reverted": 25,
+    "clean": 150,
+    "injected_by_kind": {
+      "flipped_comparison": 10,
+      "removed_none_guard": 10,
+      "off_by_one_range_len": 10,
+      "transposed_args": 10
+    }
+  },
+  "sha256": {
+    "injected": "89d9d2a16443326936b193340fe25928c6971ffb8428a3466f4b20aa129b1953",
+    "reverted": "883be16560f1ff5a07f86d51cd2de7c8ee58f009efa8832ce5248738ec63625a",
+    "clean": "c9fa1714420c5f2fecde095ae3cbada1c1f99796e5f2ac085b462ae81c867201",
+    "v1": "15e03b5c4f656ac1f7fd7b4271f80bda649da88f9abe88a6c9d157c6ddff466c"
+  }
+}

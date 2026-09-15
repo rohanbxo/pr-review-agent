@@ -1,0 +1,118 @@
+# eval/ — does the review agent earn its cost?
+
+SPEC phase 6. Everything here runs offline: each dataset case carries its own patches and file
+contents, and the agent is driven through the **real** LangGraph graph and the **real**
+read-only GitHub client (allowlist included) over `app.agent.fixtures.mock_transport_for_case`.
+No GitHub traffic, no rate limits, reproducible after upstream force-pushes.
+
+```
+eval/
+  mutations.py       AST-located, text-applied, pyflakes-verified bug injection
+  build_dataset.py   git history of public repos -> data/{injected,reverted,clean,v1}.jsonl
+  metrics.py         pure scoring functions (FP rate, detection, localisation, cost)
+  run_eval.py        runner: agent / --baseline / --llm fake
+  data/              the dataset + manifest.json (pinned SHAs, counts, hashes) + README
+  reports/           baseline.json, v1.json (real model), smoke-fake.json (plumbing only)
+  tests/             pytest eval/tests
+```
+
+All commands run from the repo root with the backend venv. `run_eval` puts `backend/` on
+`sys.path` itself (it imports the agent as `app.*`).
+
+```bash
+PY=backend/.venv/Scripts/python.exe          # Windows; backend/.venv/bin/python elsewhere
+uv pip install --python $PY -r eval/requirements.txt   # pyflakes
+
+$PY -m pytest eval/tests -q
+```
+
+## Build the dataset
+
+```bash
+$PY -m eval.build_dataset             # uses the SHAs pinned in eval/data/manifest.json
+$PY -m eval.build_dataset --refresh   # fetch upstream and re-pin (changes the dataset hash)
+```
+
+Repos are bare-cloned over HTTPS into `eval/.cache/repos` (gitignored; `git clone` is not
+subject to the GitHub API rate limit). See `eval/data/README.md` for provenance, filters and
+caveats.
+
+## Run
+
+```bash
+# 1. Baseline first. No LLM: one `medium` finding per changed file, on the file's first hunk.
+$PY -m eval.run_eval --baseline --dataset eval/data/v1.jsonl --report eval/reports/baseline.json
+
+# 2. The agent (needs ANTHROPIC_API_KEY; fails fast and writes nothing without it).
+ANTHROPIC_API_KEY=... $PY -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json --concurrency 4
+
+# Offline plumbing smoke test: real graph + client + mock transport, stub model returning an
+# empty review. Refuses to write v1.json/baseline.json; the report is stamped "llm": "fake".
+$PY -m eval.run_eval --llm fake --limit 3 --report eval/reports/smoke-fake.json
+```
+
+Other flags: `--splits injected reverted`, `--limit N` (round-robin across splits),
+`--tolerance N`, `--case-timeout S`, `--max-tool-rounds N`.
+
+## Reading the report
+
+The report (and the stdout table) always has the four groups **in this order** — never quote
+one without the others:
+
+1. **`false_positive_rate`** — share of `clean` cases with any finding at `medium`+. This decides
+   adoption: a reviewer that cries wolf gets muted.
+2. **`detection`** — overall, `by_split`, `by_bug_kind`. A detection is a `medium`+ finding whose
+   file matches the expected file and whose line range overlaps the expected range within the
+   tolerance.
+3. **`localisation`** — `file_match_rate` vs `line_match_rate`, and `file_only_share`: of the
+   bug cases where some finding named the right file, the share where no finding landed within
+   tolerance (how much of a file-level "hit" would be a whole-file shrug).
+4. **`cost`** — mean and p95 seconds per review, mean tokens (total / input / output).
+
+Plus `errors` (an errored case counts as a *miss* on bug splits and as a *false positive* on
+`clean` — a review that did not complete is not a clean pass) and `cases` (per-case findings,
+usage, GitHub call count, **blocked calls**, error). `meta` records `llm`, `model`,
+`dataset_sha256`, split counts, tolerance, git SHA (if any) and timestamp. Only compare reports
+with the same `dataset_sha256` and tolerance.
+
+## Rules for interpreting numbers
+
+- **`injected` is a regression harness; `reverted` is the quality number.** Injected bugs are
+  far more uniform than real ones — a model can learn the shape of "comparison flipped" in a way
+  it cannot learn a real bug. Use `injected` to catch prompt changes that break something;
+  quote `reverted` (real historical bugs, re-introduced) when asked how good the agent is.
+- **Detection rate alone is a vanity metric.** An agent that reports eight findings per PR
+  catches most bugs and is unusable. Detection is only meaningful next to the FP rate.
+- **If the agent does not clearly beat the baseline, the LLM is not earning its cost.** The
+  baseline has a 100% FP rate and a non-trivial detection rate (bugs often sit in a file's first
+  hunk). The agent must hold a far lower FP rate *and* match or beat the baseline's detection on
+  `reverted` — otherwise a `git diff --stat` does the same job for free.
+- `clean` means "merged upstream", not "verified bug-free". Some clean PRs contain real bugs
+  later fixed; a small FP rate floor is expected. Read the flagged clean cases before tuning to
+  zero.
+
+## Why tolerance = 5 lines
+
+Findings are compared on file + line-range overlap, widened by 5 lines each side.
+Tolerance **0** measures line-number formatting (off-by-one in how the model counts, a range
+that starts at the `if` rather than the comparison) instead of whether it found the bug.
+Tolerance **50** lets a whole-function or whole-file shrug score a hit — at that point the
+baseline "flag every file" wins by construction. 5 lines is roughly "the same statement or its
+immediate neighbours". It is exposed as `--tolerance` so you can check a result is not an
+artefact of the choice, but reports are only comparable at the same value (default 5).
+
+## How the pieces keep the eval honest
+
+- **Mutations survive a linter.** Each is located with `ast`, applied as a byte-exact text
+  splice, then verified: the result parses, `pyflakes` reports no new message, and the AST
+  actually changed. A mutation that breaks the parser measures nothing.
+- **Bugs sit inside the reviewed change.** Only `+` lines of the PR's diff are eligible; the
+  file's patch and head content are regenerated after mutation and `expected.lines` are
+  head-file line numbers.
+- **Reverted cases do not leak the answer, and are not trivially localisable.** A bare inverse
+  of a small fix is a few-line diff that "flag the first hunk" localises for free (an unpadded
+  build scored the baseline 25/25 on `reverted`). Each case therefore carries the fixed file
+  forward through real later development (10–300 changed lines) and undoes the fix inside it.
+  Only the source file is included (not the fix's regression test or changelog), the title is a
+  neutral `Update <file>`, and the fix commit is recorded under `source`, which the mock
+  transport never serves.
