@@ -88,7 +88,7 @@ def llm_env(tmp_path, monkeypatch):
     from app.config import get_settings
 
     for var in ("LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY", "AGENT_MODEL", "LLM_MODEL", "ANTHROPIC_API_KEY",
-                "LLM_TEMPERATURE", "LLM_PROMPT_CACHE"):
+                "LLM_TEMPERATURE", "LLM_PROMPT_CACHE", "LLM_KEEP_TOOL_RESULTS", "LLM_PROVIDER_ROUTING"):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.chdir(tmp_path)
 

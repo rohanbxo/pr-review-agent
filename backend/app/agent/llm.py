@@ -41,11 +41,12 @@ class LLMConfig:
     base_url: str | None
     api_key: str
     temperature: float = 0.0
+    routing: dict | None = None  # OpenRouter "provider" routing object (openai_compatible only)
 
     def describe(self) -> dict[str, Any]:
         """Safe to log and to write into reports: never includes the key."""
         return {"provider": self.provider, "model": self.model, "base_url": self.base_url,
-                "temperature": self.temperature, "api_key_set": bool(self.api_key)}
+                "temperature": self.temperature, "routing": self.routing, "api_key_set": bool(self.api_key)}
 
 
 def resolve_llm_config(
@@ -77,7 +78,7 @@ def resolve_llm_config(
         env = "LLM_API_KEY" + (" (or ANTHROPIC_API_KEY)" if prov == "anthropic" else "")
         raise LLMConfigError(f"{env} is not set for provider {prov}")
     return LLMConfig(provider=prov, model=chosen, base_url=base_url, api_key=key,  # type: ignore[arg-type]
-                     temperature=temp)
+                     temperature=temp, routing=s.llm_provider_routing if prov == "openai_compatible" else None)
 
 
 def configured_model_label() -> str:
@@ -128,6 +129,8 @@ def build_llm(cfg: LLMConfig) -> BaseChatModel:
         http_client = default_http_async_client()
         if http_client is not None:
             kwargs["http_async_client"] = http_client
+        if cfg.routing:
+            kwargs["extra_body"] = {"provider": cfg.routing}
         return _chat_openai_class()(
             model=cfg.model,
             base_url=cfg.base_url,
@@ -154,6 +157,35 @@ def build_llm(cfg: LLMConfig) -> BaseChatModel:
 def get_llm() -> BaseChatModel:
     """The review model as configured in settings (used by the background runner)."""
     return build_llm(resolve_llm_config())
+
+
+CACHE_CONTROL = {"type": "ephemeral"}
+
+
+def with_conversation_cache(runnable: Runnable, llm: BaseChatModel) -> Runnable:
+    """Bind top-level ``cache_control`` so the provider caches the whole request prefix up to the
+    last cacheable block; each tool round reads everything before it and writes only what it added.
+    Used ONLY when context trimming is off (see app/agent/context.py for why the two conflict).
+
+    Verified on OpenRouter -> anthropic/claude-haiku-4.5 by probe, 2026-09-16: top-level alone rolls
+    (read 23,159 of call 1, wrote 1,866); top-level + any explicit block breakpoint silently stops it
+    rolling; a different tool list (synthesize) reads nothing, so bind this to analyze calls only.
+    Providers without explicit caching ignore the field. ChatOpenAI sends it in ``extra_body``,
+    merged with any model-level extra_body (e.g. provider routing) instead of replacing it.
+    LLM_PROMPT_CACHE=false returns ``runnable`` unchanged."""
+    if not get_settings().llm_prompt_cache:
+        return runnable
+    try:
+        from langchain_openai import ChatOpenAI
+    except ImportError:  # pragma: no cover
+        ChatOpenAI = None  # type: ignore[assignment]
+    from langchain_anthropic import ChatAnthropic
+
+    if ChatOpenAI is not None and isinstance(llm, ChatOpenAI):
+        return runnable.bind(extra_body={**(llm.extra_body or {}), "cache_control": CACHE_CONTROL})
+    if isinstance(llm, ChatAnthropic):
+        return runnable.bind(cache_control=CACHE_CONTROL)
+    return runnable
 
 
 def message_text(message: Any) -> str:

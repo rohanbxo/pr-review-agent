@@ -19,7 +19,7 @@ from tests.helpers.openai_stub import VALID_REVIEW, OpenAIStub
 def settings_env(monkeypatch):
     """Set LLM env vars and clear the settings cache around each test."""
     for var in ("LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY", "AGENT_MODEL", "LLM_MODEL", "ANTHROPIC_API_KEY",
-                "LLM_TEMPERATURE", "LLM_PROMPT_CACHE"):
+                "LLM_TEMPERATURE", "LLM_PROMPT_CACHE", "LLM_KEEP_TOOL_RESULTS", "LLM_PROVIDER_ROUTING"):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.chdir(__import__("tempfile").gettempdir())  # no stray .env
 
@@ -190,18 +190,42 @@ def _is_synth(body: dict) -> bool:
     return [t["function"]["name"] for t in body.get("tools") or []] == ["ReviewResult"]
 
 
-async def test_breakpoint_on_brief_never_top_level_and_none_on_synthesize(settings_env, monkeypatch):
+async def test_trimming_off_by_default_uses_rolling_top_level_cache(settings_env, monkeypatch):
     stub = OpenAIStub()
     await _review_with_stub(settings_env, monkeypatch, stub)
     analyze = [r["body"] for r in stub.requests if not _is_synth(r["body"])]
     synth = [r["body"] for r in stub.requests if _is_synth(r["body"])]
     assert analyze and synth
     for body in analyze:
+        assert body["cache_control"] == {"type": "ephemeral"}      # rolls over the whole conversation
+        assert "cache_control" not in json.dumps(body["messages"])  # never mixed with explicit breakpoints
+    for body in synth:  # different tool list: the cache can't be read, so no marker at all
+        assert "cache_control" not in json.dumps(body)
+
+
+async def test_trimming_on_uses_explicit_breakpoints_and_never_top_level(settings_env, monkeypatch):
+    monkeypatch.setenv("LLM_KEEP_TOOL_RESULTS", "2")
+    stub = OpenAIStub()
+    await _review_with_stub(settings_env, monkeypatch, stub)
+    analyze = [r["body"] for r in stub.requests if not _is_synth(r["body"])]
+    synth = [r["body"] for r in stub.requests if _is_synth(r["body"])]
+    for body in analyze:
         assert "cache_control" not in body  # top-level + explicit breakpoints don't mix (probe)
         brief = next(m for m in body["messages"] if m["role"] == "user")
         assert brief["content"][0]["cache_control"] == {"type": "ephemeral"}
-    for body in synth:  # different tool list: the cache can't be read, so no breakpoints at all
+    for body in synth:
         assert "cache_control" not in json.dumps(body)
+
+
+async def test_provider_routing_is_sent_and_merged_with_cache_control(settings_env, monkeypatch):
+    routing = {"only": ["novita"], "allow_fallbacks": False}
+    monkeypatch.setenv("LLM_PROVIDER_ROUTING", json.dumps(routing))
+    stub = OpenAIStub()
+    await _review_with_stub(settings_env, monkeypatch, stub)
+    assert resolve_llm_config().describe()["routing"] == routing
+    for r in stub.requests:
+        assert r["body"]["provider"] == routing  # every call, analyze AND synthesize
+    assert any("cache_control" in r["body"] for r in stub.requests if not _is_synth(r["body"]))
 
 
 async def test_caching_never_changes_what_the_model_sees(settings_env, monkeypatch):

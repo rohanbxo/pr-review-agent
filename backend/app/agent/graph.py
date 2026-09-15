@@ -34,7 +34,7 @@ from pydantic import ValidationError
 
 from app.agent.github_client import CallRecord, ReadOnlyGitHubClient
 from app.agent.context import model_view
-from app.agent.llm import structured_output
+from app.agent.llm import structured_output, with_conversation_cache
 from app.agent.prompts import (
     REPAIR_INSTRUCTION,
     SYNTHESIZE_INSTRUCTION,
@@ -146,9 +146,13 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
     pr_ref = PRRef(repo="", pr_number=0)
     tools = build_tools(client, pr_ref)
     tools_by_name = {t.name: t for t in tools}
-    analyst = llm.bind_tools(tools)
     settings = get_settings()
-    keep = settings.llm_keep_tool_results
+    keep = settings.llm_keep_tool_results  # None = trimming off
+    # Trimming off: rolling top-level cache on analyze. Trimming on: explicit breakpoints on the
+    # brief and newest stub placed by model_view (top-level and explicit must never be mixed).
+    analyst = llm.bind_tools(tools)
+    if keep is None:
+        analyst = with_conversation_cache(analyst, llm)
 
     async def fetch_context(state: ReviewState) -> dict:
         pr_ref.repo, pr_ref.pr_number = state["repo"], state["pr_number"]

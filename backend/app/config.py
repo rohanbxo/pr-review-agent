@@ -64,10 +64,15 @@ class Settings(BaseSettings):
     # Prompt-cache breakpoints on the brief and the newest trimmed stub (app/agent/context.py).
     # Changes cost, never what the model sees.
     llm_prompt_cache: bool = True
-    # Context hygiene: the N most recent tool results are sent in full; older ones become a stub
-    # (tool, args, size). The brief with every patch is never trimmed. This DOES change what the
-    # model sees, so it is recorded in eval reports (meta.keep_tool_results) and is compared.
-    llm_keep_tool_results: int = Field(default=2, ge=0)
+    # Context hygiene (OFF by default): when set to N, the N most recent tool results are sent in
+    # full and older ones become a stub (tool, args, size); the brief with every patch is never
+    # trimmed. It changes what the model sees, so eval reports record it (meta.keep_tool_results)
+    # and it is part of the comparison rule. Unset = no trimming + rolling top-level prompt cache.
+    llm_keep_tool_results: int | None = Field(default=None, ge=0)
+    # OpenRouter provider routing object, sent as the request's "provider" field (JSON), e.g.
+    # {"only": ["novita"], "allow_fallbacks": false}. Open-weight models are served by many hosts
+    # with different quantization and context limits; pin one for any number you intend to compare.
+    llm_provider_routing: dict | None = None
     # 0 by default: at non-zero temperature case-level differences between runs are sampling
     # noise and no A/B is interpretable. Recorded in every eval report (meta.temperature).
     llm_temperature: float = 0.0

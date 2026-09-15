@@ -53,8 +53,13 @@ def stub_text(name: str, args: dict | None, size_chars: int) -> str:
             f"You already read it; call {name} again with the same arguments if you need the content.]")
 
 
-def model_view(messages: list[BaseMessage], *, keep: int, cache: bool) -> list[BaseMessage]:
-    """Project the full conversation onto what the model is sent. Pure; never mutates ``messages``."""
+def model_view(messages: list[BaseMessage], *, keep: int | None, cache: bool) -> list[BaseMessage]:
+    """Project the full conversation onto what the model is sent. Pure; never mutates ``messages``.
+
+    ``keep=None`` means trimming is off: the conversation is returned as-is with no block breakpoints
+    (the caller uses the rolling top-level cache instead)."""
+    if keep is None:
+        return list(messages)
     if keep < 0:
         raise ValueError("keep must be >= 0")
     calls: dict[str, dict] = {}
