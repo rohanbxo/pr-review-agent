@@ -264,6 +264,43 @@ def test_agent_errors_are_never_retried(monkeypatch):
     assert res["error"] and res["infra_retries"] == 0 and not res["infra_error"]
 
 
+class APIStatusError(Exception):
+    def __init__(self, status_code):
+        super().__init__(f"Error code: {status_code}")
+        self.status_code = status_code
+
+
+def test_out_of_credits_aborts_the_run_and_writes_no_report(tmp_path, monkeypatch):
+    """A 402 means every remaining case fails the same way: stop spending, no report."""
+    state = {"calls": 0}
+    original = R.make_fake_llm
+
+    def factory(case):
+        llm = original(case)
+        state["calls"] += 1
+        if state["calls"] >= 2:
+            class NoCredits(type(llm)):
+                def _generate(self, *a, **kw):
+                    raise APIStatusError(402)
+            return NoCredits()
+        return llm
+
+    monkeypatch.setattr(R, "make_fake_llm", factory)
+    cases = [{**CASE, "id": f"c{i}", "pr_number": i + 1} for i in range(6)]
+    ds = _dataset(tmp_path, cases)
+    out = tmp_path / "abort-fake.json"
+    assert R.main(["--llm", "fake", "--dataset", str(ds), "--report", str(out), "--concurrency", "1"]) == 3
+    assert not out.exists()
+    assert state["calls"] == 2  # nothing after the 402 was attempted
+
+
+def test_account_errors_are_fatal_not_transient():
+    for code in (401, 402, 403):
+        assert R.is_fatal_provider_error(APIStatusError(code))
+        assert not R.is_transient_provider_error(APIStatusError(code))
+    assert not R.is_fatal_provider_error(APIStatusError(429))
+
+
 def test_transient_classification():
     class InternalServerError(Exception):
         pass

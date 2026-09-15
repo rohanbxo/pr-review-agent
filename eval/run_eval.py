@@ -152,6 +152,20 @@ _TRANSIENT_NAMES = {"RateLimitError", "InternalServerError", "APIConnectionError
 _TRANSIENT_STATUS = {408, 409, 429, 500, 502, 503, 504, 529}
 
 
+# Account-level failures: no credits (402), bad or revoked key (401), forbidden (403). Every
+# remaining case would fail identically, so the run aborts and writes no report.
+_FATAL_STATUS = {401, 402, 403}
+
+
+class ProviderAccountError(RuntimeError):
+    """The provider refused the account, not the request; the whole run is invalid."""
+
+
+def is_fatal_provider_error(exc: BaseException) -> bool:
+    return any(getattr(e, "status_code", None) in _FATAL_STATUS
+               for e in (exc, exc.__cause__, exc.__context__) if e is not None)
+
+
 def is_transient_provider_error(exc: BaseException) -> bool:
     for e in (exc, exc.__cause__, exc.__context__):
         if e is None:
@@ -170,6 +184,8 @@ async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rou
     while True:
         res = await _run_agent_case_once(case, llm_factory, timeout_s, max_tool_rounds)
         exc = res.pop("_exception", None)
+        if exc is not None and is_fatal_provider_error(exc):
+            raise ProviderAccountError(f"{case['id']}: {res['error']}") from exc
         if exc is None or not is_transient_provider_error(exc):
             res["infra_retries"] = attempt
             return res
@@ -260,7 +276,14 @@ async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: 
         print(f"  [{done}/{len(cases)}] {case['id']}: {status} ({r['duration_s']}s)", file=sys.stderr)
         return r
 
-    return list(await asyncio.gather(*(one(c) for c in cases)))
+    tasks = [asyncio.ensure_future(one(c)) for c in cases]
+    try:
+        return list(await asyncio.gather(*tasks))
+    except ProviderAccountError:
+        for t in tasks:  # stop spending: cancel queued and in-flight cases
+            t.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        raise
 
 
 # --------------------------------------------------------------------------- report
@@ -483,9 +506,14 @@ def main(argv: list[str] | None = None) -> int:
     cases = select_cases(all_cases, args.splits, args.limit)
     print(f"running {len(cases)} cases in mode={mode} provider={provider} model={model}", file=sys.stderr)
 
-    results = asyncio.run(run_all(cases, mode=mode, concurrency=args.concurrency, timeout_s=args.case_timeout,
-                                  max_tool_rounds=args.max_tool_rounds, llm_config=llm_config,
-                                  max_infra_retries=args.infra_retries, backoff_s=args.retry_backoff))
+    try:
+        results = asyncio.run(run_all(cases, mode=mode, concurrency=args.concurrency, timeout_s=args.case_timeout,
+                                      max_tool_rounds=args.max_tool_rounds, llm_config=llm_config,
+                                      max_infra_retries=args.infra_retries, backoff_s=args.retry_backoff))
+    except ProviderAccountError as exc:
+        print(f"\nABORTED: the provider refused the account ({exc}). Out of credits, or the key is invalid. "
+              "Remaining cases were cancelled and NO report was written.", file=sys.stderr)
+        return 3
     report = build_report(results, mode=mode, provider=provider, model=model, base_url=base_url,
                           dataset=args.dataset, dataset_sha=sha, all_cases=all_cases, scoring=scoring, args=args)
     args.report.parent.mkdir(parents=True, exist_ok=True)
