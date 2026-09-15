@@ -1,0 +1,437 @@
+{
+  "meta": {
+    "llm": "configured",
+    "provider": "openai_compatible",
+    "model": "anthropic/claude-haiku-4.5",
+    "temperature": 0.0,
+    "prompt_cache": true,
+    "keep_tool_results": 2,
+    "base_url": "https://openrouter.ai/api/v1",
+    "dataset": "eval\\data\\dev.jsonl",
+    "dataset_sha256": "13a3ef5c81cdc6d07c0ed1f292b410d80b45404736b66680c69b4b05283b6f17",
+    "dataset_counts": {
+      "injected": 15,
+      "reverted": 10,
+      "clean": 35
+    },
+    "evaluated_counts": {
+      "injected": 2,
+      "reverted": 2,
+      "clean": 2
+    },
+    "evaluated_by_bug_kind": {
+      "removed_none_guard": 2,
+      "reverted_fix": 2,
+      "none": 2
+    },
+    "scoring": {
+      "scoring_version": 3,
+      "tolerance_lines": 5,
+      "narrow_max_lines": 30,
+      "narrow_span_fraction": 0.25,
+      "narrow_min_lines": 3,
+      "detection_rule": "medium+ AND same file AND range overlap within tolerance_lines",
+      "localisation_rule": "detection AND finding_width <= max(bug_width, narrow_min_lines, min(narrow_max_lines, narrow_span_fraction * changed_line_span))",
+      "changed_line_span": "max - min + 1 over the head lines the expected file's patch adds, or deletes next to; context lines excluded"
+    },
+    "limit": 6,
+    "splits": null,
+    "concurrency": 2,
+    "git_sha": "135cd61cda84e074bd6882ecf68d6e70a06e9613",
+    "timestamp": "2026-09-15T21:09:09+00:00",
+    "python": "3.12.13"
+  },
+  "parse_errors": {
+    "cases_run": 6,
+    "cases_with_parse_failure": 0,
+    "case_rate": 0.0,
+    "repaired_cases": 0,
+    "unrecovered_cases": 0,
+    "failed_attempts": 0,
+    "case_ids": []
+  },
+  "false_positive_rate": {
+    "rate": 0.5,
+    "false_positives": 1,
+    "cases": 2,
+    "errored_counted_as_fp": 0,
+    "mean_medium_plus_findings_per_clean_case": 0.5
+  },
+  "detection": {
+    "overall": {
+      "detection_rate": 1.0,
+      "detected": 4,
+      "cases": 4,
+      "errored": 0
+    },
+    "by_split": {
+      "injected": {
+        "detection_rate": 1.0,
+        "detected": 2,
+        "cases": 2,
+        "errored": 0
+      },
+      "reverted": {
+        "detection_rate": 1.0,
+        "detected": 2,
+        "cases": 2,
+        "errored": 0
+      }
+    },
+    "by_bug_kind": {
+      "removed_none_guard": {
+        "detection_rate": 1.0,
+        "detected": 2,
+        "cases": 2,
+        "errored": 0
+      },
+      "reverted_fix": {
+        "detection_rate": 1.0,
+        "detected": 2,
+        "cases": 2,
+        "errored": 0
+      }
+    }
+  },
+  "localisation": {
+    "overall": {
+      "localisation_rate_of_detected": 1.0,
+      "localised": 4,
+      "detected": 4,
+      "cases": 4,
+      "localised_share_of_all_bugs": 1.0
+    },
+    "by_split": {
+      "injected": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 2,
+        "detected": 2,
+        "cases": 2,
+        "localised_share_of_all_bugs": 1.0
+      },
+      "reverted": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 2,
+        "detected": 2,
+        "cases": 2,
+        "localised_share_of_all_bugs": 1.0
+      }
+    },
+    "by_bug_kind": {
+      "removed_none_guard": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 2,
+        "detected": 2,
+        "cases": 2,
+        "localised_share_of_all_bugs": 1.0
+      },
+      "reverted_fix": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 2,
+        "detected": 2,
+        "cases": 2,
+        "localised_share_of_all_bugs": 1.0
+      }
+    }
+  },
+  "cost": {
+    "cases_timed": 6,
+    "mean_seconds": 31.742,
+    "p95_seconds": 48.283,
+    "mean_total_tokens": 147770.333,
+    "mean_input_tokens": 145711.333,
+    "mean_output_tokens": 2059.0,
+    "mean_cache_read_input_tokens": 16477.5,
+    "mean_cache_creation_input_tokens": 0.0,
+    "cache_read_share_of_input": 0.1131,
+    "total_cost_usd": 0.8471,
+    "mean_cost_usd": 0.14118
+  },
+  "errors": {
+    "count": 0,
+    "by_split": {},
+    "infra_errors": 0,
+    "cases_retried_for_provider": 1,
+    "cases": []
+  },
+  "cases": [
+    {
+      "id": "flask-4580-removed_none_guard",
+      "split": "injected",
+      "repo": "pallets/flask",
+      "pr_number": 4580,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "src/flask/app.py",
+        "lines": {
+          "start": 1751,
+          "end": 1752
+        }
+      },
+      "expected_changed_line_span": 1972,
+      "findings": [
+        {
+          "file": "src/flask/app.py",
+          "lines": {
+            "start": 1745,
+            "end": 1750
+          },
+          "severity": "medium",
+          "title": "Missing null adapter check when outside request context",
+          "detail": "When outside a request context and no app context exists, the code calls `self.create_url_adapter(None)` without checking if the result is None. If `create_url_adapter` returns None (which can happen when SERVER_NAME is not configured), the subsequent call to `url_adapter.build()` at line 1768 will raise an AttributeError instead of a helpful error message. The original code in helpers.py explicitly checked for this and raised a RuntimeError with a descriptive message.",
+          "suggestion": null
+        },
+        {
+          "file": "src/flask/app.py",
+          "lines": {
+            "start": 1755,
+            "end": 1760
+          },
+          "severity": "medium",
+          "title": "Incorrect logic for _external default when _scheme is provided",
+          "detail": "At line 1755, when in a request context, the code sets `_external = _scheme is not None`. This means if `_scheme='https'` is provided in a request context, `_external` becomes True. However, the subsequent check at line 1762 raises ValueError if `_scheme is not None and not _external`. This creates a logical inconsistency: the code first forces `_external=True` when scheme is provided, then checks if scheme is provided without external being True. The test at line 125 in test_helpers.py expects `_scheme='https'` without explicit `_external` to work and return an external URL, which this code does handle, but the logic flow is confusing and potentially fragile.",
+          "suggestion": null
+        }
+      ],
+      "summary": "This PR moves the `url_for` function from `flask.helpers` to `Flask.url_for` method on the app object. The `helpers.url_for` function now delegates to `current_app.url_for`. The implementation handles both request and app contexts, manages URL building with proper scheme/external handling, and includes error handling through `handle_url_build_error`. The test changes verify the new behavior, particularly around scheme handling.",
+      "risk": "medium",
+      "duration_s": 48.283,
+      "usage": {
+        "input_tokens": 434480,
+        "output_tokens": 1881,
+        "total_tokens": 436361,
+        "cache_read_input_tokens": 98865,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.3549065
+      },
+      "github_calls": 17,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 2,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-9da1791476-reverted",
+      "split": "reverted",
+      "repo": "pallets/click",
+      "pr_number": 705204,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "click/core.py",
+        "lines": {
+          "start": 1404,
+          "end": 1405
+        }
+      },
+      "expected_changed_line_span": 1597,
+      "findings": [
+        {
+          "file": "click/core.py",
+          "lines": {
+            "start": 1404,
+            "end": 1406
+          },
+          "severity": "medium",
+          "title": "Removal of nargs validation check for Options",
+          "detail": "The PR removes the validation check 'if self.nargs < 0: raise TypeError(\"Options cannot have nargs < 0\")' from the Option class's __debug__ block. This check prevented invalid negative nargs values. Removing this validation without replacement could allow invalid Option states to be created, potentially causing unexpected behavior or crashes downstream when negative nargs values are used.",
+          "suggestion": null
+        }
+      ],
+      "summary": "This PR refactors error handling in click/core.py by replacing ctx.fail() with a MissingParameter exception, adds human_readable_name properties to Parameter and Argument classes, removes the chain import, and removes a validation check for negative nargs values in Options. The removal of the nargs validation check is a potential defect that could allow invalid states.",
+      "risk": "medium",
+      "duration_s": 30.206,
+      "usage": {
+        "input_tokens": 116533,
+        "output_tokens": 1712,
+        "total_tokens": 118245,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.125093
+      },
+      "github_calls": 10,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-2898-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 2898,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "flask/cli.py",
+          "lines": {
+            "start": 751,
+            "end": 754
+          },
+          "severity": "medium",
+          "title": "SeparatedPathType.convert does not handle None values correctly",
+          "detail": "When the `--extra-files` option is not provided, Click passes the default value `None` to the `convert` method. The method calls `split_envvar_value(None)`, which returns an empty list `[]`, and then returns `[]` instead of `None`. This changes the semantics: `None` should indicate 'don't watch extra files' while `[]` means 'watch these extra files (none of them)'. This can cause unexpected behavior in werkzeug's `run_simple` if it distinguishes between `None` and an empty list.",
+          "suggestion": "Add a guard at the beginning of the convert method to return None when value is None:\n\n    def convert(self, value, param, ctx):\n        if value is None:\n            return None\n        items = self.split_envvar_value(value)\n        super_convert = super(SeparatedPathType, self).convert\n        return [super_convert(item, param, ctx) for item in items]"
+        }
+      ],
+      "summary": "This PR adds an `--extra-files` option to the `flask run` CLI command to specify extra files that trigger the reloader on change. The implementation includes a new `SeparatedPathType` custom Click type to parse colon/semicolon-separated file paths, documentation updates, and changelog entries.",
+      "risk": "medium",
+      "duration_s": 39.966,
+      "usage": {
+        "input_tokens": 95496,
+        "output_tokens": 3281,
+        "total_tokens": 98777,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.111901
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-108-removed_none_guard",
+      "split": "injected",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 108,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "more_itertools/more.py",
+        "lines": {
+          "start": 1100,
+          "end": 1101
+        }
+      },
+      "expected_changed_line_span": 1098,
+      "findings": [
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 1101,
+            "end": 1106
+          },
+          "severity": "high",
+          "title": "always_iterable() incorrectly handles None values",
+          "detail": "The function returns (None,) when passed None, but the docstring (lines 1071-1074) and tests (test_more.py lines 945-947) expect it to return an empty tuple (). The issue is that None lacks an __iter__ attribute, so the condition `not hasattr(obj, '__iter__')` at line 1103 evaluates to True, causing None to be wrapped in a tuple. The function needs to explicitly check for None before checking for __iter__.",
+          "suggestion": "Add an explicit check for None before the string and __iter__ checks. For example: `if obj is None: return ()` should be added before line 1103."
+        }
+      ],
+      "summary": "This PR adds the `always_iterable()` function to the more-itertools library. The function is intended to wrap non-iterable objects in a tuple while returning iterables as-is, with special handling for strings and None. However, the implementation has a critical logic error: it fails to handle None correctly, returning (None,) instead of the empty tuple () as documented and tested.",
+      "risk": "high",
+      "duration_s": 24.253,
+      "usage": {
+        "input_tokens": 121375,
+        "output_tokens": 1600,
+        "total_tokens": 122975,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.129375
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-e3290ea9f3-reverted",
+      "split": "reverted",
+      "repo": "pallets/jinja",
+      "pr_number": 818761,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "jinja2/parser.py",
+        "lines": {
+          "start": 712,
+          "end": 713
+        }
+      },
+      "expected_changed_line_span": 687,
+      "findings": [
+        {
+          "file": "jinja2/parser.py",
+          "lines": {
+            "start": 464,
+            "end": 471
+          },
+          "severity": "high",
+          "title": "Unreliable string type comparison using 'is' operator",
+          "detail": "Lines 464 and 468 use `token.type is 'string'` and `self.stream.current.type is 'string'` to compare token types. The `is` operator checks object identity, not equality, and is unreliable for string comparisons. String interning is not guaranteed, so this will fail unpredictably at runtime. Should use `==` instead of `is` for string comparison.",
+          "suggestion": "Change `token.type is 'string'` to `token.type == 'string'` on line 464, and `self.stream.current.type is 'string'` to `self.stream.current.type == 'string'` on line 468."
+        },
+        {
+          "file": "jinja2/parser.py",
+          "lines": {
+            "start": 711,
+            "end": 714
+          },
+          "severity": "high",
+          "title": "Removal of test chaining validation and keyword lookahead",
+          "detail": "The PR removes two critical checks from parse_test: (1) the condition `and not self.stream.current.test_any('name:else', 'name:or', 'name:and')` that prevented parsing expressions after these keywords, and (2) the validation `if self.stream.current.test('name:is'): self.fail('You cannot chain multiple tests with is')` that prevented invalid test chains. Removing these allows syntactically invalid templates to be parsed without error, such as `x is divisibleby(3) is odd`.",
+          "suggestion": "Restore the validation checks: add back the `and not self.stream.current.test_any('name:else', 'name:or', 'name:and')` condition and the chaining validation check."
+        }
+      ],
+      "summary": "This PR refactors the parser initialization and modifies string literal and test parsing logic. It removes the intermediate `unicode()` conversion and changes the tokenization call, adds string concatenation for consecutive string literals, and removes validation checks in test parsing.",
+      "risk": "high",
+      "duration_s": 26.041,
+      "usage": {
+        "input_tokens": 66227,
+        "output_tokens": 2169,
+        "total_tokens": 68396,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.077072
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-321-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 321,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a bug where the `prefix` parameter was ignored when `dump_to` was set on a field. The logic is refactored from a multi-branch if/elif/else to a single concatenation expression, and a test case is added to verify the fix works correctly.",
+      "risk": "low",
+      "duration_s": 21.704,
+      "usage": {
+        "input_tokens": 40157,
+        "output_tokens": 1711,
+        "total_tokens": 41868,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.048712
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    }
+  ]
+}

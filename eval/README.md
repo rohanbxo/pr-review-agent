@@ -196,6 +196,60 @@ overlaps anything, which is why whole-file shrugs are handled separately by the 
 in *localisation*, not by tightening tolerance. All three thresholds are flags, so you can check a
 result is not an artefact of the choice, but reports are only comparable at the same values.
 
+## Prompt caching on OpenRouter → Claude: measured, not assumed
+
+All numbers are from small real probes on OpenRouter → `anthropic/claude-haiku-4.5` (served by
+Amazon Bedrock), 2026-09-16. None of this is enforced by a type checker, and several of these
+behaviours are undocumented. Re-probe before relying on them for another model or provider.
+
+Prices: cache reads cost 0.1× input and cache writes 1.25× (5-minute TTL). After a cached
+request, OpenRouter keeps routing the model to the same provider, so the cache stays warm.
+
+1. **A top-level `cache_control` field rolls with the conversation.** On its own it puts the
+   breakpoint on the last cacheable block. A second call extending the first read all 23,159
+   earlier tokens from cache and wrote only the 1,866 new ones.
+2. **Top-level plus any explicit block breakpoint silently disables the top-level one.** With an
+   explicit marker on the brief as well, only the brief was cached (14,093 tokens), and nothing
+   after it was ever written or read. No error, no warning: the requests simply cost more.
+3. **A different tool list reads nothing.** Synthesize binds only `ReviewResult`, and a
+   synthesize-shaped request on an identical conversation read 0 cached tokens. So synthesize
+   carries no breakpoints: a write there is never read.
+4. **Rewriting history breaks the rolling breakpoint.** With old tool results replaced by stubs
+   (keep 2), a top-level breakpoint never hit again after trimming started. Six simulated rounds
+   cost $0.249, above the $0.224 uncached price, because every call re-wrote everything at 1.25×.
+5. **Explicit breakpoints on stable positions survive trimming.** Stubbing is monotonic, so the
+   prefix ending at the newest stub is identical in the next request. The provider checks earlier
+   block boundaries for an existing entry, so the next request still hits.
+   - **Brief + newest stub:** $0.164.
+   - **Brief + newest stub + last message:** $0.184. The kept full results follow a position that
+     changes every round, so caching them only pays the write premium.
+6. **Nothing below 4,096 tokens is cached.** That is Haiku 4.5's minimum prefix. On small PRs the
+   brief plus stubs is 2–3k tokens, so trimmed runs cached nothing at all
+   (`click-9da1791476`: 8 calls, 0 read, 0 written).
+
+What this means for the agent: prompt caching and context trimming pull against each other.
+Trimming rewrites the part of the conversation the cache would be reading. See the context
+hygiene section below for the measured trade-off.
+
+## Context hygiene (trimming old tool results)
+
+The model sees the `LLM_KEEP_TOOL_RESULTS` most recent tool results in full (default 2). Older
+ones become a stub naming the tool, its arguments and the result size. The brief, with every
+patch, is never trimmed. Graph state and `agent_steps` keep the full history. This changes what
+the model sees, so it is recorded as `meta.keep_tool_results`.
+
+**First measurement:** the same 6 dev cases at temperature 0, untrimmed-with-cache vs trimmed.
+- **Cost:** $0.617 untrimmed, $0.847 trimmed.
+- **Mean input:** 133k tokens untrimmed, 146k trimmed.
+- **GitHub calls:** 47 untrimmed, 58 trimmed. The model re-reads files after they are stubbed:
+  `flask-4580` went from 9 calls to 17.
+- **Cache reads:** 53k per case untrimmed, 16k trimmed. See finding 6 above.
+- **Findings:** bug cases detected went from 2/4 to 4/4, all localised. On the 2 clean cases,
+  one false positive disappeared and another appeared.
+
+At 6 cases this is a direction, not a result. The quality signal is promising, and the cost is
+worse.
+
 ## How the pieces keep the eval honest
 
 - **Mutations survive a linter.** Each is located with `ast`, applied as a byte-exact text

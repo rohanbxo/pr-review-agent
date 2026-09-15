@@ -1,0 +1,425 @@
+{
+  "meta": {
+    "llm": "configured",
+    "provider": "openai_compatible",
+    "model": "anthropic/claude-haiku-4.5",
+    "temperature": 0.0,
+    "prompt_cache": true,
+    "base_url": "https://openrouter.ai/api/v1",
+    "dataset": "eval\\data\\dev.jsonl",
+    "dataset_sha256": "13a3ef5c81cdc6d07c0ed1f292b410d80b45404736b66680c69b4b05283b6f17",
+    "dataset_counts": {
+      "injected": 15,
+      "reverted": 10,
+      "clean": 35
+    },
+    "evaluated_counts": {
+      "injected": 2,
+      "reverted": 2,
+      "clean": 2
+    },
+    "evaluated_by_bug_kind": {
+      "removed_none_guard": 2,
+      "reverted_fix": 2,
+      "none": 2
+    },
+    "scoring": {
+      "scoring_version": 3,
+      "tolerance_lines": 5,
+      "narrow_max_lines": 30,
+      "narrow_span_fraction": 0.25,
+      "narrow_min_lines": 3,
+      "detection_rule": "medium+ AND same file AND range overlap within tolerance_lines",
+      "localisation_rule": "detection AND finding_width <= max(bug_width, narrow_min_lines, min(narrow_max_lines, narrow_span_fraction * changed_line_span))",
+      "changed_line_span": "max - min + 1 over the head lines the expected file's patch adds, or deletes next to; context lines excluded"
+    },
+    "limit": 6,
+    "splits": null,
+    "concurrency": 2,
+    "git_sha": "1c59a3e1716a1c9a5de6d2651bbf8c618d901d5c",
+    "timestamp": "2026-09-15T20:49:47+00:00",
+    "python": "3.12.13"
+  },
+  "parse_errors": {
+    "cases_run": 6,
+    "cases_with_parse_failure": 0,
+    "case_rate": 0.0,
+    "repaired_cases": 0,
+    "unrecovered_cases": 0,
+    "failed_attempts": 0,
+    "case_ids": []
+  },
+  "false_positive_rate": {
+    "rate": 0.5,
+    "false_positives": 1,
+    "cases": 2,
+    "errored_counted_as_fp": 0,
+    "mean_medium_plus_findings_per_clean_case": 0.5
+  },
+  "detection": {
+    "overall": {
+      "detection_rate": 0.5,
+      "detected": 2,
+      "cases": 4,
+      "errored": 0
+    },
+    "by_split": {
+      "injected": {
+        "detection_rate": 0.5,
+        "detected": 1,
+        "cases": 2,
+        "errored": 0
+      },
+      "reverted": {
+        "detection_rate": 0.5,
+        "detected": 1,
+        "cases": 2,
+        "errored": 0
+      }
+    },
+    "by_bug_kind": {
+      "removed_none_guard": {
+        "detection_rate": 0.5,
+        "detected": 1,
+        "cases": 2,
+        "errored": 0
+      },
+      "reverted_fix": {
+        "detection_rate": 0.5,
+        "detected": 1,
+        "cases": 2,
+        "errored": 0
+      }
+    }
+  },
+  "localisation": {
+    "overall": {
+      "localisation_rate_of_detected": 1.0,
+      "localised": 2,
+      "detected": 2,
+      "cases": 4,
+      "localised_share_of_all_bugs": 0.5
+    },
+    "by_split": {
+      "injected": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 1,
+        "detected": 1,
+        "cases": 2,
+        "localised_share_of_all_bugs": 0.5
+      },
+      "reverted": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 1,
+        "detected": 1,
+        "cases": 2,
+        "localised_share_of_all_bugs": 0.5
+      }
+    },
+    "by_bug_kind": {
+      "removed_none_guard": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 1,
+        "detected": 1,
+        "cases": 2,
+        "localised_share_of_all_bugs": 0.5
+      },
+      "reverted_fix": {
+        "localisation_rate_of_detected": 1.0,
+        "localised": 1,
+        "detected": 1,
+        "cases": 2,
+        "localised_share_of_all_bugs": 0.5
+      }
+    }
+  },
+  "cost": {
+    "cases_timed": 6,
+    "mean_seconds": 25.009,
+    "p95_seconds": 32.168,
+    "mean_total_tokens": 134513.667,
+    "mean_input_tokens": 132731.833,
+    "mean_output_tokens": 1781.833,
+    "mean_cache_read_input_tokens": 53052.667,
+    "mean_cache_creation_input_tokens": 35553.0,
+    "cache_read_share_of_input": 0.3997,
+    "total_cost_usd": 0.6167,
+    "mean_cost_usd": 0.10278
+  },
+  "errors": {
+    "count": 0,
+    "by_split": {},
+    "infra_errors": 0,
+    "cases_retried_for_provider": 2,
+    "cases": []
+  },
+  "cases": [
+    {
+      "id": "flask-4580-removed_none_guard",
+      "split": "injected",
+      "repo": "pallets/flask",
+      "pr_number": 4580,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "src/flask/app.py",
+        "lines": {
+          "start": 1751,
+          "end": 1752
+        }
+      },
+      "expected_changed_line_span": 1972,
+      "findings": [
+        {
+          "file": "src/flask/app.py",
+          "lines": {
+            "start": 1765,
+            "end": 1772
+          },
+          "severity": "high",
+          "title": "Missing None check for url_adapter before calling build()",
+          "detail": "When url_for is called outside both request and app contexts without SERVER_NAME configured, create_url_adapter(None) on line 1750 returns None. The code then attempts to call url_adapter.build() on line 1766 without checking if url_adapter is None, which will raise AttributeError: 'NoneType' object has no attribute 'build' instead of a proper error message. The original code in helpers.py had a RuntimeError check for this case (\"Application was not able to create a URL adapter...\"), which is now missing.",
+          "suggestion": "Add a None check after line 1750: if url_adapter is None: raise RuntimeError(\"Application was not able to create a URL adapter for request independent URL generation. You might be able to fix this by setting the SERVER_NAME config variable.\")"
+        }
+      ],
+      "summary": "This PR moves the `url_for` function from `helpers.py` to the Flask app object as a method, with `helpers.url_for` now delegating to `current_app.url_for()`. The refactoring is mostly sound, but there is a critical bug where `url_adapter` can be `None` when called outside request/app contexts without SERVER_NAME configured, leading to an AttributeError instead of proper error handling.",
+      "risk": "high",
+      "duration_s": 32.168,
+      "usage": {
+        "input_tokens": 279803,
+        "output_tokens": 2047,
+        "total_tokens": 281850,
+        "cache_read_input_tokens": 112945,
+        "cache_creation_input_tokens": 82741,
+        "cost_usd": 0.20907275
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-9da1791476-reverted",
+      "split": "reverted",
+      "repo": "pallets/click",
+      "pr_number": 705204,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "click/core.py",
+        "lines": {
+          "start": 1404,
+          "end": 1405
+        }
+      },
+      "expected_changed_line_span": 1597,
+      "findings": [
+        {
+          "file": "click/core.py",
+          "lines": {
+            "start": 1269,
+            "end": 1270
+          },
+          "severity": "medium",
+          "title": "Exception type change may break error handling flow",
+          "detail": "Line 1270 changes from `ctx.fail(self.get_missing_message(ctx))` (which raises UsageError) to `raise MissingParameter(ctx=ctx, param=self)`. The `augment_usage_errors` context manager at lines 57-73 only catches `BadParameter` and `UsageError`, not `MissingParameter`. If `MissingParameter` is not a subclass of `UsageError`, this exception will propagate uncaught and bypass the error augmentation logic that sets ctx and param on exceptions.",
+          "suggestion": "Verify that `MissingParameter` is a subclass of `UsageError` or `BadParameter`, or update the `augment_usage_errors` context manager to also catch `MissingParameter`."
+        }
+      ],
+      "summary": "This PR refactors error handling for missing parameters in Click by replacing the `get_missing_message()` method with a direct exception raise, adds `human_readable_name` properties to Parameter and Argument classes, removes an nargs validation check, and cleans up imports. The main concern is whether the new `MissingParameter` exception is properly integrated with the existing error handling infrastructure.",
+      "risk": "medium",
+      "duration_s": 24.249,
+      "usage": {
+        "input_tokens": 129144,
+        "output_tokens": 1584,
+        "total_tokens": 130728,
+        "cache_read_input_tokens": 25803,
+        "cache_creation_input_tokens": 48065,
+        "cost_usd": 0.12585755
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-2898-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 2898,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds an `--extra-files` option to the `flask run` CLI command to specify extra files that trigger the reloader on change. The implementation includes a new `SeparatedPathType` Click parameter type, documentation, and changelog updates.",
+      "risk": "low",
+      "duration_s": 18.897,
+      "usage": {
+        "input_tokens": 54272,
+        "output_tokens": 1367,
+        "total_tokens": 55639,
+        "cache_read_input_tokens": 19461,
+        "cache_creation_input_tokens": 15388,
+        "cost_usd": 0.0474391
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-108-removed_none_guard",
+      "split": "injected",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 108,
+      "expected": {
+        "bug_kind": "removed_none_guard",
+        "file": "more_itertools/more.py",
+        "lines": {
+          "start": 1100,
+          "end": 1101
+        }
+      },
+      "expected_changed_line_span": 1098,
+      "findings": [
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 1102,
+            "end": 1106
+          },
+          "severity": "high",
+          "title": "always_iterable() does not handle None correctly",
+          "detail": "The function's condition `isinstance(obj, string_like_types) or not hasattr(obj, '__iter__')` will be True for None (since None is not a string and has no __iter__ attribute), causing the function to return (None,) instead of the empty tuple () as specified in the docstring (lines 1071-1074) and expected by the test (test_more.py lines 945-947). The function needs to explicitly check for None before checking for iterability.",
+          "suggestion": "Add an explicit check for None before the current condition: `if obj is None: return ()` should come before the string and iterability checks."
+        }
+      ],
+      "summary": "This PR adds the `always_iterable()` function to the more-itertools library. The function is intended to always return an iterable, wrapping non-iterables in a tuple, treating strings specially, and returning an empty tuple for None. However, the implementation has a critical logic error: it does not correctly handle None, returning (None,) instead of () as documented and tested.",
+      "risk": "high",
+      "duration_s": 22.535,
+      "usage": {
+        "input_tokens": 154060,
+        "output_tokens": 1653,
+        "total_tokens": 155713,
+        "cache_read_input_tokens": 55626,
+        "cache_creation_input_tokens": 47426,
+        "cost_usd": 0.1241181
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-e3290ea9f3-reverted",
+      "split": "reverted",
+      "repo": "pallets/jinja",
+      "pr_number": 818761,
+      "expected": {
+        "bug_kind": "reverted_fix",
+        "file": "jinja2/parser.py",
+        "lines": {
+          "start": 712,
+          "end": 713
+        }
+      },
+      "expected_changed_line_span": 687,
+      "findings": [
+        {
+          "file": "jinja2/parser.py",
+          "lines": {
+            "start": 711,
+            "end": 714
+          },
+          "severity": "high",
+          "title": "Removal of test chaining validation allows invalid syntax",
+          "detail": "The PR removes the validation check `if self.stream.current.test('name:is'): self.fail('You cannot chain multiple tests with is')` that was present in the base version at lines 709-710. This check prevented invalid template syntax where multiple tests are chained with the `is` operator. Without this validation, invalid templates will now parse successfully instead of raising a TemplateSyntaxError.",
+          "suggestion": "Restore the validation check: `if self.stream.current.test('name:is'): self.fail('You cannot chain multiple tests with is')`"
+        },
+        {
+          "file": "jinja2/parser.py",
+          "lines": {
+            "start": 711,
+            "end": 714
+          },
+          "severity": "high",
+          "title": "Removal of keyword filtering in test argument parsing",
+          "detail": "The PR removes the condition `and not self.stream.current.test_any('name:else', 'name:or', 'name:and')` from the elif clause at lines 704-708 in the base version. This condition prevented control flow keywords (else, or, and) from being consumed as test arguments. Without this check, these keywords can now be incorrectly parsed as part of test expressions instead of being recognized as statement keywords, causing incorrect parsing of templates.",
+          "suggestion": "Restore the keyword filtering condition: `and not self.stream.current.test_any('name:else', 'name:or', 'name:and')`"
+        }
+      ],
+      "summary": "This PR refactors the parser initialization to use `environment._tokenize()` instead of `environment.lexer.tokenize()`, adds string literal concatenation support in `parse_primary()`, and removes validation logic from `parse_test()`. The changes introduce two significant defects: removal of test chaining validation and removal of keyword filtering that prevents control flow keywords from being consumed as test arguments.",
+      "risk": "high",
+      "duration_s": 28.656,
+      "usage": {
+        "input_tokens": 93269,
+        "output_tokens": 2406,
+        "total_tokens": 95675,
+        "cache_read_input_tokens": 60906,
+        "cache_creation_input_tokens": 1385,
+        "cost_usd": 0.05082985
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-321-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 321,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "marshmallow/marshalling.py",
+          "lines": {
+            "start": 135,
+            "end": 135
+          },
+          "severity": "high",
+          "title": "Breaking change in key generation logic when both prefix and dump_to are set",
+          "detail": "The refactored line `key = ''.join([self.prefix or '', field_obj.dump_to or attr_name])` changes the semantics of the dump_to parameter. Previously, if dump_to was set, it would be used as the complete key regardless of prefix (lines 134-135 in base). Now, the prefix is always prepended to dump_to when both are present. This breaks the original behavior where dump_to acted as an explicit override. Code that sets both prefix and dump_to expecting dump_to to take precedence will now get unexpected key names (e.g., 'usr_NaMe' instead of 'NaMe').",
+          "suggestion": "Clarify the intended behavior: if dump_to should override prefix, restore the original if-elif-else logic. If dump_to should be combined with prefix, document this as a breaking change and ensure all existing tests pass."
+        }
+      ],
+      "summary": "This PR refactors the key generation logic in the Marshaller to combine prefix and dump_to parameters. The change simplifies the code but introduces a breaking change in behavior: when both prefix and dump_to are set, the new code concatenates them (prefix + dump_to), whereas the original code would use only dump_to. The new test validates this new behavior, but existing code relying on dump_to as an override may break.",
+      "risk": "high",
+      "duration_s": 23.547,
+      "usage": {
+        "input_tokens": 85843,
+        "output_tokens": 1634,
+        "total_tokens": 87477,
+        "cache_read_input_tokens": 43575,
+        "cache_creation_input_tokens": 18313,
+        "cost_usd": 0.05937375
+      },
+      "github_calls": 10,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 1,
+      "infra_error": false,
+      "error": null
+    }
+  ]
+}
