@@ -1,0 +1,49 @@
+# Applied on top of the official, unmodified Langfuse compose file (infra/langfuse/docker-compose.yml)
+# by infra/langfuse.sh. Two jobs:
+#
+# 1. Nothing publishes a host port. Upstream publishes 3000, 3030, 9090 and loopback-only
+#    5432/6379/8123/9000/9091; all are reset. The only published port on the machine stays
+#    nginx :80, which serves the Langfuse UI at http://langfuse.localhost.
+#
+# 2. Only langfuse-web joins this app's `app` network, so the api (LANGFUSE_HOST) and nginx can
+#    reach it by name. It is pinned to 172.28.2.10: inside the subnet, OUTSIDE the ip_range
+#    172.28.1.0/24 that TRUSTED_PROXIES covers, so it can never become a trusted proxy and set
+#    the IP written to the audit log. Its datastores stay on Langfuse's private default network.
+#
+# `!reset` needs Docker Compose >= 2.24.
+
+x-langfuse-url: &langfuse_url
+  NEXTAUTH_URL: ${LANGFUSE_PUBLIC_URL:-http://langfuse.localhost}
+
+services:
+  langfuse-worker:
+    ports: !reset []
+    environment:
+      <<: *langfuse_url
+
+  langfuse-web:
+    ports: !reset []
+    environment:
+      <<: *langfuse_url
+    networks:
+      default: {}
+      app:
+        ipv4_address: 172.28.2.10
+
+  clickhouse:
+    ports: !reset []
+
+  minio:
+    ports: !reset []
+
+  redis:
+    ports: !reset []
+
+  postgres:
+    ports: !reset []
+
+networks:
+  app:
+    # Created by this repo's docker-compose.yml (project "pr-review-agent"); start that first.
+    name: pr-review-agent_app
+    external: true

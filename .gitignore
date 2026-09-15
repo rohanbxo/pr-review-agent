@@ -5,4 +5,9 @@ __pycache__/
 node_modules/
 .next/
 eval/.cache/
-infra/langfuse/
+infra/langfuse/docker-compose.yml
+
+# Eval splits are regenerated from pinned git history (make eval-data); only the sample is committed.
+eval/data/*.jsonl
+!eval/data/sample.jsonl
+eval/reports/sample-baseline.json

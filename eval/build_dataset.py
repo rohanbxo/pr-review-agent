@@ -1,11 +1,15 @@
 """Build the eval dataset from the git history of public repositories.
 
     python -m eval.build_dataset                 # uses pinned refs from eval/data/manifest.json
+    python -m eval.build_dataset --verify        # ...and fail unless output hashes match the manifest
     python -m eval.build_dataset --refresh       # fetch clones, re-pin to current default branch
 
+Only ``manifest.json`` (pinned repo SHAs + output hashes) and ``sample.jsonl`` (10 cases for CI)
+are committed. The full splits are regenerated with ``make eval-data``.
+
 Nothing here talks to the GitHub API: repositories are cloned over HTTPS (bare) into
-``eval/.cache/repos`` and everything -- PR number, title, body, per-file patches, head and base
-file contents -- is read from git objects. See ``eval/data/README.md`` for provenance and caveats.
+``eval/.cache/repos`` and everything -- PR number, title, body, per-file patches, head file contents --
+is read from git objects. See ``eval/data/README.md`` for provenance and caveats.
 
 Splits (CONTRACTS.md § Dataset case format):
 
@@ -15,6 +19,10 @@ Splits (CONTRACTS.md § Dataset case format):
   real later development and re-introduces the bug inside it (see ``pad_revert``).
 * ``clean``    -- real merged PRs, untouched.
 * ``v1``       -- concatenation of the three.
+* ``sample``   -- 10 cases drawn from v1 (4 injected, one per kind; 2 reverted; 4 clean), committed.
+
+Cases carry head ``content`` and ``patch`` only. Base versions are NOT stored: they are fully
+determined by head + patch and ``app.agent.fixtures.reverse_apply_patch`` derives them.
 
 Deterministic: pinned commit SHAs per repo, sorted candidate pools, string-seeded RNGs.
 """
@@ -604,8 +612,23 @@ def build_clean(pool: dict[str, list[Commit]], blobs: dict[str, BlobReader], tar
 
 
 # --------------------------------------------------------------------------- main
+BUILD_ONLY_FILE_KEYS = ("base_content",)  # needed while building (mutations diff against it), never shipped
+
+
+def public_case(case: dict) -> dict:
+    return {**case, "files": [{k: v for k, v in f.items() if k not in BUILD_ONLY_FILE_KEYS}
+                              for f in case["files"]]}
+
+
+def pick_sample(injected: list[dict], reverted: list[dict], clean: list[dict]) -> list[dict]:
+    """10 cases for CI: the first injected case of each bug kind, 2 reverted, 4 clean."""
+    per_kind = [next(c for c in injected if c["expected"]["bug_kind"] == k) for k in mut.KINDS
+                if any(c["expected"]["bug_kind"] == k for c in injected)]
+    return per_kind + reverted[:2] + clean[:4]
+
+
 def write_jsonl(path: Path, cases: list[dict]) -> str:
-    text = "".join(json.dumps(c, ensure_ascii=False, sort_keys=False) + "\n" for c in cases)
+    text = "".join(json.dumps(public_case(c), ensure_ascii=False, sort_keys=False) + "\n" for c in cases)
     path.write_text(text, encoding="utf-8", newline="\n")
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -618,7 +641,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--refresh", action="store_true", help="fetch clones and re-pin refs to current HEAD")
     ap.add_argument("--repos", nargs="*", default=REPOS)
     ap.add_argument("--out", type=Path, default=DATA)
+    ap.add_argument("--verify", action="store_true",
+                    help="exit 1 unless the output hashes equal those pinned in manifest.json")
     args = ap.parse_args(argv)
+    if args.verify and args.refresh:
+        ap.error("--verify compares against the pinned manifest; it cannot be combined with --refresh")
 
     args.out.mkdir(parents=True, exist_ok=True)
     manifest = json.loads(MANIFEST.read_text("utf-8")) if MANIFEST.exists() and not args.refresh else {}
@@ -654,14 +681,24 @@ def main(argv: list[str] | None = None) -> int:
         "reverted": write_jsonl(args.out / "reverted.jsonl", reverted),
         "clean": write_jsonl(args.out / "clean.jsonl", clean),
         "v1": write_jsonl(args.out / "v1.jsonl", injected + reverted + clean),
+        "sample": write_jsonl(args.out / "sample.jsonl", pick_sample(injected, reverted, clean)),
     }
+    if args.verify:
+        pinned = manifest.get("sha256", {})
+        diff = {k: {"manifest": pinned.get(k), "rebuilt": h} for k, h in hashes.items() if pinned.get(k) != h}
+        if diff:
+            print(f"VERIFY FAILED: rebuilt data differs from manifest.json:\n{json.dumps(diff, indent=2)}",
+                  file=sys.stderr)
+            return 1
+        print("verify: rebuilt dataset matches manifest.json hashes", file=sys.stderr)
+        return 0
     counts = {
         "injected": len(injected), "reverted": len(reverted), "clean": len(clean),
         "injected_by_kind": {k: sum(1 for c in injected if c["expected"]["bug_kind"] == k) for k in mut.KINDS},
     }
     (args.out / "manifest.json").write_text(json.dumps({
         "seed": SEED, "targets": TARGETS, "repos": pins, "counts": counts, "sha256": hashes,
-    }, indent=2) + "\n", encoding="utf-8")
+    }, indent=2) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(counts, indent=2))
     return 0
 

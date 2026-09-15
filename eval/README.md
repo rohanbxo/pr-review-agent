@@ -28,10 +28,17 @@ $PY -m pytest eval/tests -q
 
 ## Build the dataset
 
+Only `eval/data/manifest.json` (pinned repo SHAs + output hashes) and `eval/data/sample.jsonl`
+(10 cases, used by CI) are committed. Regenerate the full splits:
+
 ```bash
-$PY -m eval.build_dataset             # uses the SHAs pinned in eval/data/manifest.json
-$PY -m eval.build_dataset --refresh   # fetch upstream and re-pin (changes the dataset hash)
+make eval-data                                 # = $PY -m eval.build_dataset --verify
+$PY -m eval.build_dataset --refresh            # fetch upstream and re-pin (changes the dataset hash)
 ```
+
+`--verify` fails unless every rebuilt file hashes to the value pinned in the manifest, so the
+dataset cannot quietly drift. Cases store head `content` + `patch` only. Base versions are derived
+from them (`app.agent.fixtures.reverse_apply_patch`) rather than stored.
 
 Repos are bare-cloned over HTTPS into `eval/.cache/repos` (gitignored; `git clone` is not
 subject to the GitHub API rate limit). See `eval/data/README.md` for provenance, filters and

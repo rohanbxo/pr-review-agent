@@ -11,6 +11,13 @@ every source repository, per-split counts and the sha256 of every file — a rep
 | `reverted.jsonl` | 25 | real bug-fix commit, inverted (the "PR" re-introduces the bug) |
 | `clean.jsonl` | 150 | real merged PRs, untouched |
 | `v1.jsonl` | 215 | concatenation, in that order |
+| `sample.jsonl` | 10 | first injected case of each kind, 2 reverted, 4 clean — **committed**, for CI |
+
+**Only `manifest.json` and `sample.jsonl` are committed.** The four full files above are
+regenerated from git history with `make eval-data` (or
+`backend/.venv/Scripts/python.exe -m eval.build_dataset --verify`). The build is deterministic
+and `--verify` fails unless every output file hashes to the value pinned in `manifest.json`.
+The first run clones the source repos into `eval/.cache/`; after that no network is needed.
 
 ## Provenance
 
@@ -25,8 +32,11 @@ No GitHub API was used. A **merged PR** is a first-parent commit on the default 
 message is either `Merge pull request #N from …` (title = first body line, body = the rest) or a
 squash commit `Title (#N)` (body = commit body). The diff is first parent → commit
 (`git diff --no-renames -U3`), per-file `patch` is the hunk text GitHub would show, `content` is
-the full file at head and `base_content` the full file at base (served by the mock transport
-for `read_file(ref=base)`). `source` records the upstream repo URL, commit, parents and date; it
+the full file at head. Base versions are **not stored**. A patch contains every changed line, so
+base is fully determined by head + patch, and the mock transport derives it with
+`app.agent.fixtures.reverse_apply_patch` when the agent calls `read_file(ref=base)`. Before the
+stored copies were dropped, that derivation was checked to reproduce all 487 stored base files
+byte for byte. `source` records the upstream repo URL, commit, parents and date; it
 is never served to the agent.
 
 Reviewable-PR filter: 1–8 files, ≤ 600 changed lines, only `.py` plus doc files

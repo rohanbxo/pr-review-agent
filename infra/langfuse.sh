@@ -6,15 +6,12 @@
 #   ./infra/langfuse.sh down       # stop (keeps volumes)
 #   LANGFUSE_REF=v3.x.y ./infra/langfuse.sh   # pin a tag/branch/sha (default: main)
 #
-# How the api reaches it: Langfuse's compose publishes langfuse-web on host port 3000 (and binds
-# its other services to 127.0.0.1). The api container reaches that through the host:
-# LANGFUSE_HOST=http://host.docker.internal:3000, with `extra_hosts: host-gateway` in our
-# docker-compose.yml so the name also resolves on Linux. No ports beyond what Langfuse's own
-# compose publishes, and no shared Docker network, so our stack starts with or without Langfuse.
-#
-# Tension: "only nginx publishes a port" holds for THIS app's compose project. Langfuse is a
-# separate, operator-facing tool and its compose publishes :3000 (and loopback-only ports for
-# minio/clickhouse/postgres/redis). See README "Tracing with Langfuse".
+# The official compose file is used UNMODIFIED, with infra/langfuse.override.yml on top:
+#   - every upstream port mapping is reset, so nginx :80 stays the only published port;
+#   - langfuse-web joins this app's `app` network (pinned outside the trusted-proxy range), so
+#     the api reaches it at LANGFUSE_HOST=http://langfuse-web:3000 and nginx serves the UI at
+#     http://langfuse.localhost.
+# Start the app stack first (`docker compose up -d`): it creates the network Langfuse joins.
 #
 # Before exposing this anywhere, edit infra/langfuse/docker-compose.yml: every value marked
 # `# CHANGEME` (NEXTAUTH_SECRET, SALT, ENCRYPTION_KEY, database/minio/redis/clickhouse passwords).
@@ -25,8 +22,13 @@ REF="${LANGFUSE_REF:-main}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DIR="$HERE/langfuse"
 FILE="$DIR/docker-compose.yml"
+OVERRIDE="$HERE/langfuse.override.yml"
+NETWORK="pr-review-agent_app"
 URL="https://raw.githubusercontent.com/langfuse/langfuse/${REF}/docker-compose.yml"
-PROJECT="langfuse"
+# Namespaced on purpose: a generic "langfuse" project name collides with any other Langfuse the
+# operator already runs, and `up` would recreate THEIR containers with this override (and newer
+# upstream images, which migrate their data).
+PROJECT="pr-review-agent-langfuse"
 
 fetch() {
   mkdir -p "$DIR"
@@ -48,17 +50,27 @@ case "${1:-up}" in
     fetch
     ;;
   down)
-    docker compose -p "$PROJECT" -f "$FILE" down
+    docker compose -p "$PROJECT" -f "$FILE" -f "$OVERRIDE" down
     ;;
   up)
     [ -f "$FILE" ] || fetch
     if grep -q "CHANGEME" "$FILE"; then
       echo "WARNING: $FILE still contains CHANGEME defaults. Fine for local use only." >&2
     fi
-    docker compose -p "$PROJECT" -f "$FILE" up -d
+    if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
+      echo "network $NETWORK not found: start the app first with 'docker compose up -d'" >&2
+      exit 1
+    fi
+    # Refuse to adopt containers this script did not create.
+    foreign="$(docker ps -a --filter "label=com.docker.compose.project=$PROJECT"       --format '{{.Label "com.docker.compose.project.config_files"}}' | grep -v "langfuse.override.yml" | head -n 1 || true)"
+    if [ -n "$foreign" ]; then
+      echo "compose project $PROJECT exists but was not started by this script ($foreign); refusing" >&2
+      exit 1
+    fi
+    docker compose -p "$PROJECT" -f "$FILE" -f "$OVERRIDE" up -d
     echo
-    echo "Langfuse UI: http://localhost:3000  — create a project, then set LANGFUSE_PUBLIC_KEY /"
-    echo "LANGFUSE_SECRET_KEY in .env and restart the api: docker compose up -d api"
+    echo "Langfuse UI: http://langfuse.localhost  (via nginx; no port published)"
+    echo "Create a project, set LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY in .env, then: docker compose up -d api"
     ;;
   *)
     echo "usage: $0 [up|pull|down]" >&2

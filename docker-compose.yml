@@ -1,8 +1,8 @@
 # PR Review Agent. `cp .env.example .env`, fill it in, then `docker compose up --build`.
 # nginx is the ONLY service that publishes a port. Everything else is `expose`-only.
 #
-# Langfuse runs as its own compose project (infra/langfuse.sh) and is reached from the api via
-# the host (host.docker.internal:3000) — see README "Tracing with Langfuse".
+# Langfuse runs as its own compose project (infra/langfuse.sh) with every port unpublished; its
+# langfuse-web container joins the `app` network below. See README "Tracing with Langfuse".
 
 name: pr-review-agent
 
@@ -57,12 +57,9 @@ services:
       # below). The network gateway 172.28.0.1 — which published-port traffic can appear to
       # come from — is deliberately OUTSIDE this range, so a client cannot become "trusted".
       TRUSTED_PROXIES: ${TRUSTED_PROXIES:-172.28.1.0/24}
-      LANGFUSE_HOST: ${LANGFUSE_HOST:-http://host.docker.internal:3000}
+      LANGFUSE_HOST: ${LANGFUSE_HOST:-http://langfuse-web:3000}
     expose:
       - "8000"
-    extra_hosts:
-      # Makes host.docker.internal resolve on Linux too (Docker Desktop provides it natively).
-      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -103,6 +100,8 @@ services:
 
 networks:
   app:
+    # Fixed name: infra/langfuse.override.yml attaches langfuse-web to it as an external network.
+    name: pr-review-agent_app
     driver: bridge
     ipam:
       config:

@@ -138,12 +138,17 @@ async def create_review(
     redis: Redis = Depends(get_redis),
     ctx: RequestContext = Depends(get_request_context),
 ) -> ReviewRunOut:
-    if not any(grant_covers(g.repo_full_name, body.repo) for g in user.grants):
+    # Holders of grant:manage skip the local grant lookup: they could grant themselves the repo
+    # anyway, so requiring it is ceremony. Asked as a Permission, never a role name.
+    bypass_grants = has_permission(user.role, Permission.grant_manage)
+    if not bypass_grants and not any(grant_covers(g.repo_full_name, body.repo) for g in user.grants):
         raise await _deny(session, ctx, user, body, "no_grant")
 
     # Non-consuming quota check before spending GitHub API budget on an over-quota user.
     await enforce_review_quota(user, redis, session, ctx, consume=False)
 
+    # Unconditional for EVERY role, admin included: managing the system is not a licence to
+    # read repos this person cannot see on GitHub.
     if not await can_read_repo(user_login=user.github_login, repo_full_name=body.repo):
         raise await _deny(session, ctx, user, body, "github_denied")
 

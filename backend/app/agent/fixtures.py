@@ -27,6 +27,52 @@ def _not_found() -> httpx.Response:
     return _json(404, {"message": "Not Found", "documentation_url": "https://docs.github.com/rest"})
 
 
+_HUNK = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
+
+
+def reverse_apply_patch(head: str, patch: str) -> str:
+    """Reconstruct the base version of a file from its head version and a GitHub-style patch.
+
+    A unified patch contains every changed line, so base is fully determined by head + patch;
+    datasets therefore need not store base copies. Raises ValueError if they disagree."""
+    head_lines = head.splitlines(keepends=True)
+    out: list[str] = []
+    cursor = 0  # index into head_lines
+    lines = patch.split("\n")
+    i = 0
+    while i < len(lines):
+        m = _HUNK.match(lines[i])
+        if not m:
+            i += 1
+            continue
+        new_start, new_len = int(m.group(3)), int(m.group(4) if m.group(4) is not None else 1)
+        # A zero-length side's start is the line BEFORE the hunk (unified diff convention).
+        start = new_start - 1 if new_len else new_start
+        if start < cursor or start > len(head_lines):
+            raise ValueError("patch does not match head")
+        out.extend(head_lines[cursor:start])
+        cursor = start
+        i += 1
+        while i < len(lines) and not lines[i].startswith("@@"):
+            ln = lines[i]
+            nxt = lines[i + 1] if i + 1 < len(lines) else ""
+            no_eol = nxt.startswith("\\")
+            if ln.startswith(" "):
+                if cursor >= len(head_lines) or head_lines[cursor].rstrip("\n").rstrip("\r") != ln[1:].rstrip("\r"):
+                    raise ValueError("context line does not match head")
+                out.append(head_lines[cursor])
+                cursor += 1
+            elif ln.startswith("-"):
+                out.append(ln[1:] + ("" if no_eol else "\n"))
+            elif ln.startswith("+"):
+                if cursor >= len(head_lines):
+                    raise ValueError("added line past end of head")
+                cursor += 1
+            i += 1
+    out.extend(head_lines[cursor:])
+    return "".join(out)
+
+
 def mock_transport_for_case(case: dict, *, seen: list[httpx.Request] | None = None) -> httpx.MockTransport:
     """Build a MockTransport for ``case``. If ``seen`` is given, every request that reaches the
     transport is appended to it (tests use this to prove blocked calls never got here)."""
@@ -39,7 +85,16 @@ def mock_transport_for_case(case: dict, *, seen: list[httpx.Request] | None = No
 
     head_contents: dict[str, str] = {f["filename"]: f["content"] for f in files if f.get("content") is not None}
     head_contents.update(case.get("repo_files") or {})  # optional: unchanged files readable at head
-    base_contents: dict[str, str] = {f["filename"]: f["base_content"] for f in files if f.get("base_content") is not None}
+    # Base versions: an explicit base_content if a case carries one, else derived from head + patch.
+    base_contents: dict[str, str] = {}
+    for f in files:
+        if f.get("base_content") is not None:
+            base_contents[f["filename"]] = f["base_content"]
+        elif f.get("status") != "added" and f.get("patch") is not None:
+            try:
+                base_contents[f["filename"]] = reverse_apply_patch(f.get("content") or "", f["patch"])
+            except ValueError:
+                pass  # unrecoverable: base read 404s rather than serving a wrong file
 
     owner, name = repo.split("/")
     prefix = f"/repos/{owner}/{name}"

@@ -130,6 +130,41 @@ async def test_org_grant_is_not_enough_when_github_denies(
     assert (row.outcome, row.metadata_["reason"]) == (Outcome.denied, "github_denied")
 
 
+async def test_admin_bypasses_local_grants_but_github_is_still_asked(
+    client, session, make_user, auth_headers, env
+):
+    admin = await make_user(Role.admin, login="root")  # no repo_grants at all
+    r = await client.post("/reviews", json={"repo": "acme/widgets", "pr_number": 4},
+                          headers=auth_headers(admin))
+    assert r.status_code == 202, r.text
+    assert env.github_calls == [("root", "acme/widgets")]
+
+
+async def test_admin_is_refused_a_repo_github_says_they_cannot_read(
+    client, session, make_user, auth_headers, env
+):
+    admin = await make_user(Role.admin, login="root")
+    await _grant(session, admin, "acme/*")  # even an explicit local grant does not override GitHub
+    env.github_allows = False
+    r = await client.post("/reviews", json={"repo": "acme/secret", "pr_number": 9},
+                          headers=auth_headers(admin))
+    assert r.status_code == 403
+    assert env.github_calls == [("root", "acme/secret")]
+    assert await _count_runs(session) == 0 and env.queued == []
+    (row,) = await _audits(session, "review.create")
+    assert (row.outcome, row.metadata_["reason"]) == (Outcome.denied, "github_denied")
+    assert row.actor_user_id == admin.id
+
+
+async def test_reviewer_does_not_get_the_admin_grant_bypass(
+    client, session, make_user, auth_headers, env
+):
+    reviewer = await make_user(Role.reviewer)
+    r = await client.post("/reviews", json={"repo": "acme/widgets", "pr_number": 4},
+                          headers=auth_headers(reviewer))
+    assert r.status_code == 403 and env.github_calls == []
+
+
 async def test_viewer_cannot_create(client, session, make_user, auth_headers, env):
     viewer = await make_user(Role.viewer)
     await _grant(session, viewer, "acme/*")

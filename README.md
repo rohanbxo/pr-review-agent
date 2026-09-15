@@ -27,8 +27,9 @@ browser ──► nginx :80 ──┬──► /            Next.js 15 (App Rout
   token. FastAPI re-reads the identity from GitHub itself, applies the fail-closed sign-in
   policy, and returns a backend JWT (8h), which the frontend exposes as `session.apiToken`.
   FastAPI never tries to verify Auth.js session tokens.
-- **Reviews.** `POST /api/reviews` checks permission → repo grant → GitHub's own answer to "can
-  this user read this repo" → the per-user hourly quota. It then commits the run and its audit
+- **Reviews.** `POST /api/reviews` checks permission → repo grant (skipped for holders of
+  `grant:manage`) → a non-consuming quota check → GitHub's own answer to "can this user read this
+  repo" (asked for every role, admins included) → consumes one unit of the per-user hourly quota. It then commits the run and its audit
   row together and runs the agent as a background task:
   `fetch_context → analyze ⇄ tools → synthesize`. Each node is saved as an `agent_steps` row.
   The GitHub call log is always saved too, whatever the outcome.
@@ -112,8 +113,8 @@ paths are relative to `backend/tests/`.
 | The agent's GitHub client refuses every verb except GET/HEAD, and refuses any path not on an explicit allowlist, **before a socket opens**. Blocked attempts are still logged. Query-string smuggling and off-allowlist redirects are blocked. Raw fetches are cut off at a byte cap. | [`test_readonly.py`](backend/tests/test_readonly.py) |
 | Routes ask for a `Permission`, never a role name. The role → permission matrix is enforced, and denials return 403 and are audited. | [`test_rbac.py`](backend/tests/test_rbac.py) |
 | The exchange endpoint needs the bridge secret, accepts **only** an access token (extra profile fields are rejected), and re-reads identity from GitHub. Unknown GitHub accounts are rejected, not provisioned (fails closed). Role is derived at first sign-in only. The last admin cannot be demoted (409) and no one can remove their own admin role. Deactivation clears the stored GitHub token. The token is stored encrypted. | [`test_auth.py`](backend/tests/test_auth.py) |
-| App-layer limits are keyed on **user id, not IP**: 600 requests/min overall, plus a review quota of 20/h for reviewers and 100/h for admins. They use a sliding-window log, so the budget does not double at a window boundary. The 21st review in an hour returns 429 with a correct `Retry-After` and is audited as `review.quota_exceeded`. Denied, forbidden and invalid requests do not consume quota. | [`test_ratelimit.py`](backend/tests/test_ratelimit.py) |
-| Reviews: a repo grant is required. On top of that, GitHub is asked whether *this* user can read *this* repo, because an org grant alone is not enough. Both denials are audited. The run and its `review.create` audit row commit in one transaction. Runs the caller cannot see return 404. Repo names like `../etc`, `acme/..` are rejected. | [`test_reviews.py`](backend/tests/test_reviews.py) |
+| App-layer limits are keyed on **user id, not IP**: 600 requests/min overall, plus a review quota of 20/h for reviewers and 100/h for admins. They use a sliding-window log, so the budget does not double at a window boundary. The 21st review in an hour returns 429 with a correct `Retry-After` and is audited as `review.quota_exceeded`. Denied, forbidden and invalid requests do not consume quota. An over-quota request is refused before GitHub is called, so it cannot spend the GitHub App's API budget. | [`test_ratelimit.py`](backend/tests/test_ratelimit.py) |
+| Reviews: a repo grant is required, except for holders of `grant:manage` (admins), who could grant themselves anyway. GitHub is then asked whether *this* user can read *this* repo for **every role, admins included**: an org grant alone is not enough, and admin is not a licence to read repos the person cannot see. Both denials are audited. The run and its `review.create` audit row commit in one transaction. Runs the caller cannot see return 404. Repo names like `../etc`, `acme/..` are rejected. | [`test_reviews.py`](backend/tests/test_reviews.py) |
 | `X-Forwarded-For` is only believed when the TCP peer is in `TRUSTED_PROXIES` (CIDR blocks supported). A client-supplied header cannot choose the IP that gets logged. | [`test_proxy_trust.py`](backend/tests/test_proxy_trust.py) |
 | Audit rows are written in the same transaction as the action they describe. The helper never commits. Denials are audited as well as successes. `actor_email` is denormalised so the log survives user deletion. | [`test_audit.py`](backend/tests/test_audit.py) |
 | Prompt injection in diffs, comments or file contents (≥15 cases) is reported as a `high` finding, and the GitHub call log shows no blocked call attempts. | [`test_injection.py`](backend/tests/test_injection.py) |
@@ -144,26 +145,32 @@ so that only the app decides whom to trust (`app/netutil.py`).
 ## Tracing with Langfuse
 
 ```sh
-./infra/langfuse.sh              # downloads the official docker-compose.yml from langfuse/langfuse into infra/langfuse/ and starts it as project "langfuse"
-LANGFUSE_REF=v3.100.0 ./infra/langfuse.sh pull   # pin a tag
+docker compose up -d             # the app first: it creates the `pr-review-agent_app` network
+./infra/langfuse.sh              # downloads the official docker-compose.yml into infra/langfuse/, starts project "pr-review-agent-langfuse"
+LANGFUSE_REF=v4.0.0 ./infra/langfuse.sh pull   # pin a tag
 ./infra/langfuse.sh down
 ```
 
-Open `http://localhost:3000`, create a project, put its keys in `LANGFUSE_PUBLIC_KEY` /
+Open `http://langfuse.localhost`, create a project, put its keys in `LANGFUSE_PUBLIC_KEY` /
 `LANGFUSE_SECRET_KEY`, then run `docker compose up -d api`. Replace every `CHANGEME` value in
-`infra/langfuse/docker-compose.yml` before running it anywhere but your own machine.
+`infra/langfuse/docker-compose.yml`, and set `AUTH_DISABLE_SIGNUP=true` once your account exists,
+before running it anywhere but your own machine.
 
-**How the api reaches it:** through the host. Langfuse's own compose publishes `langfuse-web` on
-host port 3000. The api uses `LANGFUSE_HOST=http://host.docker.internal:3000`, and
-`extra_hosts: host.docker.internal:host-gateway` makes that name resolve on Linux as well. The
-two stacks share no network, so this app starts with or without Langfuse, and Langfuse publishes
-no ports beyond what its upstream compose already does.
+**Nothing but nginx publishes a port, Langfuse included.** The upstream compose file is used
+unmodified. `infra/langfuse.override.yml` is layered on top and does two things:
+- It resets every upstream port mapping: 3000, 3030 and 9090, plus loopback-only 5432, 6379, 8123, 9000 and 9091.
+- It attaches only `langfuse-web` to this app's `app` network, pinned to `172.28.2.10`.
+  - That address is inside the subnet but outside the `172.28.1.0/24` range `TRUSTED_PROXIES` covers,
+    so Langfuse can never act as a trusted proxy and choose the IP in the audit log.
+  - Its datastores stay on Langfuse's private network.
 
-**The tension:** "only nginx publishes a port" holds for this project's compose. Langfuse is a
-separate operator tool, and its compose publishes `:3000` (its minio, clickhouse, postgres and
-redis ports are bound to 127.0.0.1). If that is unacceptable, remove its `ports:`, attach
-`langfuse-web` to a shared external network, and set `LANGFUSE_HOST=http://langfuse-web:3000`.
-That route makes the network something that must exist before `docker compose up`.
+The api traces to `LANGFUSE_HOST=http://langfuse-web:3000`, and nginx serves the UI by host name at
+`http://langfuse.localhost`. Browsers resolve `*.localhost` to loopback, so there is no second port
+and no clash with Next.js dev on :3000. Until Langfuse is started, that host returns 502 and the api
+silently skips tracing.
+
+Known gap: media attachments in traces use MinIO presigned URLs, which browsers can no longer reach
+without a published MinIO port. This agent sends text only.
 
 `agent_steps` in Postgres duplicates the trace on purpose. Langfuse has its own retention and is
 for debugging. The table is the record you keep.
