@@ -192,7 +192,9 @@ async def test_create_success_commits_run_and_audit_and_queues(
     body = r.json()
     assert body["status"] == "queued"
     assert body["repo"] == "acme/widgets" and body["pr_number"] == 42
-    assert body["model"] == get_settings().llm_model
+    from app.agent.llm import configured_model_label
+
+    assert body["model"] == configured_model_label()
     assert body["user_id"] == user.id
     assert set(body) >= {"id", "langfuse_trace_id", "result", "usage", "error", "created_at",
                          "started_at", "finished_at"}

@@ -10,8 +10,9 @@ backward-compatible and note it at the bottom under "Changes".
   Run tests: `cd backend && .venv/Scripts/python.exe -m pytest -q`.
 - Docker is available locally. There is **no** GitHub token and **no** LLM API key on this machine:
   anything requiring them must be built, unit-tested offline, and marked `@pytest.mark.live`.
-- LLM provider: **Anthropic** via `langchain-anthropic` (`ChatAnthropic`), model from
-  `settings.llm_model` (default `claude-sonnet-5`).
+- LLM provider: `settings.llm_provider` — `openai_compatible` (default; `ChatOpenAI` against
+  `LLM_BASE_URL`, default OpenRouter) or `anthropic` (`ChatAnthropic`). Model from `AGENT_MODEL`
+  (alias `LLM_MODEL`). Constructed ONLY in `app/agent/llm.py`.
 - Langfuse Python SDK installed is **v4.x** — check its actual API (`langfuse.langchain.CallbackHandler`,
   trace attributes) in `.venv` before using it; do not assume v2 APIs.
 
@@ -81,7 +82,10 @@ backward-compatible and note it at the bottom under "Changes".
   - `async def review_pull_request(*, repo: str, pr_number: int, client: ReadOnlyGitHubClient, llm: BaseChatModel, callbacks: list|None=None, metadata: dict|None=None, on_step: Callable[[StepEvent], Awaitable[None]]|None=None) -> ReviewOutcome`
   - `StepEvent{name: str, input: dict|None, output: dict|None, latency_ms: int}`
   - `ReviewOutcome{result: ReviewResult, usage: {"input_tokens","output_tokens","total_tokens"}, calls: list[CallRecord], duration_s: float}`
-- `app/agent/llm.py` — `get_llm() -> BaseChatModel`
+- `app/agent/llm.py` — `resolve_llm_config(*, provider=None, model=None, require_key=True) -> LLMConfig`
+  (raises `LLMConfigError`), `build_llm(LLMConfig) -> BaseChatModel`, `get_llm()` (= both, from settings),
+  `structured_output(llm, schema)` (forced function calling on every provider), `configured_model_label()`.
+  `ReviewOutcome.parse_failures` / `synthesis_attempts`; `SynthesisError.parse_failures` / `.attempts`.
 - `app/agent/fixtures.py` — `def mock_transport_for_case(case: dict) -> httpx.MockTransport` serving a dataset case (below) at the same GitHub REST paths the tools use. Eval and injection tests go through the REAL client + allowlist with this transport.
 - `app/agent/runner.py` — `async def run_review(run_id: uuid.UUID) -> None`: opens its own session via `app.db.get_sessionmaker()`, marks running, gets token via `github_app.get_installation_token()`, streams graph, persists each node as an `agent_steps` row (`kind=node`), and ALWAYS (finally) persists the call log as `kind=github_calls`. Sets `result`, `usage`, `status`, `langfuse_trace_id`, `finished_at`.
 

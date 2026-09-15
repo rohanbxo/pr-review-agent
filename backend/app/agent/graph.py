@@ -33,6 +33,7 @@ from langgraph.graph import END, START, StateGraph, add_messages
 from pydantic import ValidationError
 
 from app.agent.github_client import CallRecord, ReadOnlyGitHubClient
+from app.agent.llm import structured_output
 from app.agent.prompts import (
     REPAIR_INSTRUCTION,
     SYNTHESIZE_INSTRUCTION,
@@ -51,6 +52,11 @@ _EMPTY_USAGE = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
 class SynthesisError(RuntimeError):
     """synthesize could not produce a valid ReviewResult after the repair retry."""
 
+    def __init__(self, message: str, *, parse_failures: int = 0, attempts: int = 0) -> None:
+        super().__init__(message)
+        self.parse_failures = parse_failures
+        self.attempts = attempts
+
 
 @dataclass
 class StepEvent:
@@ -67,6 +73,10 @@ class ReviewOutcome:
     calls: list[CallRecord] = field(default_factory=list)
     duration_s: float = 0.0
     dropped_findings: list[dict] = field(default_factory=list)
+    # Structured-output attempts in synthesize that did not yield a valid ReviewResult (0 = first
+    # try parsed; 1 = repaired on retry). A run that never parses raises SynthesisError instead.
+    parse_failures: int = 0
+    synthesis_attempts: int = 0
 
 
 def _merge_usage(a: dict | None, b: dict | None) -> dict:
@@ -92,6 +102,8 @@ class ReviewState(TypedDict, total=False):
     usage: Annotated[dict, _merge_usage]
     result: dict
     dropped_findings: list[dict]
+    parse_failures: int
+    synthesis_attempts: int
 
 
 def _close_dangling_tool_calls(messages: list[BaseMessage]) -> list[BaseMessage]:
@@ -165,13 +177,15 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
         return "synthesize"
 
     async def synthesize(state: ReviewState, config: RunnableConfig) -> dict:
-        structured = llm.with_structured_output(ReviewResult, include_raw=True)
+        structured = structured_output(llm, ReviewResult)
         messages = _close_dangling_tool_calls(list(state["messages"]))
         messages.append(HumanMessage(content=SYNTHESIZE_INSTRUCTION))
         usage = dict(_EMPTY_USAGE)
         parsed: ReviewResult | None = None
         error: str = ""
+        failures = attempts = 0
         for attempt in range(2):  # first try + one repair retry
+            attempts += 1
             out = await structured.ainvoke(messages, config)
             usage = _merge_usage(usage, usage_of(out.get("raw")))
             parsed = out.get("parsed")
@@ -182,6 +196,7 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
                     parsed, out["parsing_error"] = None, exc
             if isinstance(parsed, ReviewResult):
                 break
+            failures += 1
             error = str(out.get("parsing_error") or "no ReviewResult object was returned")
             raw = out.get("raw")
             raw_text = raw.content if isinstance(getattr(raw, "content", None), str) else ""
@@ -191,7 +206,8 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
                     + (f"\n\nYour previous text output was:\n{raw_text[:2000]}" if raw_text else "")
                 )]
         if not isinstance(parsed, ReviewResult):
-            raise SynthesisError(f"synthesize output failed validation after repair: {error[:500]}")
+            raise SynthesisError(f"synthesize output failed validation after repair: {error[:500]}",
+                                 parse_failures=failures, attempts=attempts)
 
         changed = set(state.get("changed_files") or [])
         kept, dropped = [], []
@@ -205,6 +221,8 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
             "result": result.model_dump(mode="json"),
             "dropped_findings": [f.model_dump(mode="json") for f in dropped],
             "usage": usage,
+            "parse_failures": failures,
+            "synthesis_attempts": attempts,
         }
 
     g = StateGraph(ReviewState)
@@ -277,6 +295,7 @@ async def review_pull_request(
     usage = dict(_EMPTY_USAGE)
     result: dict | None = None
     dropped: list[dict] = []
+    parse_failures = synthesis_attempts = 0
     rounds = 0
     pending_tool_calls: list[dict] = []
 
@@ -306,6 +325,8 @@ async def review_pull_request(
             elif node == "synthesize":
                 result = update.get("result")
                 dropped = update.get("dropped_findings") or []
+                parse_failures = int(update.get("parse_failures") or 0)
+                synthesis_attempts = int(update.get("synthesis_attempts") or 0)
             if on_step is not None:
                 await on_step(StepEvent(name=node, input=step_input, output=_jsonable(update), latency_ms=latency_ms))
 
@@ -317,4 +338,6 @@ async def review_pull_request(
         calls=list(client.calls),
         duration_s=time.perf_counter() - t_start,
         dropped_findings=dropped,
+        parse_failures=parse_failures,
+        synthesis_attempts=synthesis_attempts,
     )

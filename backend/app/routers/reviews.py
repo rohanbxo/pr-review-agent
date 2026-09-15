@@ -24,9 +24,9 @@ from redis.asyncio import Redis
 from sqlalchemy import ColumnElement, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agent.llm import configured_model_label
 from app.agent.runner import run_review
 from app.audit import record_audit
-from app.config import get_settings
 from app.db import get_session
 from app.deps import require
 from app.github_identity import can_read_repo
@@ -156,7 +156,7 @@ async def create_review(
 
     run = ReviewRun(
         id=uuid.uuid4(), user_id=user.id, repo_full_name=body.repo, pr_number=body.pr_number,
-        status=RunStatus.queued, model=get_settings().llm_model,
+        status=RunStatus.queued, model=configured_model_label(),
     )
     session.add(run)
     record_audit(

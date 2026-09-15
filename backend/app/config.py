@@ -1,7 +1,7 @@
 from functools import lru_cache
-from typing import Annotated
+from typing import Annotated, Literal
 
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # Env lists are CSV (or JSON); NoDecode stops pydantic-settings JSON-parsing them first.
@@ -50,9 +50,16 @@ class Settings(BaseSettings):
     review_quota_per_hour_reviewer: int = 20
     review_quota_per_hour_admin: int = 100
 
-    # LLM + tracing.
+    # LLM. One construction point for every caller: app/agent/llm.py.
+    #   openai_compatible -> ChatOpenAI(base_url=LLM_BASE_URL, api_key=LLM_API_KEY)  (default: OpenRouter)
+    #   anthropic         -> ChatAnthropic(api_key=LLM_API_KEY or ANTHROPIC_API_KEY)  (direct, for comparison)
+    llm_provider: Literal["anthropic", "openai_compatible"] = "openai_compatible"
+    llm_base_url: str = "https://openrouter.ai/api/v1"
+    llm_api_key: str = ""
     anthropic_api_key: str = ""
-    llm_model: str = "claude-sonnet-5"
+    # AGENT_MODEL is the name; LLM_MODEL is still accepted. Model ids are provider-specific
+    # (OpenRouter: "anthropic/<model>"), so openai_compatible has no default -- see app/agent/llm.py.
+    agent_model: str = Field(default="", validation_alias=AliasChoices("AGENT_MODEL", "LLM_MODEL", "agent_model"))
     llm_max_tool_rounds: int = 12
     langfuse_public_key: str = ""
     langfuse_secret_key: str = ""

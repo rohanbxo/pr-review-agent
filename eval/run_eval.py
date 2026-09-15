@@ -17,7 +17,6 @@ import argparse
 import asyncio
 import hashlib
 import json
-import os
 import platform
 import re
 import subprocess
@@ -141,13 +140,13 @@ def _result_stub(case: dict) -> dict:
             "expected": case.get("expected"), "expected_changed_line_span": expected_changed_line_span(case),
             "findings": [], "summary": None, "risk": None,
             "duration_s": None, "usage": None, "github_calls": 0, "blocked_calls": [],
-            "dropped_findings": 0, "error": None}
+            "dropped_findings": 0, "parse_failures": 0, "synthesis_failed": False, "error": None}
 
 
 async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rounds: int | None) -> dict:
     from app.agent.fixtures import mock_transport_for_case
     from app.agent.github_client import ReadOnlyGitHubClient
-    from app.agent.graph import review_pull_request
+    from app.agent.graph import SynthesisError, review_pull_request
 
     res = _result_stub(case)
     t0 = time.perf_counter()
@@ -162,8 +161,11 @@ async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rou
         result = outcome.result.model_dump(mode="json")
         res.update(findings=result["findings"], summary=result["summary"], risk=result["risk"],
                    duration_s=round(outcome.duration_s, 3), usage=dict(outcome.usage),
-                   dropped_findings=len(outcome.dropped_findings))
+                   dropped_findings=len(outcome.dropped_findings), parse_failures=outcome.parse_failures)
     except Exception as exc:  # an errored case is a failure in its split, reported separately
+        if isinstance(exc, SynthesisError):
+            res["parse_failures"] = exc.parse_failures
+            res["synthesis_failed"] = True
         res["error"] = f"{type(exc).__name__}: {exc}"[:2000]
         res["traceback"] = traceback.format_exc(limit=5)[-4000:]
         res["duration_s"] = round(time.perf_counter() - t0, 3)
@@ -175,7 +177,8 @@ async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rou
 
 
 async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: float,
-                  max_tool_rounds: int | None) -> list[dict]:
+                  max_tool_rounds: int | None, llm_config=None) -> list[dict]:
+    """``llm_config`` (an ``app.agent.llm.LLMConfig``) is required for mode ``configured``."""
     if mode == "baseline":
         out = []
         for case in cases:
@@ -190,9 +193,12 @@ async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: 
     if mode == "fake":
         llm_factory = make_fake_llm
     else:
-        from app.agent.llm import get_llm
+        # Same construction path as the background runner (app.agent.llm), never a copy of it.
+        from app.agent.llm import build_llm
 
-        shared = get_llm()
+        if llm_config is None:
+            raise ValueError("mode 'configured' needs an LLMConfig")
+        shared = build_llm(llm_config)
         llm_factory = lambda _case: shared  # noqa: E731
 
     sem = asyncio.Semaphore(max(1, concurrency))
@@ -219,12 +225,17 @@ def project_git_sha() -> str | None:
         return None
 
 
-def build_report(results: list[dict], *, mode: str, model: str | None, dataset: Path, dataset_sha: str,
-                 all_cases: list[dict], scoring: M.ScoringConfig, args: argparse.Namespace) -> dict:
+def build_report(results: list[dict], *, mode: str, provider: str, model: str, base_url: str | None,
+                 dataset: Path, dataset_sha: str, all_cases: list[dict], scoring: M.ScoringConfig,
+                 args: argparse.Namespace) -> dict:
     metrics = M.compute_report_metrics(results, scoring)
     meta = {
-        "llm": mode,  # "anthropic" | "fake" | "baseline"
+        "llm": mode,  # "configured" | "fake" | "baseline"
+        # Two agent reports are comparable only if provider, model, dataset_sha256 and scoring all
+        # match (eval/README.md). Recorded for every mode, never inferred later.
+        "provider": provider,
         "model": model,
+        "base_url": base_url,
         "dataset": str(dataset),
         "dataset_sha256": dataset_sha,
         "dataset_counts": dict(Counter(c["split"] for c in all_cases)),
@@ -245,6 +256,8 @@ def build_report(results: list[dict], *, mode: str, model: str | None, dataset: 
         report["WARNING"] = ("llm=fake: offline plumbing smoke test with a stub model that returns an "
                              "empty review. These numbers say NOTHING about review quality.")
     report["meta"] = meta
+    # Health first: if synthesis parsing fails often, every metric below is noise.
+    report["parse_errors"] = metrics["parse_errors"]
     for key in ("false_positive_rate", "detection", "localisation", "cost", "errors"):  # SPEC order
         report[key] = metrics[key]
     report["cases"] = results
@@ -258,9 +271,14 @@ def _pct(x) -> str:
 def summary_table(report: dict) -> str:
     m, fp, det, loc, cost = (report["meta"], report["false_positive_rate"], report["detection"],
                              report["localisation"], report["cost"])
-    sc = m["scoring"]
+    sc, pe = m["scoring"], report["parse_errors"]
+    flag = "!!! " if pe["cases_with_parse_failure"] else ""
     lines = [
-        f"PR review eval  llm={m['llm']}  model={m['model']}",
+        f"PR review eval  llm={m['llm']}  provider={m['provider']}  model={m['model']}",
+        f"{flag}0. Synthesis parse errors: {pe['cases_with_parse_failure']}/{pe['cases_run']} cases "
+        f"({_pct(pe['case_rate'])}); repaired on retry {pe['repaired_cases']}, unrecovered "
+        f"{pe['unrecovered_cases']}; failed attempts {pe['failed_attempts']}"
+        + ("  <- if this is not ~0, every number below is noise" if flag else ""),
         f"scoring v{sc['scoring_version']}: tolerance={sc['tolerance_lines']} lines, narrow <= "
         f"max(bug width, min({sc['narrow_max_lines']}, {sc['narrow_span_fraction']} x changed-line span))",
         f"dataset {m['dataset']}  sha256={m['dataset_sha256'][:12]}  evaluated={m['evaluated_counts']}",
@@ -304,8 +322,13 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--report", type=Path, default=None,
                     help="default: eval/reports/{v1,baseline,smoke-fake}.json by mode")
     ap.add_argument("--baseline", action="store_true", help="no LLM: flag every changed file as medium")
-    ap.add_argument("--llm", choices=["anthropic", "fake"], default="anthropic",
-                    help="'fake' is an offline plumbing smoke test; its report may not be v1/baseline")
+    ap.add_argument("--llm", choices=["configured", "fake"], default="configured",
+                    help="'configured': the model from settings (LLM_PROVIDER / AGENT_MODEL), built by "
+                         "app.agent.llm. 'fake' is an offline plumbing smoke test; its report may not be "
+                         "v1/baseline")
+    ap.add_argument("--provider", choices=["anthropic", "openai_compatible"], default=None,
+                    help="override LLM_PROVIDER for this run")
+    ap.add_argument("--model", default=None, help="override AGENT_MODEL for this run")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--splits", nargs="*", default=None, choices=["injected", "reverted", "clean", "injection"])
@@ -331,7 +354,7 @@ def main(argv: list[str] | None = None) -> int:
     mode = "baseline" if args.baseline else args.llm
     if args.report is None:
         args.report = REPORTS / {"baseline": "baseline.json", "fake": "smoke-fake.json",
-                                 "anthropic": "v1.json"}[mode]
+                                 "configured": "v1.json"}[mode]
 
     if mode == "fake" and (args.report.name in PROTECTED_REPORTS or "fake" not in args.report.name):
         print(f"error: --llm fake must not write {args.report}; use a report name containing 'fake' "
@@ -341,32 +364,35 @@ def main(argv: list[str] | None = None) -> int:
         print("error: refusing to write the baseline over eval/reports/v1.json.", file=sys.stderr)
         return 2
 
-    model: str | None = None
-    if mode == "anthropic":
-        from app.config import get_settings
+    llm_config = None
+    base_url: str | None = None
+    if mode == "configured":
+        from app.agent.llm import LLMConfigError, resolve_llm_config
 
-        settings = get_settings()
-        if not (os.environ.get("ANTHROPIC_API_KEY") or settings.anthropic_api_key):
-            print("error: ANTHROPIC_API_KEY is not set (env or backend .env). The agent eval needs a real "
-                  "model; no report was written.\n  Offline plumbing check: python -m eval.run_eval "
-                  "--llm fake --limit 3\n  No-LLM baseline:        python -m eval.run_eval --baseline",
-                  file=sys.stderr)
+        try:
+            llm_config = resolve_llm_config(provider=args.provider, model=args.model)
+        except LLMConfigError as exc:
+            print(f"error: {exc}. The agent eval needs a real model; no report was written.\n"
+                  "  Offline plumbing check: python -m eval.run_eval --llm fake --limit 3\n"
+                  "  No-LLM baseline:        python -m eval.run_eval --baseline", file=sys.stderr)
             return 2
-        model = settings.llm_model
+        provider, model, base_url = llm_config.provider, llm_config.model, llm_config.base_url
     elif mode == "fake":
-        model = "fake-review (stub)"
+        provider, model = "fake", "fake-review (stub)"
+    else:
+        provider, model = "none", "baseline:whole-file"
 
     if not args.dataset.exists():
         print(f"error: dataset {args.dataset} not found (python -m eval.build_dataset)", file=sys.stderr)
         return 2
     all_cases, sha = load_dataset(args.dataset)
     cases = select_cases(all_cases, args.splits, args.limit)
-    print(f"running {len(cases)} cases in mode={mode}", file=sys.stderr)
+    print(f"running {len(cases)} cases in mode={mode} provider={provider} model={model}", file=sys.stderr)
 
-    results = asyncio.run(run_all(cases, mode=mode, concurrency=args.concurrency,
-                                  timeout_s=args.case_timeout, max_tool_rounds=args.max_tool_rounds))
-    report = build_report(results, mode=mode, model=model, dataset=args.dataset, dataset_sha=sha,
-                          all_cases=all_cases, scoring=scoring, args=args)
+    results = asyncio.run(run_all(cases, mode=mode, concurrency=args.concurrency, timeout_s=args.case_timeout,
+                                  max_tool_rounds=args.max_tool_rounds, llm_config=llm_config))
+    report = build_report(results, mode=mode, provider=provider, model=model, base_url=base_url,
+                          dataset=args.dataset, dataset_sha=sha, all_cases=all_cases, scoring=scoring, args=args)
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(summary_table(report))

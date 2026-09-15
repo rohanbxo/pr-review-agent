@@ -17,3 +17,4 @@ langchain-anthropic>=0.3
 langfuse>=4.0
 # langfuse.langchain.CallbackHandler imports the `langchain` package itself (not just langchain-core)
 langchain>=1.0
+langchain-openai>=1.0

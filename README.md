@@ -45,8 +45,10 @@ Next.js server. The reasoning is also written up in [`infra/nginx/nginx.conf`](i
 
 ## Quick start
 
-Prerequisites: Docker with Compose v2, a GitHub OAuth App, a GitHub App (see below), and an
-Anthropic API key.
+Prerequisites: Docker with Compose v2, a GitHub OAuth App, a GitHub App (see below), and an LLM
+key. By default that's an OpenRouter key: set `LLM_API_KEY` and `AGENT_MODEL`, e.g.
+`anthropic/<model>`. Setting `LLM_PROVIDER=anthropic` uses an Anthropic key directly. Both are
+built in one place, `backend/app/agent/llm.py`.
 
 ```sh
 cp .env.example .env
@@ -125,7 +127,7 @@ paths are relative to `backend/tests/`.
   detects it. They also check injected text reaches the model only inside the untrusted-data
   delimiters.
 - **"Reports injections as `high` findings" is unverified until the live run**
-  (`pytest tests/test_injection.py --run-live` with `ANTHROPIC_API_KEY` set). That is a statement
+  (`pytest tests/test_injection.py --run-live` with `LLM_API_KEY` and `AGENT_MODEL` set). That is a statement
   about the real model's behaviour, and no offline test can back it. Those tests skip without a key.
 
 The nginx behaviour was checked by hand against echo upstreams, not in CI: `/api/` prefix
@@ -206,8 +208,17 @@ and 0% localisation (`eval/reports/baseline.json`). The agent has to beat it on 
 localisation; if it doesn't, the LLM is not earning its cost.
 
 ```sh
-python -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json
+python -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json   # full run
+python -m eval.dev_split --verify && python -m eval.run_eval --dataset eval/data/dev.jsonl --report eval/reports/dev.json
 ```
+
+Every report opens with a `parse_errors` block. If synthesis output fails to parse often, every
+other number is noise.
+
+**Two agent reports compare only if `dataset_sha256`, `meta.scoring`, `meta.provider` and
+`meta.model` all match.** So a Haiku run is never silently compared with a Sonnet run, and a
+60-case dev run never with the full run. The dev subset's 35 clean cases give roughly ±8% slop on
+the FP rate: good for "did this change help", not for a headline number.
 
 Quote `reverted` as the quality number. `injected` is a regression harness for prompt changes,
 because injected bugs are more uniform than real ones.

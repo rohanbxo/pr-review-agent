@@ -116,7 +116,8 @@ async def run_review(
             )
             run.result = outcome.result.model_dump(mode="json")
             run.usage = {**outcome.usage, "duration_s": round(outcome.duration_s, 3),
-                         "dropped_findings": len(outcome.dropped_findings)}
+                         "dropped_findings": len(outcome.dropped_findings),
+                         "parse_failures": outcome.parse_failures}
             run.status = RunStatus.succeeded
         except Exception as exc:  # noqa: BLE001 - recorded on the run
             log.exception("review run %s failed", run_id)

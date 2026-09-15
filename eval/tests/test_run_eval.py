@@ -1,6 +1,10 @@
 import asyncio
+import json
+
+import pytest
 
 from eval import run_eval as R
+from eval.run_eval import ROOT
 
 
 CASE = {
@@ -78,17 +82,122 @@ def test_fake_llm_cannot_write_protected_reports(tmp_path):
     assert not list(tmp_path.iterdir())
 
 
-def test_agent_mode_fails_fast_without_key(tmp_path, monkeypatch):
+@pytest.fixture
+def llm_env(tmp_path, monkeypatch):
+    """Clean LLM settings (no stray .env), applied per test."""
     from app.config import get_settings
 
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
-    get_settings.cache_clear()
-    try:
-        assert R.main(["--report", str(tmp_path / "v1.json")]) == 2
-    finally:
+    for var in ("LLM_PROVIDER", "LLM_BASE_URL", "LLM_API_KEY", "AGENT_MODEL", "LLM_MODEL", "ANTHROPIC_API_KEY"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.chdir(tmp_path)
+
+    def apply(**env):
+        for k, v in env.items():
+            monkeypatch.setenv(k, v)
         get_settings.cache_clear()
-    assert not list(tmp_path.iterdir())
+
+    get_settings.cache_clear()
+    yield apply
+    get_settings.cache_clear()
+
+
+@pytest.mark.parametrize("env", [
+    {"AGENT_MODEL": "anthropic/claude-test"},                    # openai_compatible, no key
+    {"LLM_API_KEY": "sk-test"},                                  # openai_compatible, no model
+    {"LLM_PROVIDER": "anthropic"},                               # anthropic, no key
+])
+def test_agent_mode_fails_fast_when_llm_is_not_configured(tmp_path, llm_env, env, capsys):
+    llm_env(**env)
+    assert R.main(["--report", str(tmp_path / "out" / "v1.json")]) == 2
+    assert not (tmp_path / "out").exists()
+    assert "no report was written" in capsys.readouterr().err
+
+
+def _load_openai_stub():
+    import importlib.util
+    import sys
+
+    path = ROOT / "backend" / "tests" / "helpers" / "openai_stub.py"
+    spec = importlib.util.spec_from_file_location("openai_stub_for_eval", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module  # dataclasses resolve annotations through sys.modules
+    spec.loader.exec_module(module)
+    return module
+
+
+def _dataset(tmp_path, cases):
+    ds = tmp_path / "ds.jsonl"
+    ds.write_text("".join(json.dumps(c) + "\n" for c in cases), encoding="utf-8")
+    return ds
+
+
+def test_configured_mode_end_to_end_with_stub_openai_server(tmp_path, llm_env, monkeypatch):
+    """The whole eval path with the REAL ChatOpenAI client and graph, a stub OpenRouter, no key:
+    provider/model land in meta, and parse errors surface at the top of the report."""
+    from app.agent import llm as llm_mod
+
+    stub_mod = _load_openai_stub()
+    good = json.dumps(stub_mod.VALID_REVIEW)
+    # PR 1 parses first time; PR 2 fails once then repairs; PR 3 never parses.
+    stub = stub_mod.OpenAIStub(payloads_by_pr={1: [good], 2: ['{"summary": 1}', good], 3: ["not json"]})
+    monkeypatch.setattr(llm_mod, "default_http_async_client", stub.async_client)
+    llm_env(LLM_API_KEY="sk-or-test", AGENT_MODEL="anthropic/claude-sonnet-test")
+
+    bug = {**CASE, "id": "demo-bug", "split": "injected", "pr_number": 2,
+           "expected": {"bug_kind": "flipped_comparison", "file": "src/a.py", "lines": {"start": 4, "end": 4}}}
+    broken = {**CASE, "id": "demo-broken", "pr_number": 3}
+    ds = _dataset(tmp_path, [CASE, bug, broken])
+    out = tmp_path / "configured.json"
+    assert R.main(["--dataset", str(ds), "--report", str(out), "--concurrency", "1"]) == 0
+    rep = json.loads(out.read_text(encoding="utf-8"))
+
+    assert rep["meta"]["llm"] == "configured"
+    assert rep["meta"]["provider"] == "openai_compatible"
+    assert rep["meta"]["model"] == "anthropic/claude-sonnet-test"
+    assert rep["meta"]["base_url"] == "https://openrouter.ai/api/v1"
+    assert "sk-or-test" not in out.read_text(encoding="utf-8")
+
+    assert list(rep)[:3] == ["meta", "parse_errors", "false_positive_rate"]
+    pe = rep["parse_errors"]
+    assert (pe["cases_run"], pe["cases_with_parse_failure"], pe["repaired_cases"], pe["unrecovered_cases"],
+            pe["failed_attempts"]) == (3, 2, 1, 1, 3)
+    assert sorted(pe["case_ids"]) == ["demo-broken", "demo-bug"]
+    by_id = {c["id"]: c for c in rep["cases"]}
+    assert by_id["demo-broken"]["synthesis_failed"] and "SynthesisError" in by_id["demo-broken"]["error"]
+    assert by_id["demo-1-clean"]["usage"]["total_tokens"] > 0
+    assert {r["authorization"] for r in stub.requests} == {"Bearer sk-or-test"}
+    assert {r["body"]["model"] for r in stub.requests} == {"anthropic/claude-sonnet-test"}
+
+
+def test_provider_and_model_overrides_are_recorded(tmp_path, llm_env, monkeypatch):
+    llm_env(ANTHROPIC_API_KEY="sk-ant-test")
+    captured = {}
+
+    async def fake_run_all(cases, **kw):
+        captured.update(kw)
+        return [R._result_stub(c) for c in cases]
+
+    monkeypatch.setattr(R, "run_all", fake_run_all)
+    ds = _dataset(tmp_path, [CASE])
+    out = tmp_path / "haiku.json"
+    assert R.main(["--dataset", str(ds), "--report", str(out), "--provider", "anthropic",
+                   "--model", "claude-haiku-4-5-20251001"]) == 0
+    meta = json.loads(out.read_text(encoding="utf-8"))["meta"]
+    assert (meta["provider"], meta["model"], meta["base_url"]) == ("anthropic", "claude-haiku-4-5-20251001", None)
+    assert captured["llm_config"].provider == "anthropic"
+
+
+def test_every_mode_records_provider_and_model(tmp_path):
+    ds = _dataset(tmp_path, [CASE])
+    for argv, provider, model in [
+        (["--baseline"], "none", "baseline:whole-file"),
+        (["--llm", "fake"], "fake", "fake-review (stub)"),
+    ]:
+        out = tmp_path / f"{provider}-fake.json"
+        assert R.main(["--dataset", str(ds), "--report", str(out), *argv]) == 0
+        meta = json.loads(out.read_text(encoding="utf-8"))["meta"]
+        assert (meta["provider"], meta["model"]) == (provider, model)
+        assert "parse_errors" in json.loads(out.read_text(encoding="utf-8"))
 
 
 def test_fake_llm_goes_through_real_graph_client_and_transport():

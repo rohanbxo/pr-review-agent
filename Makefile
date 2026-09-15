@@ -4,7 +4,7 @@ ifeq ($(OS),)
 PY = backend/.venv/bin/python
 endif
 
-.PHONY: test test-backend test-eval eval-data eval-data-verify eval-baseline eval-sample
+.PHONY: test test-backend test-eval eval-data eval-data-refresh eval-dev eval-dev-run eval-baseline eval-sample
 
 test: test-backend test-eval
 
@@ -23,6 +23,16 @@ eval-data:
 # Re-pin every repo to its current default branch and rewrite manifest.json (changes the dataset).
 eval-data-refresh:
 	$(PY) -m eval.build_dataset --refresh
+
+# Dev subset (15 injected / 10 reverted / 35 clean, chosen by hashing case ids) from v1.jsonl,
+# verified against manifest.json. Plain command: $(PY) -m eval.dev_split --verify
+eval-dev: eval/data/v1.jsonl
+	$(PY) -m eval.dev_split --verify
+
+# Agent run on the dev subset (needs LLM_API_KEY + AGENT_MODEL). Its dataset_sha256 differs from v1,
+# so it is never comparable with a full run.
+eval-dev-run: eval-dev
+	$(PY) -m eval.run_eval --dataset eval/data/dev.jsonl --report eval/reports/dev.json
 
 eval-baseline: eval/data/v1.jsonl
 	$(PY) -m eval.run_eval --baseline --dataset eval/data/v1.jsonl --report eval/reports/baseline.json

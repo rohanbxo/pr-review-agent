@@ -199,10 +199,12 @@ async def test_offline_defender_sees_injection_only_as_untrusted_data(case):
 @pytest.mark.live
 @pytest.mark.parametrize("case", CASES, ids=IDS)
 async def test_live_model_reports_injection_and_makes_no_blocked_calls(case):
-    if not get_settings().anthropic_api_key:
-        pytest.skip("ANTHROPIC_API_KEY is not set")
-    from app.agent.llm import get_llm
+    from app.agent.llm import LLMConfigError, build_llm, resolve_llm_config
 
-    outcome = await _run(case, get_llm())
+    try:
+        cfg = resolve_llm_config()
+    except LLMConfigError as exc:
+        pytest.skip(f"live model not configured: {exc}")
+    outcome = await _run(case, build_llm(cfg))
     assert_injection_reported_high(outcome.result, case)
     assert_no_blocked_calls(outcome.calls)

@@ -26,6 +26,11 @@
     "injected": 40,
     "reverted": 25,
     "clean": 150,
+    "dev": {
+      "injected": 15,
+      "reverted": 10,
+      "clean": 35
+    },
     "injected_by_kind": {
       "flipped_comparison": 10,
       "removed_none_guard": 10,
@@ -38,6 +43,7 @@
     "reverted": "72cf5bea5fbaa30dc9273819f383cf7bd58e4ac1aec9470ce7d3b12af8d0da45",
     "clean": "acd93a421a3317278a785944ce2898fbed7111465e736a30cb36bf3a61feb690",
     "v1": "637400043fb43519140c3767441d4e8620bf8fb65d6f65d054a72557a2c0b2ca",
-    "sample": "d5340be3e6c78b1ccb00e5f9e4833add474f1172dd5ff01e2f36bb2c82b092fa"
+    "sample": "d5340be3e6c78b1ccb00e5f9e4833add474f1172dd5ff01e2f36bb2c82b092fa",
+    "dev": "13a3ef5c81cdc6d07c0ed1f292b410d80b45404736b66680c69b4b05283b6f17"
   }
 }

@@ -267,8 +267,28 @@ def errors(results: list[dict]) -> dict:
             "cases": [{"id": r.get("id"), "split": r.get("split"), "error": r.get("error")} for r in errs]}
 
 
+def parse_errors(results: list[dict]) -> dict:
+    """Structured-output health of synthesize, over every evaluated case.
+
+    ``failed_attempts`` counts attempts that did not yield a valid ReviewResult. A case is
+    ``repaired`` if it failed first and parsed on the retry, ``unrecovered`` if synthesis gave up
+    (the case then also appears under ``errors``). If this is not ~0, the other numbers are noise."""
+    run = len(results)
+    failing = [r for r in results if int(r.get("parse_failures") or 0) > 0 or r.get("synthesis_failed")]
+    unrecovered = sum(1 for r in results if r.get("synthesis_failed"))
+    return {
+        "cases_run": run,
+        "cases_with_parse_failure": len(failing),
+        "case_rate": _rate(len(failing), run),
+        "repaired_cases": len(failing) - unrecovered,
+        "unrecovered_cases": unrecovered,
+        "failed_attempts": sum(int(r.get("parse_failures") or 0) for r in results),
+        "case_ids": [r.get("id") for r in failing],
+    }
+
+
 def compute_report_metrics(results: list[dict], cfg: ScoringConfig | None = None) -> dict:
-    """All four groups, in the mandated order, plus errors and the scoring config used."""
+    """All four groups, in the mandated order, plus errors, parse errors and the scoring config used."""
     cfg = cfg or ScoringConfig()
     return {
         "false_positive_rate": false_positive_rate(results, cfg),
@@ -276,5 +296,6 @@ def compute_report_metrics(results: list[dict], cfg: ScoringConfig | None = None
         "localisation": localisation(results, cfg),
         "cost": cost(results),
         "errors": errors(results),
+        "parse_errors": parse_errors(results),
         "scoring": cfg.as_dict(),
     }

@@ -20,6 +20,7 @@ Splits (CONTRACTS.md § Dataset case format):
 * ``clean``    -- real merged PRs, untouched.
 * ``v1``       -- concatenation of the three.
 * ``sample``   -- 10 cases drawn from v1 (4 injected, one per kind; 2 reverted; 4 clean), committed.
+* ``dev``      -- 15 injected / 10 reverted / 35 clean, chosen by hashing case ids (``eval/dev_split.py``).
 
 Cases carry head ``content`` and ``patch`` only. Base versions are NOT stored: they are fully
 determined by head + patch and ``app.agent.fixtures.reverse_apply_patch`` derives them.
@@ -41,6 +42,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from eval import mutations as mut
+from eval.dev_split import DEV_TARGETS, select_dev
 
 ROOT = Path(__file__).resolve().parent
 CACHE = ROOT / ".cache" / "repos"
@@ -682,6 +684,7 @@ def main(argv: list[str] | None = None) -> int:
         "clean": write_jsonl(args.out / "clean.jsonl", clean),
         "v1": write_jsonl(args.out / "v1.jsonl", injected + reverted + clean),
         "sample": write_jsonl(args.out / "sample.jsonl", pick_sample(injected, reverted, clean)),
+        "dev": write_jsonl(args.out / "dev.jsonl", select_dev(injected + reverted + clean)),
     }
     if args.verify:
         pinned = manifest.get("sha256", {})
@@ -693,7 +696,7 @@ def main(argv: list[str] | None = None) -> int:
         print("verify: rebuilt dataset matches manifest.json hashes", file=sys.stderr)
         return 0
     counts = {
-        "injected": len(injected), "reverted": len(reverted), "clean": len(clean),
+        "injected": len(injected), "reverted": len(reverted), "clean": len(clean), "dev": DEV_TARGETS,
         "injected_by_kind": {k: sum(1 for c in injected if c["expected"]["bug_kind"] == k) for k in mut.KINDS},
     }
     (args.out / "manifest.json").write_text(json.dumps({

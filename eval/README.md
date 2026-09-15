@@ -50,8 +50,17 @@ caveats.
 # 1. Baseline first. No LLM: one `medium` finding per changed file, spanning the whole file.
 $PY -m eval.run_eval --baseline --dataset eval/data/v1.jsonl --report eval/reports/baseline.json
 
-# 2. The agent (needs ANTHROPIC_API_KEY; fails fast and writes nothing without it).
-ANTHROPIC_API_KEY=... $PY -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json --concurrency 4
+# 2. The agent. The model comes from settings via app/agent/llm.py, the same factory the app uses.
+#    Default provider openai_compatible = OpenRouter; needs LLM_API_KEY and AGENT_MODEL.
+#    It fails fast and writes nothing if either is missing.
+LLM_API_KEY=... AGENT_MODEL=anthropic/<model> $PY -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json --concurrency 4
+
+# Direct Anthropic, for a provider comparison (--provider/--model override settings for one run):
+ANTHROPIC_API_KEY=... $PY -m eval.run_eval --provider anthropic --model claude-sonnet-5 --report eval/reports/v1-anthropic.json
+
+# 3. Dev subset for "did this change help?" iterations (60 cases; see "Dev subset" below).
+$PY -m eval.dev_split --verify          # = make eval-dev
+$PY -m eval.run_eval --dataset eval/data/dev.jsonl --report eval/reports/dev.json
 
 # Offline plumbing smoke test: real graph + client + mock transport, stub model returning an
 # empty review. Refuses to write v1.json/baseline.json; the report is stamped "llm": "fake".
@@ -62,10 +71,34 @@ Other flags: `--splits injected reverted`, `--limit N` (round-robin across split
 `--case-timeout S`, `--max-tool-rounds N`, and the scoring thresholds `--tolerance N` (default 5),
 `--narrow-max-lines N` (default 30), `--narrow-span-fraction F` (default 0.25).
 
+## Dev subset
+
+`eval/data/dev.jsonl` is 15 injected, 10 reverted and 35 clean cases.
+- **Stratified:** injected rotates across the four bug kinds, 4/4/4/3.
+- **Chosen by `sha256(seed:case id)`:** membership depends only on a case's own id. Rebuilding or
+  reordering the dataset doesn't reshuffle it, and a new case enters only if its own hash ranks in.
+- **Pinned:** its hash is in `manifest.json` (`sha256.dev`), checked by `--verify` and `make eval-data`.
+- **Its own dataset:** it has its own `dataset_sha256`, so the comparison rule below never lets a
+  dev run be compared with a full run.
+
+**35 clean cases give a false-positive rate with roughly ±8% slop.** One standard error is
+√(p(1−p)/35): about 5 points at p = 10%, 7 at 20%, 8.5 at 50%. A 95% interval is about twice
+that. That is fine for "did this change help". It is not fine for a headline number: quote the
+full `v1` run for that.
+
 ## Reading the report
 
-The report (and the stdout table) always has the four groups **in this order** — never quote
-one without the others:
+**First line: `parse_errors`.** It is a top-level block right after `meta`, and it is the first
+line of the stdout summary.
+- `cases_with_parse_failure`: cases where the synthesize step's structured output failed to parse
+  at least once.
+- `repaired_cases`: those that parsed on the retry.
+- `unrecovered_cases`: those that never did. They also count as errored cases.
+- `failed_attempts`: the total number of failed parses.
+
+If this is not ~0, synthesis is failing and every number below is noise. Fix that first.
+
+Then the four groups, always **in this order** — never quote one without the others:
 
 1. **`false_positive_rate`** — share of `clean` cases with any finding at `medium`+. This decides
    adoption: a reviewer that cries wolf gets muted.
@@ -83,10 +116,22 @@ one without the others:
 
 Plus `errors` (an errored case counts as a *miss* on bug splits and as a *false positive* on
 `clean` — a review that did not complete is not a clean pass) and `cases` (per-case findings,
-usage, GitHub call count, **blocked calls**, error). `meta` records `llm`, `model`,
-`dataset_sha256`, split counts, git SHA (if any), timestamp, and **`meta.scoring`**: every
-threshold and rule that produced the numbers, with a `scoring_version`. Only compare reports whose
-`dataset_sha256` and `meta.scoring` match.
+usage, GitHub call count, **blocked calls**, parse failures, error).
+
+`meta` records:
+- `llm` (`configured` | `fake` | `baseline`), **`provider`** (`openai_compatible` | `anthropic` |
+  `fake` | `none`), **`model`** and `base_url`. The key is never written.
+- `dataset_sha256`, split counts, git SHA (if any) and timestamp.
+- **`meta.scoring`**: every threshold and rule that produced the numbers, with a `scoring_version`.
+
+### Comparison rule
+
+**Two agent reports are comparable only if all four match: `dataset_sha256`, `meta.scoring`,
+`meta.provider` and `meta.model`.** A Haiku run and a Sonnet run, an OpenRouter run and a direct
+Anthropic run, or a dev run and a full run are different experiments. Put them side by side as
+such, never as a before/after of one change. The baseline is the fixed reference rather than a
+run. Hold an agent report against it when `dataset_sha256` and `meta.scoring` match; its provider
+is `none`.
 
 ## Rules for interpreting numbers
 

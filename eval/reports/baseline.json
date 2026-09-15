@@ -1,7 +1,9 @@
 {
   "meta": {
     "llm": "baseline",
-    "model": null,
+    "provider": "none",
+    "model": "baseline:whole-file",
+    "base_url": null,
     "dataset": "eval\\data\\v1.jsonl",
     "dataset_sha256": "637400043fb43519140c3767441d4e8620bf8fb65d6f65d054a72557a2c0b2ca",
     "dataset_counts": {
@@ -34,9 +36,18 @@
     "limit": null,
     "splits": null,
     "concurrency": 4,
-    "git_sha": "095c4321d220fa02f3ba21f93123bfb4229c3d1c",
-    "timestamp": "2026-09-15T14:53:44+00:00",
+    "git_sha": "723b2e3ff998dde54d9094c239c3d9ca5e5c4cb8",
+    "timestamp": "2026-09-15T18:40:19+00:00",
     "python": "3.12.13"
+  },
+  "parse_errors": {
+    "cases_run": 215,
+    "cases_with_parse_failure": 0,
+    "case_rate": 0.0,
+    "repaired_cases": 0,
+    "unrecovered_cases": 0,
+    "failed_attempts": 0,
+    "case_ids": []
   },
   "false_positive_rate": {
     "rate": 1.0,
@@ -226,7 +237,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000515,
+      "duration_s": 0.000503,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -235,6 +246,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -277,7 +290,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.6e-05,
+      "duration_s": 8.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -286,6 +299,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -350,7 +365,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000125,
+      "duration_s": 0.000114,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -359,6 +374,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -401,7 +418,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.5e-05,
+      "duration_s": 8.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -410,6 +427,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -452,7 +471,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000184,
+      "duration_s": 0.000169,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -461,6 +480,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -492,7 +513,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.1e-05,
+      "duration_s": 4.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -501,6 +522,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -554,7 +577,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000159,
+      "duration_s": 0.00015,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -563,6 +586,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -614,6 +639,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -667,7 +694,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.0001,
+      "duration_s": 9.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -676,6 +703,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -729,7 +758,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9.6e-05,
+      "duration_s": 8.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -738,6 +767,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -769,7 +800,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.7e-05,
+      "duration_s": 5.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -778,6 +809,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -820,7 +853,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000167,
+      "duration_s": 0.000166,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -829,6 +862,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -882,7 +917,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000338,
+      "duration_s": 0.000375,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -891,6 +926,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -977,7 +1014,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000216,
+      "duration_s": 0.00025,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -986,6 +1023,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1072,7 +1111,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000432,
+      "duration_s": 0.000438,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1081,6 +1120,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1134,7 +1175,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000121,
+      "duration_s": 0.000117,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1143,6 +1184,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1207,7 +1250,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000135,
+      "duration_s": 0.000147,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1216,6 +1259,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1269,7 +1314,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000223,
+      "duration_s": 0.000213,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1278,6 +1323,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1342,7 +1389,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000159,
+      "duration_s": 0.000166,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1351,6 +1398,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1415,7 +1464,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000195,
+      "duration_s": 0.000209,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1424,6 +1473,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1477,7 +1528,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000138,
+      "duration_s": 0.000123,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1486,6 +1537,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1528,7 +1581,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00026,
+      "duration_s": 0.000252,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1537,6 +1590,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1623,7 +1678,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00025,
+      "duration_s": 0.000254,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1632,6 +1687,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1674,7 +1731,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000131,
+      "duration_s": 0.000129,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1683,6 +1740,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1725,7 +1784,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000273,
+      "duration_s": 0.000238,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1734,6 +1793,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1787,7 +1848,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000202,
+      "duration_s": 0.000194,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1796,6 +1857,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1827,7 +1890,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000181,
+      "duration_s": 0.000173,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1836,6 +1899,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1878,7 +1943,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000306,
+      "duration_s": 0.000307,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1887,6 +1952,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1929,7 +1996,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000187,
+      "duration_s": 0.000153,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1938,6 +2005,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -1980,7 +2049,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.1e-05,
+      "duration_s": 4.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -1989,6 +2058,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2042,7 +2113,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000244,
+      "duration_s": 0.000237,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2051,6 +2122,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2093,7 +2166,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000134,
+      "duration_s": 0.00013,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2102,6 +2175,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2199,7 +2274,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000317,
+      "duration_s": 0.000275,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2208,6 +2283,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2250,7 +2327,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000132,
+      "duration_s": 0.000122,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2259,6 +2336,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2345,7 +2424,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000373,
+      "duration_s": 0.000374,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2354,6 +2433,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2451,7 +2532,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000288,
+      "duration_s": 0.000286,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2460,6 +2541,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2502,7 +2585,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000418,
+      "duration_s": 0.000409,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2511,6 +2594,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2553,7 +2638,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.8e-05,
+      "duration_s": 8.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2562,6 +2647,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2604,7 +2691,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000126,
+      "duration_s": 8.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2613,6 +2700,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2666,7 +2755,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000187,
+      "duration_s": 0.000175,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2675,6 +2764,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2706,7 +2797,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000113,
+      "duration_s": 0.000108,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2715,6 +2806,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2746,7 +2839,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7e-05,
+      "duration_s": 5.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2755,6 +2848,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2786,7 +2881,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.5e-05,
+      "duration_s": 3.7e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2795,6 +2890,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2826,7 +2923,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9.6e-05,
+      "duration_s": 5.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2835,6 +2932,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2866,7 +2965,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.9e-05,
+      "duration_s": 4.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2875,6 +2974,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2906,7 +3007,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3.2e-05,
+      "duration_s": 7.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2915,6 +3016,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2946,7 +3049,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.1e-05,
+      "duration_s": 7.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2955,6 +3058,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -2986,7 +3091,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000135,
+      "duration_s": 7.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -2995,6 +3100,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3026,7 +3133,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.1e-05,
+      "duration_s": 4.7e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3035,6 +3142,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3066,7 +3175,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.9e-05,
+      "duration_s": 7.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3075,6 +3184,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3106,7 +3217,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.3e-05,
+      "duration_s": 4.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3115,6 +3226,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3146,7 +3259,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000123,
+      "duration_s": 0.000107,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3155,6 +3268,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3186,7 +3301,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3.6e-05,
+      "duration_s": 3.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3195,6 +3310,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3226,7 +3343,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000141,
+      "duration_s": 0.000133,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3235,6 +3352,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3266,7 +3385,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.9e-05,
+      "duration_s": 5.5e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3275,6 +3394,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3306,7 +3427,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.3e-05,
+      "duration_s": 4.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3315,6 +3436,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3346,7 +3469,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00022,
+      "duration_s": 0.00021,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3355,6 +3478,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3386,7 +3511,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000179,
+      "duration_s": 0.000168,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3395,6 +3520,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3426,7 +3553,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.5e-05,
+      "duration_s": 6.5e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3435,6 +3562,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3466,7 +3595,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3.5e-05,
+      "duration_s": 3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3475,6 +3604,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3506,7 +3637,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.8e-05,
+      "duration_s": 5.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3515,6 +3646,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3546,7 +3679,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.4e-05,
+      "duration_s": 6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3555,6 +3688,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3586,7 +3721,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3e-05,
+      "duration_s": 2.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3595,6 +3730,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3626,7 +3763,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9.1e-05,
+      "duration_s": 7.7e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3635,6 +3772,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3666,7 +3805,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000149,
+      "duration_s": 0.000145,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3675,6 +3814,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3721,7 +3862,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9.1e-05,
+      "duration_s": 9.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3730,6 +3871,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3787,7 +3930,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000158,
+      "duration_s": 0.000156,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3796,6 +3939,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3886,7 +4031,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.4e-05,
+      "duration_s": 7.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3895,6 +4040,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3919,7 +4066,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000145,
+      "duration_s": 0.000147,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -3928,6 +4075,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -3961,6 +4110,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4007,7 +4158,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.9e-05,
+      "duration_s": 3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4016,6 +4167,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4040,7 +4193,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.8e-05,
+      "duration_s": 8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4049,6 +4202,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4128,7 +4283,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00046,
+      "duration_s": 0.000466,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4137,6 +4292,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4205,7 +4362,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000177,
+      "duration_s": 0.00018,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4214,6 +4371,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4249,7 +4408,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000191,
+      "duration_s": 0.000193,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4258,6 +4417,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4291,6 +4452,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4335,6 +4498,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4359,7 +4524,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.7e-05,
+      "duration_s": 2.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4368,6 +4533,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4401,6 +4568,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4447,7 +4616,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.3e-05,
+      "duration_s": 2.5e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4456,6 +4625,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4489,6 +4660,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4535,7 +4708,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.6e-05,
+      "duration_s": 7e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4544,6 +4717,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4612,7 +4787,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000272,
+      "duration_s": 0.00028,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4621,6 +4796,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4656,7 +4833,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000441,
+      "duration_s": 0.00045,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4665,6 +4842,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4689,7 +4868,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.7e-05,
+      "duration_s": 2.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4698,6 +4877,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4733,7 +4914,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.1e-05,
+      "duration_s": 5.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4742,6 +4923,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4775,6 +4958,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4808,6 +4993,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4832,7 +5019,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3.6e-05,
+      "duration_s": 3.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4841,6 +5028,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4876,7 +5065,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000158,
+      "duration_s": 0.000161,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4885,6 +5074,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4909,7 +5100,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6e-05,
+      "duration_s": 5.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4918,6 +5109,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4951,6 +5144,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -4975,7 +5170,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.7e-05,
+      "duration_s": 2.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -4984,6 +5179,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5019,7 +5216,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000291,
+      "duration_s": 0.000325,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5028,6 +5225,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5085,7 +5284,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000131,
+      "duration_s": 0.000132,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5094,6 +5293,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5129,7 +5330,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000121,
+      "duration_s": 0.000116,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5138,6 +5339,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5173,7 +5376,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.2e-05,
+      "duration_s": 8.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5182,6 +5385,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5206,7 +5411,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00014,
+      "duration_s": 0.000143,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5215,6 +5420,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5248,6 +5455,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5316,7 +5525,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.5e-05,
+      "duration_s": 4.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5325,6 +5534,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5371,7 +5582,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.4e-05,
+      "duration_s": 7.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5380,6 +5591,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5415,7 +5628,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000116,
+      "duration_s": 0.000113,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5424,6 +5637,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5448,7 +5663,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.2e-05,
+      "duration_s": 4.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5457,6 +5672,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5514,7 +5731,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000147,
+      "duration_s": 0.000149,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5523,6 +5740,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5556,6 +5775,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5591,7 +5812,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00018,
+      "duration_s": 0.000183,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5600,6 +5821,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5635,7 +5858,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000163,
+      "duration_s": 0.000157,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5644,6 +5867,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5677,6 +5902,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5734,7 +5961,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000166,
+      "duration_s": 0.000164,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5743,6 +5970,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5798,6 +6027,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5822,7 +6053,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.3e-05,
+      "duration_s": 2.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5831,6 +6062,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5899,7 +6132,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000259,
+      "duration_s": 0.00026,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5908,6 +6141,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5943,7 +6178,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.5e-05,
+      "duration_s": 6.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5952,6 +6187,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -5976,7 +6213,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.2e-05,
+      "duration_s": 5.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -5985,6 +6222,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6009,7 +6248,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7e-06,
+      "duration_s": 6e-06,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6018,6 +6257,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6064,7 +6305,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000136,
+      "duration_s": 0.000133,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6073,6 +6314,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6119,7 +6362,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000155,
+      "duration_s": 0.000158,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6128,6 +6371,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6185,7 +6430,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00022,
+      "duration_s": 0.000221,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6194,6 +6439,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6240,7 +6487,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000164,
+      "duration_s": 0.000161,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6249,6 +6496,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6295,7 +6544,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.8e-05,
+      "duration_s": 8.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6304,6 +6553,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6328,7 +6579,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3e-05,
+      "duration_s": 3.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6337,6 +6588,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6383,7 +6636,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8e-05,
+      "duration_s": 8.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6392,6 +6645,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6416,7 +6671,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.7e-05,
+      "duration_s": 4.5e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6425,6 +6680,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6460,7 +6717,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000116,
+      "duration_s": 0.000117,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6469,6 +6726,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6513,6 +6772,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6548,7 +6809,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000196,
+      "duration_s": 0.000197,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6557,6 +6818,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6590,6 +6853,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6625,7 +6890,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.4e-05,
+      "duration_s": 6.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6634,6 +6899,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6702,7 +6969,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000311,
+      "duration_s": 0.000316,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6711,6 +6978,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6757,7 +7026,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000185,
+      "duration_s": 0.000188,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6766,6 +7035,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6867,7 +7138,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000173,
+      "duration_s": 0.000211,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6876,6 +7147,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6900,7 +7173,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.9e-05,
+      "duration_s": 4.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6909,6 +7182,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6944,7 +7219,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.8e-05,
+      "duration_s": 0.000117,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6953,6 +7228,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -6988,7 +7265,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8e-06,
+      "duration_s": 1.7e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -6997,6 +7274,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7021,7 +7300,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000196,
+      "duration_s": 0.000226,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7030,6 +7309,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7065,7 +7346,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.5e-05,
+      "duration_s": 0.000146,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7074,6 +7355,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7164,7 +7447,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000144,
+      "duration_s": 0.000151,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7173,6 +7456,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7219,7 +7504,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000204,
+      "duration_s": 0.000209,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7228,6 +7513,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7252,7 +7539,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6.6e-05,
+      "duration_s": 7.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7261,6 +7548,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7285,7 +7574,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.3e-05,
+      "duration_s": 8.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7294,6 +7583,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7327,6 +7618,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7362,7 +7655,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.4e-05,
+      "duration_s": 7.6e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7371,6 +7664,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7417,7 +7712,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000102,
+      "duration_s": 0.000106,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7426,6 +7721,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7472,7 +7769,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000123,
+      "duration_s": 0.000119,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7481,6 +7778,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7505,7 +7804,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4e-05,
+      "duration_s": 4.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7514,6 +7813,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7549,7 +7850,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000141,
+      "duration_s": 0.000146,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7558,6 +7859,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7593,7 +7896,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000149,
+      "duration_s": 0.000153,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7602,6 +7905,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7635,6 +7940,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7681,7 +7988,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.2e-05,
+      "duration_s": 3.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7690,6 +7997,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7725,7 +8034,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00027,
+      "duration_s": 0.000371,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7734,6 +8043,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7780,7 +8091,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.6e-05,
+      "duration_s": 0.000175,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7789,6 +8100,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7835,7 +8148,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000134,
+      "duration_s": 0.000325,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7844,6 +8157,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7879,7 +8194,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000117,
+      "duration_s": 0.000153,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7888,6 +8203,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7912,7 +8229,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4e-06,
+      "duration_s": 6e-06,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7921,6 +8238,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7945,7 +8264,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000191,
+      "duration_s": 0.000202,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7954,6 +8273,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -7978,7 +8299,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.3e-05,
+      "duration_s": 2.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -7987,6 +8308,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8022,7 +8345,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7e-05,
+      "duration_s": 8.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8031,6 +8354,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8055,7 +8380,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9e-06,
+      "duration_s": 1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8064,6 +8389,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8132,7 +8459,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000249,
+      "duration_s": 0.000261,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8141,6 +8468,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8176,7 +8505,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000153,
+      "duration_s": 0.000151,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8185,6 +8514,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8209,7 +8540,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5e-06,
+      "duration_s": 6e-06,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8218,6 +8549,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8275,7 +8608,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3e-05,
+      "duration_s": 3.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8284,6 +8617,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8341,7 +8676,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000164,
+      "duration_s": 0.000167,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8350,6 +8685,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8429,7 +8766,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000154,
+      "duration_s": 0.000156,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8438,6 +8775,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8495,7 +8834,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00022,
+      "duration_s": 0.000226,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8504,6 +8843,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8539,7 +8880,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.9e-05,
+      "duration_s": 5.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8548,6 +8889,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8614,6 +8957,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8638,7 +8983,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000128,
+      "duration_s": 0.000132,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8647,6 +8992,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8671,7 +9018,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000179,
+      "duration_s": 0.000195,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8680,6 +9027,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8726,7 +9075,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.2e-05,
+      "duration_s": 4.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8735,6 +9084,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8759,7 +9110,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.9e-05,
+      "duration_s": 3.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8768,6 +9119,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8801,6 +9154,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8825,7 +9180,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.1e-05,
+      "duration_s": 5.4e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8834,6 +9189,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8858,7 +9215,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.8e-05,
+      "duration_s": 2.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8867,6 +9224,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8913,7 +9272,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6e-05,
+      "duration_s": 6.2e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8922,6 +9281,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -8968,7 +9329,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 4.8e-05,
+      "duration_s": 4.9e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -8977,6 +9338,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9001,7 +9364,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000114,
+      "duration_s": 0.000119,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9010,6 +9373,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9098,6 +9463,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9153,6 +9520,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9199,7 +9568,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000259,
+      "duration_s": 0.000266,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9208,6 +9577,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9254,7 +9625,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000108,
+      "duration_s": 0.000111,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9263,6 +9634,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9298,7 +9671,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.7e-05,
+      "duration_s": 2.8e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9307,6 +9680,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9331,7 +9706,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000191,
+      "duration_s": 0.000197,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9340,6 +9715,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9364,7 +9741,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.7e-05,
+      "duration_s": 8.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9373,6 +9750,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9397,7 +9776,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 3.1e-05,
+      "duration_s": 3.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9406,6 +9785,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9452,7 +9833,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000213,
+      "duration_s": 0.000171,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9461,6 +9842,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9485,7 +9868,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.1e-05,
+      "duration_s": 5e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9494,6 +9877,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9529,7 +9914,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000121,
+      "duration_s": 0.000126,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9538,6 +9923,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9584,7 +9971,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7.1e-05,
+      "duration_s": 7.3e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9593,6 +9980,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9661,7 +10050,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00011,
+      "duration_s": 0.000116,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9670,6 +10059,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9694,7 +10085,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000372,
+      "duration_s": 0.00029,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9703,6 +10094,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9738,7 +10131,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.2e-05,
+      "duration_s": 5e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9747,6 +10140,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9802,6 +10197,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9826,7 +10223,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000155,
+      "duration_s": 0.000157,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9835,6 +10232,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9892,7 +10291,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000138,
+      "duration_s": 0.000141,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -9901,6 +10300,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -9991,7 +10392,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000164,
+      "duration_s": 0.00017,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10000,6 +10401,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10068,7 +10471,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000211,
+      "duration_s": 0.000216,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10077,6 +10480,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10123,7 +10528,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000163,
+      "duration_s": 0.00017,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10132,6 +10537,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10156,7 +10563,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 5.3e-05,
+      "duration_s": 5.7e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10165,6 +10572,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10189,7 +10598,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 2.8e-05,
+      "duration_s": 3.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10198,6 +10607,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10242,6 +10653,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10277,7 +10690,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 6e-05,
+      "duration_s": 7e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10286,6 +10699,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10332,7 +10747,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000284,
+      "duration_s": 0.000297,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10341,6 +10756,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10365,7 +10782,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9e-06,
+      "duration_s": 1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10374,6 +10791,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10409,7 +10828,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 1.8e-05,
+      "duration_s": 2.1e-05,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10418,6 +10837,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10475,7 +10896,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000102,
+      "duration_s": 0.000112,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10484,6 +10905,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10552,7 +10975,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000122,
+      "duration_s": 0.000134,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10561,6 +10984,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10618,7 +11043,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000236,
+      "duration_s": 0.000253,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10627,6 +11052,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10662,7 +11089,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.00037,
+      "duration_s": 0.00041,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10671,6 +11098,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10717,7 +11146,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 8.1e-05,
+      "duration_s": 0.00011,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10726,6 +11155,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10761,7 +11192,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000142,
+      "duration_s": 0.000149,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10770,6 +11201,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10805,7 +11238,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000141,
+      "duration_s": 0.000123,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10814,6 +11247,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10838,7 +11273,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 7e-06,
+      "duration_s": 8e-06,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10847,6 +11282,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10893,7 +11330,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 9.7e-05,
+      "duration_s": 0.000103,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10902,6 +11339,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     },
     {
@@ -10948,7 +11387,7 @@
       ],
       "summary": null,
       "risk": null,
-      "duration_s": 0.000127,
+      "duration_s": 0.000132,
       "usage": {
         "input_tokens": 0,
         "output_tokens": 0,
@@ -10957,6 +11396,8 @@
       "github_calls": 0,
       "blocked_calls": [],
       "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
       "error": null
     }
   ]
