@@ -187,6 +187,89 @@ def test_provider_and_model_overrides_are_recorded(tmp_path, llm_env, monkeypatc
     assert captured["llm_config"].provider == "anthropic"
 
 
+class RateLimitError(Exception):
+    """Same class name as openai.RateLimitError / anthropic.RateLimitError."""
+    status_code = 429
+
+
+def _llm_failing_then_ok(failures: int, exc_factory):
+    """A fake whose first ``failures`` cases raise from the model, then behaves like make_fake_llm."""
+    state = {"n": 0}
+
+    def factory(case):
+        llm = R.make_fake_llm(case)
+        if state["n"] < failures:
+            state["n"] += 1
+
+            class Failing(type(llm)):
+                def _generate(self, *a, **kw):
+                    raise exc_factory()
+
+            return Failing()
+        return llm
+
+    return factory
+
+
+def test_rate_limit_is_retried_and_not_scored_as_an_agent_failure(monkeypatch):
+    sleeps = []
+
+    async def no_sleep(s):
+        sleeps.append(s)
+
+    monkeypatch.setattr(R.asyncio, "sleep", no_sleep)
+    res = asyncio.run(R.run_agent_case(CASE, _llm_failing_then_ok(2, RateLimitError), timeout_s=60,
+                                       max_tool_rounds=None, max_infra_retries=5, backoff_s=10))
+    assert res["error"] is None and res["infra_retries"] == 2 and not res["infra_error"]
+    assert len(sleeps) == 2 and 8 <= sleeps[0] <= 12 and 16 <= sleeps[1] <= 24  # exponential, jittered
+
+
+def test_rate_limit_that_outlasts_retries_is_flagged_infra(monkeypatch):
+    async def no_sleep(s):
+        pass
+
+    monkeypatch.setattr(R.asyncio, "sleep", no_sleep)
+    res = asyncio.run(R.run_agent_case(CASE, _llm_failing_then_ok(99, RateLimitError), timeout_s=60,
+                                       max_tool_rounds=None, max_infra_retries=3, backoff_s=1))
+    assert res["infra_error"] and res["infra_retries"] == 3 and "RateLimitError" in res["error"]
+    from eval import metrics as M
+
+    errs = M.errors([res])
+    assert (errs["infra_errors"], errs["cases_retried_for_provider"]) == (1, 1)
+
+
+def test_agent_errors_are_never_retried(monkeypatch):
+    async def fail_sleep(s):
+        raise AssertionError("must not retry a non-transient error")
+
+    monkeypatch.setattr(R.asyncio, "sleep", fail_sleep)
+    res = asyncio.run(R.run_agent_case(CASE, _llm_failing_then_ok(1, lambda: ValueError("model said nonsense")),
+                                       timeout_s=60, max_tool_rounds=None, max_infra_retries=5, backoff_s=1))
+    assert res["error"] and res["infra_retries"] == 0 and not res["infra_error"]
+
+
+def test_transient_classification():
+    class InternalServerError(Exception):
+        pass
+
+    class Wrapped(Exception):
+        pass
+
+    assert R.is_transient_provider_error(RateLimitError())
+    assert R.is_transient_provider_error(InternalServerError())
+    try:
+        try:
+            raise RateLimitError()
+        except RateLimitError as inner:
+            raise Wrapped("graph wrapper") from inner
+    except Wrapped as outer:
+        assert R.is_transient_provider_error(outer)
+    assert not R.is_transient_provider_error(ValueError("x"))
+    from app.agent.graph import SynthesisError
+
+    assert not R.is_transient_provider_error(SynthesisError("bad json"))
+
+
 def test_every_mode_records_provider_and_model(tmp_path):
     ds = _dataset(tmp_path, [CASE])
     for argv, provider, model in [

@@ -264,7 +264,12 @@ def errors(results: list[dict]) -> dict:
     for r in errs:
         by_split[r.get("split", "?")] = by_split.get(r.get("split", "?"), 0) + 1
     return {"count": len(errs), "by_split": by_split,
-            "cases": [{"id": r.get("id"), "split": r.get("split"), "error": r.get("error")} for r in errs]}
+            # Provider failures (rate limit / 5xx) that survived every retry. They still count as
+            # misses / false positives above, so any non-zero value means the run is not clean.
+            "infra_errors": sum(1 for r in errs if r.get("infra_error")),
+            "cases_retried_for_provider": sum(1 for r in results if int(r.get("infra_retries") or 0) > 0),
+            "cases": [{"id": r.get("id"), "split": r.get("split"), "error": r.get("error"),
+                       "infra_error": bool(r.get("infra_error"))} for r in errs]}
 
 
 def parse_errors(results: list[dict]) -> dict:

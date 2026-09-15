@@ -18,6 +18,7 @@ import asyncio
 import hashlib
 import json
 import platform
+import random
 import re
 import subprocess
 import sys
@@ -140,10 +141,50 @@ def _result_stub(case: dict) -> dict:
             "expected": case.get("expected"), "expected_changed_line_span": expected_changed_line_span(case),
             "findings": [], "summary": None, "risk": None,
             "duration_s": None, "usage": None, "github_calls": 0, "blocked_calls": [],
-            "dropped_findings": 0, "parse_failures": 0, "synthesis_failed": False, "error": None}
+            "dropped_findings": 0, "parse_failures": 0, "synthesis_failed": False,
+            "infra_retries": 0, "infra_error": False, "error": None}
 
 
-async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rounds: int | None) -> dict:
+# Provider-side failures that say nothing about the agent: rate limits, overload, 5xx, dropped
+# connections. Matched by class name / status so neither SDK has to be imported here.
+_TRANSIENT_NAMES = {"RateLimitError", "InternalServerError", "APIConnectionError", "APITimeoutError",
+                    "ServiceUnavailableError", "OverloadedError"}
+_TRANSIENT_STATUS = {408, 409, 429, 500, 502, 503, 504, 529}
+
+
+def is_transient_provider_error(exc: BaseException) -> bool:
+    for e in (exc, exc.__cause__, exc.__context__):
+        if e is None:
+            continue
+        if type(e).__name__ in _TRANSIENT_NAMES or getattr(e, "status_code", None) in _TRANSIENT_STATUS:
+            return True
+    return False
+
+
+async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rounds: int | None,
+                         *, max_infra_retries: int = 0, backoff_s: float = 30.0) -> dict:
+    """One case. Transient provider errors are retried (whole case, fresh client) with exponential
+    backoff, so a rate limit is not scored as an agent miss or false positive. Anything else --
+    including SynthesisError -- is the agent's result and is never retried."""
+    attempt = 0
+    while True:
+        res = await _run_agent_case_once(case, llm_factory, timeout_s, max_tool_rounds)
+        exc = res.pop("_exception", None)
+        if exc is None or not is_transient_provider_error(exc):
+            res["infra_retries"] = attempt
+            return res
+        if attempt >= max_infra_retries:
+            res["infra_retries"] = attempt
+            res["infra_error"] = True  # still failed for provider reasons: flagged loudly in the report
+            return res
+        delay = backoff_s * (2 ** attempt) * random.uniform(0.8, 1.2)
+        attempt += 1
+        print(f"  ~ {case['id']}: {type(exc).__name__}, retry {attempt}/{max_infra_retries} in {delay:.0f}s",
+              file=sys.stderr)
+        await asyncio.sleep(delay)
+
+
+async def _run_agent_case_once(case: dict, llm_factory, timeout_s: float, max_tool_rounds: int | None) -> dict:
     from app.agent.fixtures import mock_transport_for_case
     from app.agent.github_client import ReadOnlyGitHubClient
     from app.agent.graph import SynthesisError, review_pull_request
@@ -169,6 +210,7 @@ async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rou
         res["error"] = f"{type(exc).__name__}: {exc}"[:2000]
         res["traceback"] = traceback.format_exc(limit=5)[-4000:]
         res["duration_s"] = round(time.perf_counter() - t0, 3)
+        res["_exception"] = exc
     finally:
         res["github_calls"] = len(client.calls)
         res["blocked_calls"] = [c.as_dict() for c in client.calls if c.blocked]
@@ -177,7 +219,8 @@ async def run_agent_case(case: dict, llm_factory, timeout_s: float, max_tool_rou
 
 
 async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: float,
-                  max_tool_rounds: int | None, llm_config=None) -> list[dict]:
+                  max_tool_rounds: int | None, llm_config=None, max_infra_retries: int = 5,
+                  backoff_s: float = 30.0) -> list[dict]:
     """``llm_config`` (an ``app.agent.llm.LLMConfig``) is required for mode ``configured``."""
     if mode == "baseline":
         out = []
@@ -207,9 +250,13 @@ async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: 
     async def one(case):
         nonlocal done
         async with sem:
-            r = await run_agent_case(case, llm_factory, timeout_s, max_tool_rounds)
+            r = await run_agent_case(case, llm_factory, timeout_s, max_tool_rounds,
+                                     max_infra_retries=max_infra_retries, backoff_s=backoff_s)
         done += 1
-        status = "ERROR " + r["error"][:80] if r["error"] else f"{len(r['findings'])} findings"
+        status = (("INFRA ERROR " if r["infra_error"] else "ERROR ") + r["error"][:300] if r["error"]
+                  else f"{len(r['findings'])} findings")
+        if r["infra_retries"]:
+            status += f" after {r['infra_retries']} provider retries"
         print(f"  [{done}/{len(cases)}] {case['id']}: {status} ({r['duration_s']}s)", file=sys.stderr)
         return r
 
@@ -308,7 +355,9 @@ def summary_table(report: dict) -> str:
         "4. Cost",
         f"   mean {cost['mean_seconds']}s  p95 {cost['p95_seconds']}s  mean tokens {cost['mean_total_tokens']}",
         "",
-        f"errors: {report['errors']['count']} {report['errors']['by_split']}",
+        f"errors: {report['errors']['count']} {report['errors']['by_split']}; provider (infra) errors after "
+        f"retries: {report['errors']['infra_errors']}; cases that needed provider retries: "
+        f"{report['errors']['cases_retried_for_provider']}",
     ]
     if "WARNING" in report:
         lines.insert(0, "!!! " + report["WARNING"])
@@ -340,6 +389,10 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
                     help="localisation: cap as a fraction of the file's changed-line span")
     ap.add_argument("--case-timeout", type=float, default=600.0)
     ap.add_argument("--max-tool-rounds", type=int, default=None)
+    ap.add_argument("--infra-retries", type=int, default=5,
+                    help="retries per case for provider rate limits / 5xx / connection errors (never agent errors)")
+    ap.add_argument("--retry-backoff", type=float, default=30.0,
+                    help="first retry delay in seconds; doubles each retry")
     return ap.parse_args(argv)
 
 
@@ -390,7 +443,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"running {len(cases)} cases in mode={mode} provider={provider} model={model}", file=sys.stderr)
 
     results = asyncio.run(run_all(cases, mode=mode, concurrency=args.concurrency, timeout_s=args.case_timeout,
-                                  max_tool_rounds=args.max_tool_rounds, llm_config=llm_config))
+                                  max_tool_rounds=args.max_tool_rounds, llm_config=llm_config,
+                                  max_infra_retries=args.infra_retries, backoff_s=args.retry_backoff))
     report = build_report(results, mode=mode, provider=provider, model=model, base_url=base_url,
                           dataset=args.dataset, dataset_sha=sha, all_cases=all_cases, scoring=scoring, args=args)
     args.report.parent.mkdir(parents=True, exist_ok=True)
