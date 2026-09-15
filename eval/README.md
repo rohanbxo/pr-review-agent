@@ -233,22 +233,18 @@ hygiene section below for the measured trade-off.
 
 ## Context hygiene (trimming old tool results)
 
-The model sees the `LLM_KEEP_TOOL_RESULTS` most recent tool results in full (default 2). Older
-ones become a stub naming the tool, its arguments and the result size. The brief, with every
-patch, is never trimmed. Graph state and `agent_steps` keep the full history. This changes what
-the model sees, so it is recorded as `meta.keep_tool_results`.
+Trimming is **off by default**. With `LLM_KEEP_TOOL_RESULTS=N`, the model sees the N most recent
+tool results in full, and older ones become a stub naming the tool, its arguments and the result
+size. The brief, with every patch, is never trimmed. Graph state and `agent_steps` keep the full
+history. Trimming changes what the model sees, so it is recorded as `meta.keep_tool_results`
+(`"off"` or N) and is part of the comparison rule.
 
-**First measurement:** the same 6 dev cases at temperature 0, untrimmed-with-cache vs trimmed.
-- **Cost:** $0.617 untrimmed, $0.847 trimmed.
-- **Mean input:** 133k tokens untrimmed, 146k trimmed.
-- **GitHub calls:** 47 untrimmed, 58 trimmed. The model re-reads files after they are stubbed:
-  `flask-4580` went from 9 calls to 17.
-- **Cache reads:** 53k per case untrimmed, 16k trimmed. See finding 6 above.
-- **Findings:** bug cases detected went from 2/4 to 4/4, all localised. On the 2 clean cases,
-  one false positive disappeared and another appeared.
-
-At 6 cases this is a direction, not a result. The quality signal is promising, and the cost is
-worse.
+**Finding, direction only (6 cases):** with keep 2 on Haiku at temperature 0, bugs detected went
+from 2/4 to 4/4, all localised, and one false positive disappeared while another appeared. Stale
+40k-token file reads appear to distract the model after it has extracted what it needed. Cost went
+up ($0.617 to $0.847), from re-reads and lost cache hits: trimming and rolling caching are
+structurally incompatible. Full write-up, and what would confirm or refute it:
+[`reports/finding-context-trimming.md`](reports/finding-context-trimming.md).
 
 ## How the pieces keep the eval honest
 
