@@ -32,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "backend") not in sys.path:
     sys.path.insert(0, str(ROOT / "backend"))
 
+from eval import checkpoint as C  # noqa: E402
 from eval import metrics as M  # noqa: E402
 
 DEFAULT_DATASET = ROOT / "eval" / "data" / "v1.jsonl"
@@ -240,7 +241,7 @@ async def _run_agent_case_once(case: dict, llm_factory, timeout_s: float, max_to
 
 async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: float,
                   max_tool_rounds: int | None, llm_config=None, max_infra_retries: int = 5,
-                  backoff_s: float = 30.0) -> list[dict]:
+                  backoff_s: float = 30.0, on_result=None) -> list[dict]:
     """``llm_config`` (an ``app.agent.llm.LLMConfig``) is required for mode ``configured``."""
     if mode == "baseline":
         out = []
@@ -251,6 +252,8 @@ async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: 
             res["duration_s"] = round(time.perf_counter() - t0, 6)
             res["usage"] = {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
             out.append(res)
+            if on_result is not None:
+                on_result(res)
         return out
 
     if mode == "fake":
@@ -285,6 +288,8 @@ async def run_all(cases: list[dict], *, mode: str, concurrency: int, timeout_s: 
         if r["infra_retries"]:
             status += f" after {r['infra_retries']} provider retries"
         print(f"  [{done}/{len(cases)}] {case['id']}: {status} ({r['duration_s']}s)", file=sys.stderr)
+        if on_result is not None:
+            on_result(r)  # persisted before the next case starts
         return r
 
     tasks = [asyncio.ensure_future(one(c)) for c in cases]
@@ -471,6 +476,12 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
                     help="localisation: cap as a fraction of the file's changed-line span")
     ap.add_argument("--narrow-min-lines", type=int, default=M.DEFAULT_NARROW_MIN_LINES,
                     help="localisation: the limit is never below this many lines")
+    ap.add_argument("--checkpoint", type=Path, default=None,
+                    help="per-case JSONL, flushed as each case completes (default: <report>.cases.jsonl)")
+    ap.add_argument("--resume", action="store_true",
+                    help="skip cases already in the checkpoint; refuses if its config differs from this run")
+    ap.add_argument("--from-checkpoint", action="store_true",
+                    help="write the report from the checkpoint without running anything (partial runs)")
     ap.add_argument("--rescore", type=Path, default=None,
                     help="re-apply the current scoring to an existing report's per-case findings; no model "
                          "calls, provenance kept, written to --report")
@@ -540,21 +551,62 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: dataset {args.dataset} not found (python -m eval.build_dataset)", file=sys.stderr)
         return 2
     all_cases, sha = load_dataset(args.dataset)
-    cases = select_cases(all_cases, args.splits, args.limit)
-    print(f"running {len(cases)} cases in mode={mode} provider={provider} model={model}", file=sys.stderr)
+    selected = select_cases(all_cases, args.splits, args.limit)
+    cases = selected
 
-    try:
-        results = asyncio.run(run_all(cases, mode=mode, concurrency=args.concurrency, timeout_s=args.case_timeout,
-                                      max_tool_rounds=args.max_tool_rounds, llm_config=llm_config,
-                                      max_infra_retries=args.infra_retries, backoff_s=args.retry_backoff))
-    except ProviderAccountError as exc:
-        print(f"\nABORTED: the provider refused the account ({exc}). Out of credits, or the key is invalid. "
-              "Remaining cases were cancelled and NO report was written.", file=sys.stderr)
-        return 3
+    # Per-case checkpoint: a run costs real money over a long time, so nothing waits for the end.
+    ckpt_path = args.checkpoint or args.report.with_suffix(".cases.jsonl")
+    config = C.fingerprint(mode=mode, dataset_sha=sha, provider=provider, model=model, temperature=temperature,
+                           keep_tool_results=keep_tool_results, scoring=scoring.as_dict())
+    ckpt = C.Checkpoint(ckpt_path, config)
+    done_results: list[dict] = []
+    if args.resume or args.from_checkpoint:
+        try:
+            done_results = ckpt.load_for_resume()
+        except C.CheckpointMismatch as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        done_ids = {r["id"] for r in done_results}
+        cases = [c for c in cases if c["id"] not in done_ids]
+        print(f"resuming from {ckpt_path}: {len(done_results)} done, {len(cases)} to run", file=sys.stderr)
+    elif ckpt_path.exists() and mode != "baseline":
+        print(f"error: {ckpt_path} already exists. --resume continues that run, --from-checkpoint reports on "
+              "it, or delete it to start over.", file=sys.stderr)
+        return 2
+
+    if args.from_checkpoint:
+        if not done_results:
+            print(f"error: {ckpt_path} has no case results to report on", file=sys.stderr)
+            return 2
+        results = done_results
+    else:
+        print(f"running {len(cases)} cases in mode={mode} provider={provider} model={model}", file=sys.stderr)
+        try:
+            with ckpt:
+                ckpt.open(resuming=bool(done_results))
+                new_results = asyncio.run(run_all(
+                    cases, mode=mode, concurrency=args.concurrency, timeout_s=args.case_timeout,
+                    max_tool_rounds=args.max_tool_rounds, llm_config=llm_config,
+                    max_infra_retries=args.infra_retries, backoff_s=args.retry_backoff, on_result=ckpt.append))
+        except ProviderAccountError as exc:
+            print(f"\nABORTED: the provider refused the account ({exc}). Out of credits, or the key is invalid.\n"
+                  f"Completed cases are safe in {ckpt_path}. Report on them with --from-checkpoint, or add "
+                  "credits and --resume.", file=sys.stderr)
+            return 3
+        results = done_results + new_results
+
+    # Dataset order, so a resumed report is byte-identical to an uninterrupted one.
+    order = {c["id"]: i for i, c in enumerate(all_cases)}
+    results.sort(key=lambda r: order.get(r["id"], len(order)))
     report = build_report(results, mode=mode, provider=provider, model=model, base_url=base_url,
                           dataset=args.dataset, dataset_sha=sha, all_cases=all_cases, scoring=scoring, args=args,
                           temperature=temperature, prompt_cache=prompt_cache, keep_tool_results=keep_tool_results,
                           provider_routing=provider_routing)
+    if len(results) < len(selected):
+        report["meta"]["partial_run"] = {"cases_reported": len(results), "cases_selected": len(selected),
+                                         "checkpoint": str(ckpt_path)}
+        report["WARNING"] = (f"PARTIAL RUN: {len(results)} of {len(selected)} selected cases. Resume with "
+                             "--resume; every rate below is over the cases present.")
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(summary_table(report))

@@ -11,3 +11,4 @@ infra/langfuse/docker-compose.yml
 eval/data/*.jsonl
 !eval/data/sample.jsonl
 eval/reports/sample-baseline.json
+eval/reports/*.cases.jsonl

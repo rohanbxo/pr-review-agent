@@ -72,6 +72,17 @@ Other flags: `--splits injected reverted`, `--limit N` (round-robin across split
 `--narrow-max-lines N` (default 30), `--narrow-span-fraction F` (default 0.25), `--narrow-min-lines N`
 (default 3).
 
+**Runs checkpoint per case.** Every completed case is appended to `<report>.cases.jsonl` and
+flushed to disk immediately, so an interrupted run (OOM kill, Ctrl-C, dropped connection) keeps
+everything it already paid for.
+- `--resume` skips cases already in the checkpoint and finishes the rest. It refuses unless the
+  checkpoint's dataset hash, scoring, provider, model, temperature and trimming match this run: a
+  report stitched from two configs would be worse than no report.
+- `--from-checkpoint` writes a report from whatever is in the checkpoint without running anything.
+  A short report is marked `meta.partial_run` and carries a `WARNING`.
+- An existing checkpoint is never silently appended to: pass `--resume`, `--from-checkpoint`, or
+  delete it.
+
 `--rescore REPORT --report OUT` re-applies the current scoring to an existing report's stored
 findings. It calls no model and is exact, since scoring is a pure function of the findings.
 Provider, model, dataset hash and cases carry over unchanged. `meta.rescored_from` records the
