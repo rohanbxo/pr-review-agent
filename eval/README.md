@@ -160,52 +160,33 @@ is `none`.
 
 ## Results so far
 
-**Dev split, anthropic/claude-haiku-4.5 via OpenRouter** (`reports/dev.json`, rescored under
-scoring v3 in `reports/dev-nocache-v3.json`). This run predates temperature 0.
-- **False positives on clean:** 17.1% reported (6/35).
-- **Detection:** 86.7% on injected, 60.0% on reverted.
-- **Localisation:** 19/19 of detected bugs.
-- **Parse errors:** 0.
+**Reference run (PARTIAL): `anthropic/claude-haiku-4.5` via OpenRouter, pinned to the Anthropic
+host, temperature 0, rolling prompt cache, no trimming, scoring v3.**
+`reports/v1-partial.json`, with the matching baseline over the same cases in
+`reports/v1-partial-baseline.json`.
 
-**The reported false-positive rate overstates the agent's mistakes. 3 of the 6 flags were
-genuine bugs:**
-- `rich-2635` and `dateutil-681` have matching upstream fixes.
-- `werkzeug-324` is a real, older defect that upstream later fixed.
+**76 of 215 cases: all 40 injected, all 25 reverted, 11 of 150 clean.** The machine ran out of
+memory repeatedly and the run was killed; per-case checkpointing kept everything paid for
+(`reports/v1.cases.jsonl`, resume with `--resume`). Every bug-split number below is complete. The
+false-positive rate is over 11 clean cases and is NOT quotable.
 
-**The corrected false-positive rate is 8.6% (3/35), or 11.4% (4/35) if `werkzeug-324` isn't
-credited.** Of the 6 misses, 2 reported nothing and 4 flagged something else that was wrong. That
-second kind is the worse failure. See [`reports/dev-case-review.md`](reports/dev-case-review.md)
-for every verdict, the claim checked, and the upstream fix commits. The metric itself is not
-adjusted: "clean" means merged upstream, and read the flagged clean cases before tuning the FP
-rate towards zero.
+- **Parse errors: 0/76.** No synthesis failure, repaired or otherwise.
+- **Detection (share of all bugs):** injected 85.0% (34/40), reverted 76.0% (19/25). By kind:
+  transposed_args 100%, flipped_comparison 90%, off_by_one_range_len 80%, removed_none_guard 70%.
+- **Localisation (share of detected):** 92.5% overall; reverted 100%, injected 88.2%.
+- **False positives on clean: 7 of 11 (63.6%)** — far above the 17.1% seen on the 60-case dev run,
+  which was at default temperature. Whether that is the temperature change, these particular clean
+  cases, or noise at n=11 is unresolved; the remaining 139 cases decide it.
+- **Cost:** mean 129k tokens/case (of which 53k cache reads), $0.097/case, $7.38 for 76 cases.
+  Mean 23.6s per case, p95 45.4s.
 
-## Rules for interpreting numbers
+Against the baseline over the same 76 cases: the baseline detects 100% and localises 0%, with a
+100% false-positive rate. The agent gives up some detection (85% / 76%) to localise 92.5% of what
+it finds, with far fewer false positives.
 
-- **`injected` is a regression harness; `reverted` is the quality number.** Injected bugs are
-  far more uniform than real ones — a model can learn the shape of "comparison flipped" in a way
-  it cannot learn a real bug. Use `injected` to catch prompt changes that break something;
-  quote `reverted` (real historical bugs, re-introduced) when asked how good the agent is.
-- **Detection rate alone is a vanity metric.** An agent that reports eight findings per PR
-  catches most bugs and is unusable. Detection is only meaningful next to the FP rate.
-- **If the agent does not clearly beat the baseline, the LLM is not earning its cost.** The
-  baseline flags every changed file, whole file, as `medium`. By construction it has **100%
-  detection, 100% FP on `clean`, and 0% localisation** (`eval/reports/baseline.json`). Detection
-  alone can never beat it. The agent earns its cost only through a far lower FP rate *and* a
-  localisation rate well above 0% — otherwise `git diff --stat` does the same job for free.
-- `clean` means "merged upstream", not "verified bug-free". Some clean PRs contain real bugs
-  later fixed; a small FP rate floor is expected. Read the flagged clean cases before tuning to
-  zero.
-
-## Why tolerance = 5 lines
-
-Findings are compared on file + line-range overlap, widened by 5 lines each side.
-Tolerance **0** measures line-number formatting (off-by-one in how the model counts, a range
-that starts at the `if` rather than the comparison) instead of whether it found the bug.
-Tolerance **50** would let a nearby shrug count. 5 lines is roughly "the same statement or its
-immediate neighbours". Tolerance only governs *detection*, the overlap test. A wide finding
-overlaps anything, which is why whole-file shrugs are handled separately by the narrow-range test
-in *localisation*, not by tightening tolerance. All three thresholds are flags, so you can check a
-result is not an artefact of the choice, but reports are only comparable at the same values.
+**3 of 6 flags on clean PRs in the dev run were genuine upstream bugs**, two with matching upstream
+fixes, so a measured false-positive rate overstates the agent's mistakes. Every verdict is in
+[`reports/dev-case-review.md`](reports/dev-case-review.md).
 
 ## Prompt caching on OpenRouter → Claude: measured, not assumed
 
