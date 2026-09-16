@@ -223,6 +223,10 @@ async def _run_agent_case_once(case: dict, llm_factory, timeout_s: float, max_to
         if isinstance(exc, SynthesisError):
             res["parse_failures"] = exc.parse_failures
             res["synthesis_failed"] = True
+        # A failed case still cost tokens; never report it as free.
+        partial = getattr(exc, "partial_usage", None)
+        if partial:
+            res["usage"] = dict(partial)
         res["error"] = f"{type(exc).__name__}: {exc}"[:2000]
         res["traceback"] = traceback.format_exc(limit=5)[-4000:]
         res["duration_s"] = round(time.perf_counter() - t0, 3)

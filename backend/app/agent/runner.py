@@ -126,6 +126,9 @@ async def run_review(
             run = await session.get(ReviewRun, run_id)
             run.status = RunStatus.failed
             run.error = f"{type(exc).__name__}: {exc}"[:4000]
+            partial = getattr(exc, "partial_usage", None)
+            if partial:  # a failed review is billed: keep what it cost
+                run.usage = {**partial, "partial": True}
             session.add(AgentStep(
                 run_id=run_id, seq=_next_seq(), kind=StepKind.error, name=type(exc).__name__,
                 input=None, output={"error": run.error}, latency_ms=None,

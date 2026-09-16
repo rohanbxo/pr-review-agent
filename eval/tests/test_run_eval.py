@@ -349,3 +349,33 @@ def test_fake_llm_goes_through_real_graph_client_and_transport():
     assert res["findings"] == []
     assert res["blocked_calls"] == []
     assert res["github_calls"] >= 3  # PR + files (fetch_context) + tool calls
+
+
+def test_failed_case_records_the_tokens_it_burned():
+    """Cost must not understate spend: a case that ends in SynthesisError still reports usage."""
+    from eval import metrics as M
+
+    original = R.make_fake_llm
+
+    def factory(case):
+        from app.agent.graph import SynthesisError
+
+        llm = original(case)
+
+        class Failing(type(llm)):
+            def with_structured_output(self, schema, *, include_raw=False, **kwargs):
+                from langchain_core.runnables import RunnableLambda
+
+                def boom(_messages):
+                    raise SynthesisError("nope", parse_failures=2, attempts=2,
+                                         usage={"input_tokens": 500, "output_tokens": 40, "total_tokens": 540,
+                                                "cache_read_input_tokens": 0, "cache_creation_input_tokens": 0,
+                                                "cost_usd": 0.02})
+                return RunnableLambda(boom)
+
+        return Failing()
+
+    res = asyncio.run(R.run_agent_case(CASE, factory, timeout_s=30, max_tool_rounds=None))
+    assert res["error"] and res["usage"]["input_tokens"] == 500 and res["usage"]["cost_usd"] == 0.02
+    cost = M.cost([res])
+    assert cost["total_cost_usd"] == 0.02 and cost["mean_input_tokens"] == 500

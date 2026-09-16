@@ -59,10 +59,14 @@ _EMPTY_USAGE: dict[str, Any] = {
 class SynthesisError(RuntimeError):
     """synthesize could not produce a valid ReviewResult after the repair retry."""
 
-    def __init__(self, message: str, *, parse_failures: int = 0, attempts: int = 0) -> None:
+    def __init__(self, message: str, *, parse_failures: int = 0, attempts: int = 0,
+                 usage: dict | None = None) -> None:
         super().__init__(message)
         self.parse_failures = parse_failures
         self.attempts = attempts
+        # Tokens the failed synthesize attempts cost. A failed review is still billed, so the
+        # eval's cost numbers must include it (see review_pull_request's partial_usage).
+        self.usage = usage or {}
 
 
 @dataclass
@@ -236,7 +240,7 @@ def build_graph(*, client: ReadOnlyGitHubClient, llm: BaseChatModel, max_tool_ro
                 )]
         if not isinstance(parsed, ReviewResult):
             raise SynthesisError(f"synthesize output failed validation after repair: {error[:500]}",
-                                 parse_failures=failures, attempts=attempts)
+                                 parse_failures=failures, attempts=attempts, usage=usage)
 
         changed = set(state.get("changed_files") or [])
         kept, dropped = [], []
@@ -328,36 +332,46 @@ async def review_pull_request(
     rounds = 0
     pending_tool_calls: list[dict] = []
 
-    async for chunk in graph.astream({"repo": repo, "pr_number": pr_number}, config, stream_mode="updates"):
-        for node, update in chunk.items():
-            if node.startswith("__"):
-                continue
-            now = time.perf_counter()
-            latency_ms = int((now - t_prev) * 1000)
-            t_prev = now
-            update = update or {}
-            if "usage" in update:
-                usage = _merge_usage(usage, update["usage"])
-            step_input: dict | None = None
-            if node == "fetch_context":
-                step_input = {"repo": repo, "pr_number": pr_number}
-            elif node == "analyze":
-                step_input = {"round": rounds}
-                msgs = update.get("messages") or []
-                pending_tool_calls = (
-                    [{"name": t["name"], "args": t.get("args")} for t in msgs[-1].tool_calls]
-                    if msgs and isinstance(msgs[-1], AIMessage) else []
-                )
-            elif node == "tools":
-                rounds += 1
-                step_input = {"tool_calls": pending_tool_calls}
-            elif node == "synthesize":
-                result = update.get("result")
-                dropped = update.get("dropped_findings") or []
-                parse_failures = int(update.get("parse_failures") or 0)
-                synthesis_attempts = int(update.get("synthesis_attempts") or 0)
-            if on_step is not None:
-                await on_step(StepEvent(name=node, input=step_input, output=_jsonable(update), latency_ms=latency_ms))
+    try:
+        stream = graph.astream({"repo": repo, "pr_number": pr_number}, config, stream_mode="updates")
+        async for chunk in stream:
+            for node, update in chunk.items():
+                if node.startswith("__"):
+                    continue
+                now = time.perf_counter()
+                latency_ms = int((now - t_prev) * 1000)
+                t_prev = now
+                update = update or {}
+                if "usage" in update:
+                    usage = _merge_usage(usage, update["usage"])
+                step_input: dict | None = None
+                if node == "fetch_context":
+                    step_input = {"repo": repo, "pr_number": pr_number}
+                elif node == "analyze":
+                    step_input = {"round": rounds}
+                    msgs = update.get("messages") or []
+                    pending_tool_calls = (
+                        [{"name": t["name"], "args": t.get("args")} for t in msgs[-1].tool_calls]
+                        if msgs and isinstance(msgs[-1], AIMessage) else []
+                    )
+                elif node == "tools":
+                    rounds += 1
+                    step_input = {"tool_calls": pending_tool_calls}
+                elif node == "synthesize":
+                    result = update.get("result")
+                    dropped = update.get("dropped_findings") or []
+                    parse_failures = int(update.get("parse_failures") or 0)
+                    synthesis_attempts = int(update.get("synthesis_attempts") or 0)
+                if on_step is not None:
+                    await on_step(StepEvent(name=node, input=step_input, output=_jsonable(update),
+                                            latency_ms=latency_ms))
+    except BaseException as exc:
+        # A failed review is billed like any other. Carry the tokens spent so far (streamed node
+        # updates + whatever the failing node reports) out with the exception, so callers can
+        # record real cost instead of zero.
+        exc.partial_usage = _merge_usage(usage, getattr(exc, "usage", None))  # type: ignore[attr-defined]
+        exc.partial_calls = list(client.calls)  # type: ignore[attr-defined]
+        raise
 
     if result is None:
         raise SynthesisError("graph finished without a synthesize result")

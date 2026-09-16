@@ -333,3 +333,28 @@ async def test_graph_trims_old_tool_results_in_model_view_but_keeps_full_state(m
 
     tool_steps = [s for s in steps if s.name == "tools"]
     assert all("Earlier tool result removed" not in json.dumps(s.output) for s in tool_steps)  # state is full
+
+
+async def test_failed_synthesis_still_reports_what_it_cost():
+    """A failed review is billed. The tokens of the analyze rounds AND of the failed synthesize
+    attempts come out with the exception, so callers never record a failure as free."""
+    llm = ScriptedChatModel(script=sequence_script(ai("notes"), ai("not json"), ai("still not json")))
+    async with client_for(CASE) as gh:
+        with pytest.raises(SynthesisError) as info:
+            await review_pull_request(repo="acme/calc", pr_number=7, client=gh, llm=llm)
+    exc = info.value
+    # 1 analyze (100/20) + 2 synthesize attempts (100/20 each, the fake bills every call)
+    assert exc.partial_usage["input_tokens"] == 300
+    assert exc.partial_usage["output_tokens"] == 60
+    assert exc.usage["input_tokens"] == 200  # the synthesize node's own share
+    assert [c.path for c in exc.partial_calls][:2] == ["/repos/acme/calc/pulls/7", "/repos/acme/calc/pulls/7/files"]
+
+
+async def test_runner_records_partial_usage_on_failure(sessionmaker, no_token):
+    run_id = await _make_run(sessionmaker)
+    llm = ScriptedChatModel(script=sequence_script(ai("notes"), ai("not json"), ai("still not json")))
+    await runner_mod.run_review(run_id, llm=llm, transport=mock_transport_for_case(CASE))
+    async with sessionmaker() as s:
+        run = await s.get(ReviewRun, run_id)
+        assert run.status is RunStatus.failed
+        assert run.usage["input_tokens"] == 300 and run.usage["partial"] is True
