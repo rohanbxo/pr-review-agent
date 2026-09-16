@@ -160,33 +160,43 @@ is `none`.
 
 ## Results so far
 
-**Reference run (PARTIAL): `anthropic/claude-haiku-4.5` via OpenRouter, pinned to the Anthropic
-host, temperature 0, rolling prompt cache, no trimming, scoring v3.**
-`reports/v1-partial.json`, with the matching baseline over the same cases in
-`reports/v1-partial-baseline.json`.
+**Reference run: `anthropic/claude-haiku-4.5` via OpenRouter, pinned to the Anthropic host,
+temperature 0, rolling prompt cache, no context trimming, scoring v3.**
+[`reports/v1.json`](reports/v1.json), with the baseline over exactly the same cases in
+[`reports/v1-baseline.json`](reports/v1-baseline.json).
 
-**76 of 215 cases: all 40 injected, all 25 reverted, 11 of 150 clean.** The machine ran out of
-memory repeatedly and the run was killed; per-case checkpointing kept everything paid for
-(`reports/v1.cases.jsonl`, resume with `--resume`). Every bug-split number below is complete. The
-false-positive rate is over 11 clean cases and is NOT quotable.
+**179 of 215 cases: all 40 injected, all 25 reverted, 114 of 150 clean.** The run stopped when the
+OpenRouter credit ran out; per-case checkpointing kept every completed case
+(`reports/v1.cases.jsonl`, finish with `--resume`). Both bug splits are complete, so detection and
+localisation are final. The false-positive rate is over 114 of 150 clean cases.
 
-- **Parse errors: 0/76.** No synthesis failure, repaired or otherwise.
-- **Detection (share of all bugs):** injected 85.0% (34/40), reverted 76.0% (19/25). By kind:
-  transposed_args 100%, flipped_comparison 90%, off_by_one_range_len 80%, removed_none_guard 70%.
-- **Localisation (share of detected):** 92.5% overall; reverted 100%, injected 88.2%.
-- **False positives on clean: 7 of 11 (63.6%)** — far above the 17.1% seen on the 60-case dev run,
-  which was at default temperature. Whether that is the temperature change, these particular clean
-  cases, or noise at n=11 is unresolved; the remaining 139 cases decide it.
-- **Cost:** mean 129k tokens/case (of which 53k cache reads), $0.097/case, $7.38 for 76 cases.
-  Mean 23.6s per case, p95 45.4s.
+**0 parse errors in 179 cases.** No synthesis failure, repaired or otherwise.
 
-Against the baseline over the same 76 cases: the baseline detects 100% and localises 0%, with a
-100% false-positive rate. The agent gives up some detection (85% / 76%) to localise 92.5% of what
-it finds, with far fewer false positives.
+| | agent | baseline (same cases) |
+|---|---|---|
+| False positives on clean (114) | **28.9%** (33) | 100% |
+| Detection, injected | 85.0% (34/40) | 100% |
+| Detection, reverted | 76.0% (19/25) | 100% |
+| Localisation of detected, injected | 88.2% (30/34) | 0% |
+| Localisation of detected, reverted | **100%** (19/19) | 0% |
 
-**3 of 6 flags on clean PRs in the dev run were genuine upstream bugs**, two with matching upstream
-fixes, so a measured false-positive rate overstates the agent's mistakes. Every verdict is in
-[`reports/dev-case-review.md`](reports/dev-case-review.md).
+Detection by bug kind: transposed_args 100%, flipped_comparison 90%, off_by_one_range_len 80%,
+removed_none_guard 70%, reverted_fix 76%.
+
+**Cost:** 126k tokens per case (48k of them cache reads), $0.099 per case, $17.65 for 179 cases as
+reported by the provider ($19.52 charged to the account, which includes retries and eight cases
+that were run twice when two runners briefly overlapped). Median 21.0s per case, p95 56.2s.
+
+**Caveats worth stating with the numbers.**
+- One clean case (`click-1801-clean`) hung and hit the 600s case timeout while the machine was
+  thrashing on memory. It counts as an error and therefore as a false positive, so the true FP
+  count is 32 or 33 of 114.
+- The FP rate is a share of *flagged* clean PRs, not of wrong flags. In the dev run, human review
+  found **3 of 6 flags were genuine upstream bugs**, two with matching upstream fixes
+  ([`reports/dev-case-review.md`](reports/dev-case-review.md)). The 33 flags here have not been
+  reviewed one by one; expect the same pattern, so the *mistake* rate is lower than 28.9%.
+- `reverted` is the quality number to quote: 76% of real historical bugs found, every one of them
+  pinned to the right lines.
 
 ## Prompt caching on OpenRouter → Claude: measured, not assumed
 
