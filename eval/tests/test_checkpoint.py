@@ -163,3 +163,19 @@ def test_header_is_required(tmp_path):
     path.write_text('{"id": "c0"}\n', encoding="utf-8")
     with pytest.raises(C.CheckpointMismatch, match="no checkpoint header"):
         C.Checkpoint(path, {"mode": "fake"}).load_for_resume()
+
+
+def test_resume_does_not_parse_finished_cases_in_full(tmp_path, llm_env):
+    """Memory: on a resume the finished cases are stubs, not full patches and file contents."""
+    llm_env()
+    ds = _dataset(tmp_path, cases(4))
+    assert R.main(["--llm", "fake", "--dataset", str(ds), "--report", str(tmp_path / "lean-fake.json"),
+                   "--limit", "2", "--concurrency", "1"]) == 0
+    done = {r["id"] for r in C.Checkpoint(tmp_path / "lean-fake.cases.jsonl", {}).read()[1]}
+    loaded, _ = R.load_dataset(ds, skip_ids=done)
+    by_id = {c["id"]: c for c in loaded}
+    assert set(by_id) == {f"c{i}" for i in range(4)}
+    for cid in done:
+        assert set(by_id[cid]) == {"id", "split"}          # stub only
+    for cid in set(by_id) - done:
+        assert by_id[cid]["files"][0]["content"]           # still complete for the cases that run

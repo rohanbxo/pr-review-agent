@@ -41,10 +41,26 @@ PROTECTED_REPORTS = {"v1.json", "baseline.json"}
 
 
 # --------------------------------------------------------------------------- dataset
-def load_dataset(path: Path) -> tuple[list[dict], str]:
-    raw = path.read_bytes()
-    cases = [json.loads(line) for line in raw.decode("utf-8").splitlines() if line.strip()]
-    return cases, hashlib.sha256(raw).hexdigest()
+def load_dataset(path: Path, *, skip_ids: set[str] | None = None) -> tuple[list[dict], str]:
+    """Cases in file order plus the file's sha256.
+
+    ``skip_ids`` reduces those cases to ``{id, split}`` stubs instead of parsing them in full. On a
+    resume the finished cases are never needed again, and their patches and file contents are most
+    of the dataset's weight -- this run was killed three times for memory on a loaded machine.
+    Everything except ``run_agent_case`` needs only the id and split."""
+    hasher = hashlib.sha256()
+    cases: list[dict] = []
+    with path.open("rb") as fh:
+        for raw_line in fh:
+            hasher.update(raw_line)
+            line = raw_line.decode("utf-8").strip()
+            if not line:
+                continue
+            case = json.loads(line)
+            if skip_ids and case["id"] in skip_ids:
+                case = {"id": case["id"], "split": case["split"]}
+            cases.append(case)
+    return cases, hasher.hexdigest()
 
 
 def select_cases(cases: list[dict], splits: list[str] | None, limit: int | None) -> list[dict]:
@@ -550,12 +566,16 @@ def main(argv: list[str] | None = None) -> int:
     if not args.dataset.exists():
         print(f"error: dataset {args.dataset} not found (python -m eval.build_dataset)", file=sys.stderr)
         return 2
-    all_cases, sha = load_dataset(args.dataset)
+    # Per-case checkpoint: a run costs real money over a long time, so nothing waits for the end.
+    ckpt_path = args.checkpoint or args.report.with_suffix(".cases.jsonl")
+    # Read the checkpoint first so finished cases can be loaded as stubs instead of in full.
+    resume_ids: set[str] = set()
+    if (args.resume or args.from_checkpoint) and ckpt_path.exists():
+        resume_ids = {r["id"] for r in C.Checkpoint(ckpt_path, {}).read()[1]}
+    all_cases, sha = load_dataset(args.dataset, skip_ids=resume_ids)
     selected = select_cases(all_cases, args.splits, args.limit)
     cases = selected
 
-    # Per-case checkpoint: a run costs real money over a long time, so nothing waits for the end.
-    ckpt_path = args.checkpoint or args.report.with_suffix(".cases.jsonl")
     config = C.fingerprint(mode=mode, dataset_sha=sha, provider=provider, model=model, temperature=temperature,
                            keep_tool_results=keep_tool_results, scoring=scoring.as_dict())
     ckpt = C.Checkpoint(ckpt_path, config)
