@@ -179,3 +179,18 @@ def test_resume_does_not_parse_finished_cases_in_full(tmp_path, llm_env):
         assert set(by_id[cid]) == {"id", "split"}          # stub only
     for cid in set(by_id) - done:
         assert by_id[cid]["files"][0]["content"]           # still complete for the cases that run
+
+
+def test_duplicate_case_entries_are_collapsed(tmp_path):
+    """Two runners appending to one checkpoint must not double-count a case in the report."""
+    path = tmp_path / "dupes.cases.jsonl"
+    cfg = {"mode": "fake"}
+    with C.Checkpoint(path, cfg) as ck:
+        ck.open(resuming=False)
+        ck.append({"id": "c0", "split": "clean", "findings": []})
+        ck.append({"id": "c1", "split": "clean", "findings": []})
+        ck.append({"id": "c0", "split": "clean", "findings": ["second run"]})  # duplicate
+    header, results = C.Checkpoint(path, cfg).read()
+    assert header == cfg
+    assert [r["id"] for r in results] == ["c0", "c1"]
+    assert next(r for r in results if r["id"] == "c0")["findings"] == ["second run"]  # last wins

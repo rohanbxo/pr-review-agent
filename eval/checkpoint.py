@@ -41,10 +41,15 @@ class Checkpoint:
 
     # -- reading -------------------------------------------------------------------------
     def read(self) -> tuple[dict | None, list[dict]]:
+        """Header plus one result per case id, last write wins.
+
+        Deduplication matters: two runners appending to the same checkpoint (it happened -- a
+        killed loop kept running beside its replacement) would otherwise put the same case into
+        the report twice and skew every rate."""
         if not self.path.exists():
             return None, []
         header: dict | None = None
-        results: list[dict] = []
+        by_id: dict[str, dict] = {}
         for line in self.path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
@@ -54,9 +59,9 @@ class Checkpoint:
                 continue  # a torn final line from a hard kill: ignore it
             if HEADER_KEY in obj:
                 header = obj[HEADER_KEY]
-            else:
-                results.append(obj)
-        return header, results
+            elif "id" in obj:
+                by_id[obj["id"]] = obj
+        return header, list(by_id.values())
 
     def load_for_resume(self) -> list[dict]:
         header, results = self.read()
