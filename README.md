@@ -1,12 +1,52 @@
 # PR Review Agent
 
 Point an agent at a GitHub pull request and get a structured review back: findings anchored to
-specific files and line ranges, an empty review when nothing is wrong, and a visible record of
-everything the agent read. The agent has **read-only** GitHub access, enforced at the transport.
-Every run is stored in Postgres and traced to a self-hosted Langfuse.
+real files and line ranges, an empty review when nothing is wrong, and a visible record of
+everything the agent read — with **read-only** GitHub access enforced at the transport, not in the
+prompt.
 
-The goal is not "generate review comments". It is to be **trusted**. The eval harness in
-[`eval/`](eval/) exists to measure whether it is.
+The goal is not "generate review comments". It is to be **trusted**, which means knowing how often
+it is wrong. The harness in [`eval/`](eval/) measures that.
+
+## Results
+
+`anthropic/claude-haiku-4.5` via OpenRouter (pinned to the Anthropic host), temperature 0, rolling
+prompt cache, no context trimming, scoring v3, on all **215 dataset cases**:
+[`eval/reports/v1.json`](eval/reports/v1.json). The baseline over the same cases is
+[`v1-baseline.json`](eval/reports/v1-baseline.json).
+
+| | agent | baseline |
+|---|---|---|
+| Synthesis parse errors | **0 / 215** | — |
+| Flagged a clean PR (149 cases) | 28.9% (43) | 100% |
+| Detection — injected (40) | 85.0% | 100% |
+| Detection — reverted (25) | 76.0% | 100% |
+| Localisation of detected — injected | 88.2% | 0% |
+| Localisation of detected — reverted | **100%** | 0% |
+| Cost / time per case | $0.099, median 20s | — |
+
+The baseline flags every changed file, whole file, at `medium`: it "detects" everything, localises
+nothing, and cries wolf on every clean PR. The agent gives up 15–24 points of detection to pin
+92.5% of what it finds, and stays quiet on 71% of clean PRs.
+
+**28.9% is the share of clean PRs flagged, not the share of wrong flags.** 15 of the 43 flags were
+reviewed by hand against upstream history
+([`clean-flag-review.md`](eval/reports/clean-flag-review.md), seed 20260917): **4 were genuine bugs
+in merged code** (3 with a matching upstream fix), 10 were defensible but wrong, 1 was nonsense.
+That puts the wrong-flag rate at 73% of flags (95% CI 48–89%), i.e. roughly 21% of clean PRs get a
+wrong flag. The same pattern appeared in the dev run: 3 of 6 flags were real bugs
+([`dev-case-review.md`](eval/reports/dev-case-review.md)).
+
+Quote `reverted` (real historical bugs, re-introduced) as the quality number: 76% found, every one
+localised. One clean case timed out and never produced a review; it is reported as an
+infrastructure failure, not a false positive.
+
+Two findings from building this, both measured rather than assumed:
+- **[Context trimming](eval/reports/finding-context-trimming.md)** — dropping stale tool results
+  took detection from 2/4 to 4/4 on a 6-case probe. Direction only; it needs a full run.
+- **[Prompt caching on OpenRouter → Claude](eval/README.md#prompt-caching-on-openrouter--claude-measured-not-assumed)**
+  — six probe-backed behaviours, including that a top-level `cache_control` is silently disabled by
+  any explicit breakpoint, and that nothing under 4,096 tokens is cached.
 
 ## Architecture
 
@@ -42,6 +82,33 @@ once nginx strips the prefix. **nginx sends all of `/api/auth/*` to Next.js, and
 by design (the Next.js server calls `API_INTERNAL_URL` directly), so leaving it off the public
 edge takes away attack surface and costs nothing. `GET /auth/me` is called the same way by the
 Next.js server. The reasoning is also written up in [`infra/nginx/nginx.conf`](infra/nginx/nginx.conf).
+
+## Eval
+
+See [`eval/`](eval/). Three JSONL splits (`injected`, `reverted`, `clean`); each case carries its
+own patches, so eval runs never hit GitHub. Metrics are always reported together, in this order:
+1. **False-positive rate on `clean`.**
+2. **Detection rate** by split and by bug kind: right file, overlapping the bug within 5 lines.
+3. **Localisation rate**, as a share of detected bugs: the detecting finding's range is also narrow.
+4. **Cost.**
+
+```sh
+python -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json   # full run
+python -m eval.run_eval --baseline                                                    # the bar to beat
+python -m eval.dev_split --verify && python -m eval.run_eval --dataset eval/data/dev.jsonl --report eval/reports/dev.json
+```
+
+Runs checkpoint per case to `<report>.cases.jsonl` and resume with `--resume`, so an interrupted
+run keeps what it paid for. Every report opens with a `parse_errors` block: if synthesis output
+fails to parse often, every other number is noise.
+
+**Two agent reports compare only if `dataset_sha256`, `meta.scoring`, `meta.provider`,
+`meta.model` and `meta.temperature` all match.** Temperature defaults to 0, because at anything
+higher a case-level difference between two runs is sampling noise. The dev subset's 35 clean cases
+give roughly ±8% slop on the FP rate: good for "did this change help", not for a headline number.
+
+`injected` is a regression harness for prompt changes, because injected bugs are more uniform than
+real ones.
 
 ## Quick start
 
@@ -192,36 +259,6 @@ without a published MinIO port. This agent sends text only.
 
 `agent_steps` in Postgres duplicates the trace on purpose. Langfuse has its own retention and is
 for debugging. The table is the record you keep.
-
-## Eval
-
-See [`eval/`](eval/). The dataset has three JSONL splits (`injected`, `reverted`, `clean`). Each
-case carries its own patches, so eval runs never hit GitHub. Metrics are reported together and
-in this order:
-1. **False-positive rate on `clean`.**
-2. **Detection rate** by split and by bug kind: right file, overlapping the bug within 5 lines.
-3. **Localisation rate**, as a share of detected bugs: the detecting finding's range is also narrow.
-4. **Cost.**
-
-`--baseline` flags every changed file, whole file, as medium. It scores 100% detection, 100% FP
-and 0% localisation (`eval/reports/baseline.json`). The agent has to beat it on FP rate and
-localisation; if it doesn't, the LLM is not earning its cost.
-
-```sh
-python -m eval.run_eval --dataset eval/data/v1.jsonl --report eval/reports/v1.json   # full run
-python -m eval.dev_split --verify && python -m eval.run_eval --dataset eval/data/dev.jsonl --report eval/reports/dev.json
-```
-
-Every report opens with a `parse_errors` block. If synthesis output fails to parse often, every
-other number is noise.
-
-**Two agent reports compare only if `dataset_sha256`, `meta.scoring`, `meta.provider`,
-`meta.model` and `meta.temperature` all match.** Temperature defaults to 0. So a Haiku run is never silently compared with a Sonnet run, and a
-60-case dev run never with the full run. The dev subset's 35 clean cases give roughly ±8% slop on
-the FP rate: good for "did this change help", not for a headline number.
-
-Quote `reverted` as the quality number. `injected` is a regression harness for prompt changes,
-because injected bugs are more uniform than real ones.
 
 ## Known gaps
 

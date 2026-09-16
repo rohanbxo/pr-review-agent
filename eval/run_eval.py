@@ -428,8 +428,9 @@ def summary_table(report: dict) -> str:
         f"dataset {m['dataset']}  sha256={m['dataset_sha256'][:12]}  evaluated={m['evaluated_counts']}",
         "",
         "1. False-positive rate on clean (any medium+ finding)",
-        f"   {_pct(fp['rate'])}   ({fp['false_positives']}/{fp['cases']}; errored counted as FP: "
-        f"{fp['errored_counted_as_fp']}; mean medium+ findings/clean case: "
+        f"   {_pct(fp['rate'])}   ({fp['false_positives']}/{fp['cases']}; agent errors counted as FP: "
+        f"{fp['errored_counted_as_fp']}; infrastructure failures excluded: "
+        f"{fp.get('infrastructure_failures_excluded', 0)}; mean medium+ findings/clean case: "
         f"{fp['mean_medium_plus_findings_per_clean_case']})",
         "",
         "2. Detection rate, share of ALL bugs (medium+, right file, overlaps bug within tolerance)",

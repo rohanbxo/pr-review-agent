@@ -216,3 +216,23 @@ def test_cost_breaks_down_cache_and_provider_cost():
     assert (c["total_cost_usd"], c["mean_cost_usd"]) == (0.04, 0.02)
     legacy = M.cost([R("clean", duration=1.0, usage={"input_tokens": 5, "output_tokens": 1, "total_tokens": 6})])
     assert legacy["mean_cache_read_input_tokens"] == 0 and legacy["total_cost_usd"] == 0.0
+
+
+def test_infrastructure_failures_are_excluded_from_the_fp_rate():
+    """A timeout or dropped connection is not the agent flagging a clean PR."""
+    results = [
+        R("clean"),                                        # quiet
+        R("clean", [F(severity="high")]),                  # a real flag
+        R("clean", error="TimeoutError: "),                # infra: excluded
+        R("clean", error="APIConnectionError: boom"),      # infra: excluded
+        R("clean", error="SynthesisError: bad json"),      # the agent failed: counts
+    ]
+    results[3]["infra_error"] = True
+    fp = M.false_positive_rate(results)
+    assert (fp["cases"], fp["false_positives"], fp["rate"]) == (3, 2, round(2 / 3, 4))
+    assert fp["infrastructure_failures_excluded"] == 2
+    assert fp["clean_cases_run"] == 5
+    assert fp["errored_counted_as_fp"] == 1  # the SynthesisError one
+    assert M.is_infrastructure_failure({"error": "TimeoutError: "})
+    assert not M.is_infrastructure_failure({"error": "SynthesisError: x"})
+    assert not M.is_infrastructure_failure({"error": None})

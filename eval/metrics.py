@@ -194,8 +194,26 @@ def percentile(values: Iterable[float], pct: float) -> float | None:
     return vs[rank - 1]
 
 
+# Failures of the plumbing rather than of the review: a timeout, a dropped connection, a provider
+# error that survived its retries. They say nothing about the agent's judgement, so a clean case
+# that ends this way is dropped from the false-positive rate and reported on its own. An agent
+# failure (e.g. SynthesisError) still counts as a false positive: a review that did not complete
+# is not a clean pass.
+_INFRA_ERROR_NAMES = ("TimeoutError", "APITimeoutError", "APIConnectionError", "RateLimitError",
+                      "InternalServerError", "ServiceUnavailableError", "OverloadedError")
+
+
+def is_infrastructure_failure(result: dict) -> bool:
+    if result.get("infra_error"):
+        return True
+    error = result.get("error") or ""
+    return bool(error) and error.split(":", 1)[0].strip() in _INFRA_ERROR_NAMES
+
+
 def false_positive_rate(results: list[dict], cfg: ScoringConfig | None = None) -> dict:
-    clean = [r for r in results if r.get("split") in CLEAN_SPLITS]
+    all_clean = [r for r in results if r.get("split") in CLEAN_SPLITS]
+    infra = [r for r in all_clean if is_infrastructure_failure(r)]
+    clean = [r for r in all_clean if not is_infrastructure_failure(r)]
     outs = [case_outcome(r, cfg) for r in clean]
     fp = sum(o["flagged"] for o in outs)
     return {
@@ -203,6 +221,10 @@ def false_positive_rate(results: list[dict], cfg: ScoringConfig | None = None) -
         "false_positives": fp,
         "cases": len(clean),
         "errored_counted_as_fp": sum(o["errored"] for o in outs),
+        # Excluded from the rate above, not silently: these never produced a review.
+        "infrastructure_failures_excluded": len(infra),
+        "infrastructure_failure_ids": [r.get("id") for r in infra],
+        "clean_cases_run": len(all_clean),
         "mean_medium_plus_findings_per_clean_case": (
             round(sum(o["medium_plus"] for o in outs) / len(outs), 3) if outs else None),
     }

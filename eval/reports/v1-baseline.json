@@ -1,14 +1,16 @@
 {
   "meta": {
-    "note": "baseline over exactly the cases in v1.json",
-    "cases": 179
+    "note": "baseline over the same 215 cases as v1.json"
   },
   "false_positive_rate": {
     "rate": 1.0,
-    "false_positives": 114,
-    "cases": 114,
+    "false_positives": 150,
+    "cases": 150,
     "errored_counted_as_fp": 0,
-    "mean_medium_plus_findings_per_clean_case": 2.368
+    "infrastructure_failures_excluded": 0,
+    "infrastructure_failure_ids": [],
+    "clean_cases_run": 150,
+    "mean_medium_plus_findings_per_clean_case": 2.413
   },
   "detection": {
     "overall": {
@@ -127,7 +129,7 @@
     }
   },
   "cost": {
-    "cases_timed": 179,
+    "cases_timed": 215,
     "mean_seconds": 0.0,
     "p95_seconds": 0.0,
     "mean_total_tokens": 0.0,
@@ -147,7 +149,7 @@
     "cases": []
   },
   "parse_errors": {
-    "cases_run": 179,
+    "cases_run": 215,
     "cases_with_parse_failure": 0,
     "case_rate": 0.0,
     "repaired_cases": 0,
@@ -9838,6 +9840,1954 @@
           "lines": {
             "start": 1,
             "end": 267
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-801-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 801,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "changelog.d/672.bugfix.rst",
+          "lines": {
+            "start": 1,
+            "end": 1
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "dateutil/test/test_tz.py",
+          "lines": {
+            "start": 1,
+            "end": 2709
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "dateutil/tz/tz.py",
+          "lines": {
+            "start": 1,
+            "end": 1810
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-1800-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 1800,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "httpx/_client.py",
+          "lines": {
+            "start": 1,
+            "end": 2008
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/client/test_async_client.py",
+          "lines": {
+            "start": 1,
+            "end": 341
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/client/test_client.py",
+          "lines": {
+            "start": 1,
+            "end": 400
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-321-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 321,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "marshmallow/marshalling.py",
+          "lines": {
+            "start": 1,
+            "end": 308
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_marshalling.py",
+          "lines": {
+            "start": 1,
+            "end": 262
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-868-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 868,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 1,
+            "end": 4874
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-3424-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 3424,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "networkx/classes/graph.py",
+          "lines": {
+            "start": 1,
+            "end": 1924
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-995-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 995,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "click/_compat.py",
+          "lines": {
+            "start": 1,
+            "end": 697
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-2898-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 2898,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "CHANGES.rst",
+          "lines": {
+            "start": 1,
+            "end": 1005
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "docs/cli.rst",
+          "lines": {
+            "start": 1,
+            "end": 487
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "flask/cli.py",
+          "lines": {
+            "start": 1,
+            "end": 948
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-926-clean",
+      "split": "clean",
+      "repo": "pallets/jinja",
+      "pr_number": 926,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "jinja2/filters.py",
+          "lines": {
+            "start": 1,
+            "end": 1204
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-780-clean",
+      "split": "clean",
+      "repo": "pallets/werkzeug",
+      "pr_number": 780,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "tests/test_http.py",
+          "lines": {
+            "start": 1,
+            "end": 537
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "werkzeug/http.py",
+          "lines": {
+            "start": 1,
+            "end": 1114
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-2926-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 2926,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "AUTHORS.rst",
+          "lines": {
+            "start": 1,
+            "end": 165
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "requests/api.py",
+          "lines": {
+            "start": 1,
+            "end": 145
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "requests/sessions.py",
+          "lines": {
+            "start": 1,
+            "end": 680
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-1171-clean",
+      "split": "clean",
+      "repo": "pypa/packaging",
+      "pr_number": 1171,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "src/packaging/_parser.py",
+          "lines": {
+            "start": 1,
+            "end": 393
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "src/packaging/markers.py",
+          "lines": {
+            "start": 1,
+            "end": 482
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "src/packaging/requirements.py",
+          "lines": {
+            "start": 1,
+            "end": 119
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_markers.py",
+          "lines": {
+            "start": 1,
+            "end": 721
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_requirements.py",
+          "lines": {
+            "start": 1,
+            "end": 841
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "pyparsing-39-clean",
+      "split": "clean",
+      "repo": "pyparsing/pyparsing",
+      "pr_number": 39,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "unitTests.py",
+          "lines": {
+            "start": 1,
+            "end": 3913
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "attrs-1119-clean",
+      "split": "clean",
+      "repo": "python-attrs/attrs",
+      "pr_number": 1119,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "src/attr/_funcs.py",
+          "lines": {
+            "start": 1,
+            "end": 444
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_funcs.py",
+          "lines": {
+            "start": 1,
+            "end": 691
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "typer-751-clean",
+      "split": "clean",
+      "repo": "tiangolo/typer",
+      "pr_number": 751,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "docs/tutorial/commands/index.md",
+          "lines": {
+            "start": 1,
+            "end": 266
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "docs_src/commands/index/tutorial003.py",
+          "lines": {
+            "start": 1,
+            "end": 17
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_tutorial/test_commands/test_index/test_tutorial003.py",
+          "lines": {
+            "start": 1,
+            "end": 41
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-1687-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 1687,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "rich/console.py",
+          "lines": {
+            "start": 1,
+            "end": 2191
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-891-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 891,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "changelog.d/891.bugfix.rst",
+          "lines": {
+            "start": 1,
+            "end": 4
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "changelog.d/891.misc.rst",
+          "lines": {
+            "start": 1,
+            "end": 2
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "dateutil/parser/_parser.py",
+          "lines": {
+            "start": 1,
+            "end": 1593
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "dateutil/test/test_parser.py",
+          "lines": {
+            "start": 1,
+            "end": 930
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-3367-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 3367,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "httpx/_content.py",
+          "lines": {
+            "start": 1,
+            "end": 240
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/client/test_auth.py",
+          "lines": {
+            "start": 1,
+            "end": 795
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/models/test_requests.py",
+          "lines": {
+            "start": 1,
+            "end": 228
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/models/test_responses.py",
+          "lines": {
+            "start": 1,
+            "end": 1037
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/models/test_whatwg.py",
+          "lines": {
+            "start": 1,
+            "end": 52
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_content.py",
+          "lines": {
+            "start": 1,
+            "end": 523
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_main.py",
+          "lines": {
+            "start": 1,
+            "end": 187
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-819-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 819,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "CHANGELOG.rst",
+          "lines": {
+            "start": 1,
+            "end": 1130
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "docs/upgrading.rst",
+          "lines": {
+            "start": 1,
+            "end": 1080
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "marshmallow/schema.py",
+          "lines": {
+            "start": 1,
+            "end": 948
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "marshmallow/utils.py",
+          "lines": {
+            "start": 1,
+            "end": 400
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_decorators.py",
+          "lines": {
+            "start": 1,
+            "end": 863
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-213-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 213,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "docs/api.rst",
+          "lines": {
+            "start": 1,
+            "end": 236
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 1,
+            "end": 2128
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "more_itertools/tests/test_more.py",
+          "lines": {
+            "start": 1,
+            "end": 1964
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-8607-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 8607,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "networkx/algorithms/connectivity/edge_augmentation.py",
+          "lines": {
+            "start": 1,
+            "end": 1265
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-929-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 929,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "click/_compat.py",
+          "lines": {
+            "start": 1,
+            "end": 668
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-3213-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 3213,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "CONTRIBUTING.rst",
+          "lines": {
+            "start": 1,
+            "end": 196
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "setup.py",
+          "lines": {
+            "start": 1,
+            "end": 78
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-1002-clean",
+      "split": "clean",
+      "repo": "pallets/jinja",
+      "pr_number": 1002,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "jinja2/parser.py",
+          "lines": {
+            "start": 1,
+            "end": 907
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_regression.py",
+          "lines": {
+            "start": 1,
+            "end": 545
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-2014-clean",
+      "split": "clean",
+      "repo": "pallets/werkzeug",
+      "pr_number": 2014,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "CHANGES.rst",
+          "lines": {
+            "start": 1,
+            "end": 1931
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "src/werkzeug/wrappers/response.py",
+          "lines": {
+            "start": 1,
+            "end": 886
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_wrappers.py",
+          "lines": {
+            "start": 1,
+            "end": 1593
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-4001-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 4001,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "requests/api.py",
+          "lines": {
+            "start": 1,
+            "end": 152
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-21-clean",
+      "split": "clean",
+      "repo": "pypa/packaging",
+      "pr_number": 21,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "CHANGELOG.rst",
+          "lines": {
+            "start": 1,
+            "end": 59
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "packaging/version.py",
+          "lines": {
+            "start": 1,
+            "end": 376
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "attrs-363-clean",
+      "split": "clean",
+      "repo": "python-attrs/attrs",
+      "pr_number": 363,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "changelog.d/363.change.rst",
+          "lines": {
+            "start": 1,
+            "end": 1
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "docs/examples.rst",
+          "lines": {
+            "start": 1,
+            "end": 716
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "src/attr/_make.py",
+          "lines": {
+            "start": 1,
+            "end": 1686
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_annotations.py",
+          "lines": {
+            "start": 1,
+            "end": 227
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "typer-1048-clean",
+      "split": "clean",
+      "repo": "tiangolo/typer",
+      "pr_number": 1048,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "typer/_typing.py",
+          "lines": {
+            "start": 1,
+            "end": 113
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "typer/core.py",
+          "lines": {
+            "start": 1,
+            "end": 764
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "typer/main.py",
+          "lines": {
+            "start": 1,
+            "end": 1138
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "typer/rich_utils.py",
+          "lines": {
+            "start": 1,
+            "end": 731
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "typer/utils.py",
+          "lines": {
+            "start": 1,
+            "end": 190
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-3061-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 3061,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "CHANGELOG.md",
+          "lines": {
+            "start": 1,
+            "end": 2146
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "rich/text.py",
+          "lines": {
+            "start": 1,
+            "end": 1350
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_panel.py",
+          "lines": {
+            "start": 1,
+            "end": 110
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_text.py",
+          "lines": {
+            "start": 1,
+            "end": 917
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-17-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 17,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "dateutil/rrule.py",
+          "lines": {
+            "start": 1,
+            "end": 1356
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "dateutil/test/test.py",
+          "lines": {
+            "start": 1,
+            "end": 4095
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-2911-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 2911,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "httpx/_models.py",
+          "lines": {
+            "start": 1,
+            "end": 1214
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "httpx/_utils.py",
+          "lines": {
+            "start": 1,
+            "end": 442
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_utils.py",
+          "lines": {
+            "start": 1,
+            "end": 287
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-527-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 527,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "marshmallow/fields.py",
+          "lines": {
+            "start": 1,
+            "end": 1250
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "tests/test_deserialization.py",
+          "lines": {
+            "start": 1,
+            "end": 1279
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-167-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 167,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "more_itertools/more.py",
+          "lines": {
+            "start": 1,
+            "end": 1589
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "more_itertools/tests/test_more.py",
+          "lines": {
+            "start": 1,
+            "end": 1474
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-5002-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 5002,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "networkx/readwrite/gpickle.py",
+          "lines": {
+            "start": 1,
+            "end": 109
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-517-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 517,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "click/_unicodefun.py",
+          "lines": {
+            "start": 1,
+            "end": 119
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "click/core.py",
+          "lines": {
+            "start": 1,
+            "end": 1747
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "click/utils.py",
+          "lines": {
+            "start": 1,
+            "end": 416
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        }
+      ],
+      "summary": null,
+      "risk": null,
+      "duration_s": 0.0,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "github_calls": 0,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-3918-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 3918,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "src/flask/app.py",
+          "lines": {
+            "start": 1,
+            "end": 2031
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "src/flask/blueprints.py",
+          "lines": {
+            "start": 1,
+            "end": 465
+          },
+          "severity": "medium",
+          "title": "Changed file",
+          "detail": "Baseline: every changed file is flagged, whole file.",
+          "suggestion": null
+        },
+        {
+          "file": "src/flask/scaffold.py",
+          "lines": {
+            "start": 1,
+            "end": 453
           },
           "severity": "medium",
           "title": "Changed file",

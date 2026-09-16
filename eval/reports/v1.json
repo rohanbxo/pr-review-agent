@@ -23,7 +23,7 @@
     "evaluated_counts": {
       "injected": 40,
       "reverted": 25,
-      "clean": 114
+      "clean": 150
     },
     "evaluated_by_bug_kind": {
       "flipped_comparison": 10,
@@ -31,7 +31,7 @@
       "off_by_one_range_len": 10,
       "transposed_args": 10,
       "reverted_fix": 25,
-      "none": 114
+      "none": 150
     },
     "scoring": {
       "scoring_version": 3,
@@ -46,17 +46,12 @@
     "limit": null,
     "splits": null,
     "concurrency": 4,
-    "git_sha": "ba3574e74bab85f6d3896f19addc456f09199dfd",
-    "timestamp": "2026-09-16T14:03:51+00:00",
-    "python": "3.12.13",
-    "partial_run": {
-      "cases_reported": 179,
-      "cases_selected": 215,
-      "checkpoint": "eval\\reports\\v1.cases.jsonl"
-    }
+    "git_sha": "76eb28ca8c27a19e55e04e83b5464ae7a462b8e0",
+    "timestamp": "2026-09-16T21:17:45+00:00",
+    "python": "3.12.13"
   },
   "parse_errors": {
-    "cases_run": 179,
+    "cases_run": 215,
     "cases_with_parse_failure": 0,
     "case_rate": 0.0,
     "repaired_cases": 0,
@@ -65,11 +60,16 @@
     "case_ids": []
   },
   "false_positive_rate": {
-    "rate": 0.2895,
-    "false_positives": 33,
-    "cases": 114,
-    "errored_counted_as_fp": 1,
-    "mean_medium_plus_findings_per_clean_case": 0.307
+    "rate": 0.2886,
+    "false_positives": 43,
+    "cases": 149,
+    "errored_counted_as_fp": 0,
+    "infrastructure_failures_excluded": 1,
+    "infrastructure_failure_ids": [
+      "click-1801-clean"
+    ],
+    "clean_cases_run": 150,
+    "mean_medium_plus_findings_per_clean_case": 0.329
   },
   "detection": {
     "overall": {
@@ -188,17 +188,17 @@
     }
   },
   "cost": {
-    "cases_timed": 179,
-    "mean_seconds": 61.22,
+    "cases_timed": 215,
+    "mean_seconds": 55.104,
     "p95_seconds": 57.554,
-    "mean_total_tokens": 126462.163,
-    "mean_input_tokens": 124496.107,
-    "mean_output_tokens": 1966.056,
-    "mean_cache_read_input_tokens": 48490.916,
-    "mean_cache_creation_input_tokens": 33794.494,
-    "cache_read_share_of_input": 0.3895,
-    "total_cost_usd": 17.6457,
-    "mean_cost_usd": 0.09913
+    "mean_total_tokens": 127438.925,
+    "mean_input_tokens": 125469.668,
+    "mean_output_tokens": 1969.257,
+    "mean_cache_read_input_tokens": 47764.869,
+    "mean_cache_creation_input_tokens": 34904.019,
+    "cache_read_share_of_input": 0.3807,
+    "total_cost_usd": 21.6255,
+    "mean_cost_usd": 0.10105
   },
   "errors": {
     "count": 1,
@@ -7093,7 +7093,1191 @@
       "infra_retries": 0,
       "infra_error": false,
       "error": null
+    },
+    {
+      "id": "dateutil-801-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 801,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a bug where `gettz()` attempts to store `None` values in a `WeakValueDictionary`, which cannot hold weak references to `None`. The fix adds a check `or rv is None` to prevent caching `None` results. The change is correct and necessary, with appropriate test coverage for bad timezone names.",
+      "risk": "low",
+      "duration_s": 21.187,
+      "usage": {
+        "input_tokens": 304974,
+        "output_tokens": 1200,
+        "total_tokens": 306174,
+        "cache_read_input_tokens": 101721,
+        "cache_creation_input_tokens": 98151,
+        "cost_usd": 0.24396285
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-1800-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 1800,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds stricter enforcement to prevent misuse of httpx Client and AsyncClient lifespan management. It prevents attempting to enter a context manager (`with` block) when the client is already opened or has been closed. The implementation correctly checks the client state and raises appropriate RuntimeError messages. Tests are added to verify the new behavior for both sync and async clients.",
+      "risk": "low",
+      "duration_s": 19.473,
+      "usage": {
+        "input_tokens": 138352,
+        "output_tokens": 1323,
+        "total_tokens": 139675,
+        "cache_read_input_tokens": 59059,
+        "cache_creation_input_tokens": 36215,
+        "cost_usd": 0.10086765
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-321-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 321,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes the behavior of the Marshaller class to properly combine prefix and dump_to parameters when serializing fields. Previously, if both were set, the prefix would be ignored. The change simplifies the key generation logic to always concatenate prefix (or empty string) with dump_to (or attribute name), and includes a test case validating the new behavior.",
+      "risk": "low",
+      "duration_s": 15.91,
+      "usage": {
+        "input_tokens": 45948,
+        "output_tokens": 1327,
+        "total_tokens": 47275,
+        "cache_read_input_tokens": 10918,
+        "cache_creation_input_tokens": 14460,
+        "cost_usd": 0.0463718
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-868-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 868,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR improves numerical stability in the `_sample_unweighted` function by replacing `log(1.0 - W)` with `log1p(-W)`. The `log1p` function is more accurate for small values near zero. The change is mathematically correct, properly imported, and introduces no defects.",
+      "risk": "low",
+      "duration_s": 17.312,
+      "usage": {
+        "input_tokens": 330376,
+        "output_tokens": 1017,
+        "total_tokens": 331393,
+        "cache_read_input_tokens": 66246,
+        "cache_creation_input_tokens": 130626,
+        "cost_usd": 0.3084961
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-3424-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 3424,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a typo in the docstring of the `update` method in networkx/classes/graph.py, changing \"noes\" to \"nodes\" on line 1086. This is a documentation-only change with no impact on code logic or functionality.",
+      "risk": "low",
+      "duration_s": 9.982,
+      "usage": {
+        "input_tokens": 85203,
+        "output_tokens": 574,
+        "total_tokens": 85777,
+        "cache_read_input_tokens": 27434,
+        "cache_creation_input_tokens": 27768,
+        "cost_usd": 0.0703244
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-995-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 995,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "click/_compat.py",
+          "lines": {
+            "start": 12,
+            "end": 13
+          },
+          "severity": "high",
+          "title": "Missing KeyError guard in APP_ENGINE detection",
+          "detail": "The APP_ENGINE variable checks if 'APPENGINE_RUNTIME' is in os.environ but then directly accesses os.environ['SERVER_SOFTWARE'] without verifying that key exists. If APPENGINE_RUNTIME is present but SERVER_SOFTWARE is missing, this will raise a KeyError at module import time, causing an ImportError—the exact problem this PR is trying to fix.",
+          "suggestion": "Use os.environ.get('SERVER_SOFTWARE', '') instead of direct dictionary access: APP_ENGINE = ('APPENGINE_RUNTIME' in os.environ and 'Development/' in os.environ.get('SERVER_SOFTWARE', ''))"
+        }
+      ],
+      "summary": "This PR attempts to fix a Google App Engine ImportError by detecting the App Engine environment and excluding it from Windows-specific code paths. However, the implementation has a critical bug: the APP_ENGINE detection accesses os.environ['SERVER_SOFTWARE'] without first checking if that key exists, which will raise a KeyError if APPENGINE_RUNTIME is present but SERVER_SOFTWARE is not.",
+      "risk": "high",
+      "duration_s": 14.69,
+      "usage": {
+        "input_tokens": 39345,
+        "output_tokens": 1112,
+        "total_tokens": 40457,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 18358,
+        "cost_usd": 0.0494945
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-2898-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 2898,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "flask/cli.py",
+          "lines": {
+            "start": 751,
+            "end": 754
+          },
+          "severity": "high",
+          "title": "SeparatedPathType.convert() does not handle None values",
+          "detail": "The convert() method calls self.split_envvar_value(value) without checking if value is None first. When the --extra-files option is not provided and FLASK_RUN_EXTRA_FILES environment variable is not set, Click may pass None to the converter. The subsequent list comprehension will fail with 'TypeError: NoneType object is not iterable' because split_envvar_value(None) returns None, not an iterable.",
+          "suggestion": "Add a None check before processing: if value is None: return None"
+        }
+      ],
+      "summary": "This PR adds an `--extra-files` option to the `flask run` CLI command to allow users to specify additional files that should trigger the reloader on change. The implementation includes a custom Click parameter type, documentation, and changelog entries. However, there is a critical defect in the `SeparatedPathType.convert()` method that fails to handle `None` values properly.",
+      "risk": "high",
+      "duration_s": 25.61,
+      "usage": {
+        "input_tokens": 102097,
+        "output_tokens": 1912,
+        "total_tokens": 104009,
+        "cache_read_input_tokens": 45521,
+        "cache_creation_input_tokens": 26157,
+        "cost_usd": 0.07722735
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-926-clean",
+      "split": "clean",
+      "repo": "pallets/jinja",
+      "pr_number": 926,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds documentation to the `do_last` filter in jinja2/filters.py, expanding the docstring to clarify that the filter does not work with generators and providing an example of how to work around this limitation by converting to a list first. The implementation of the filter itself is unchanged.",
+      "risk": "low",
+      "duration_s": 12.803,
+      "usage": {
+        "input_tokens": 83113,
+        "output_tokens": 768,
+        "total_tokens": 83881,
+        "cache_read_input_tokens": 17071,
+        "cache_creation_input_tokens": 31766,
+        "cost_usd": 0.0795306
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-780-clean",
+      "split": "clean",
+      "repo": "pallets/werkzeug",
+      "pr_number": 780,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds validation to the `dump_cookie` function to raise a ValueError when a cookie exceeds 4093 bytes, preventing silent failures when browsers drop oversized cookies. The implementation adds a COOKIE_MAXSIZE constant and checks the final cookie size before returning. A corresponding test validates that cookies at the limit are accepted and oversized cookies are rejected.",
+      "risk": "low",
+      "duration_s": 47.66,
+      "usage": {
+        "input_tokens": 83165,
+        "output_tokens": 4195,
+        "total_tokens": 87360,
+        "cache_read_input_tokens": 18407,
+        "cache_creation_input_tokens": 27664,
+        "cost_usd": 0.0944897
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-2926-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 2926,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "AUTHORS.rst",
+          "lines": {
+            "start": 165,
+            "end": 165
+          },
+          "severity": "medium",
+          "title": "Malformed reStructuredText link syntax in AUTHORS.rst",
+          "detail": "The contributor entry has incorrect reStructuredText link formatting. The closing backtick is placed before the underscore instead of after it: `@bsamek <https://github.com/bsamek`_) should be `@bsamek <https://github.com/bsamek>`_). Additionally, there is a missing space between 'Samek' and the opening backtick, inconsistent with other entries in the file.",
+          "suggestion": "Change line 165 from:\n- Brian Samek(`@bsamek <https://github.com/bsamek`_)\n\nTo:\n- Brian Samek (`@bsamek <https://github.com/bsamek>`_)"
+        }
+      ],
+      "summary": "This PR refactors documentation for the `verify` parameter in the requests API and sessions modules, changing the wording from \"if ``True``\" to \"whether\" and clarifying default values. It also adds a contributor to the AUTHORS file. The changes are primarily documentation improvements with no functional code changes.",
+      "risk": "low",
+      "duration_s": 18.035,
+      "usage": {
+        "input_tokens": 82300,
+        "output_tokens": 1422,
+        "total_tokens": 83722,
+        "cache_read_input_tokens": 16473,
+        "cache_creation_input_tokens": 29861,
+        "cost_usd": 0.08204955
+      },
+      "github_calls": 10,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-1171-clean",
+      "split": "clean",
+      "repo": "pypa/packaging",
+      "pr_number": 1171,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds pickle support to Requirements, Markers, and Node classes by implementing __getstate__ and __setstate__ methods. The implementation handles backward compatibility with three different pickle formats from previous versions (25.0, 26.0, and 26.1). The code includes comprehensive test coverage with roundtrip tests and validation of old pickle formats.",
+      "risk": "low",
+      "duration_s": 23.602,
+      "usage": {
+        "input_tokens": 115796,
+        "output_tokens": 1870,
+        "total_tokens": 117666,
+        "cache_read_input_tokens": 55416,
+        "cache_creation_input_tokens": 29353,
+        "cost_usd": 0.08260985
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "pyparsing-39-clean",
+      "split": "clean",
+      "repo": "pyparsing/pyparsing",
+      "pr_number": 39,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes Python 3 compatibility by replacing the removed `file()` built-in function with the standard `open()` function on line 3905 of unitTests.py. The change is minimal, correct, and necessary for Python 3 support.",
+      "risk": "low",
+      "duration_s": 10.405,
+      "usage": {
+        "input_tokens": 129102,
+        "output_tokens": 686,
+        "total_tokens": 129788,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 63297,
+        "cost_usd": 0.14835625
+      },
+      "github_calls": 3,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "attrs-1119-clean",
+      "split": "clean",
+      "repo": "python-attrs/attrs",
+      "pr_number": 1119,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "tests/test_funcs.py",
+          "lines": {
+            "start": 510,
+            "end": 513
+          },
+          "severity": "high",
+          "title": "Incomplete removal of pytest.deprecated_call() in test_unknown",
+          "detail": "The `pytest.deprecated_call()` context manager was removed from other test methods (test_empty, test_no_changes, test_change, test_frozen) but was not removed from the `test_unknown` method. Since the deprecation warning was removed from the `assoc()` function in src/attr/_funcs.py, this test will fail because it expects a deprecation warning that will no longer be raised.",
+          "suggestion": "Remove `pytest.deprecated_call()` from line 512, changing the code to:\n\nwith pytest.raises(\n    AttrsAttributeNotFoundError\n) as e:\n    assoc(C(), aaaa=2)"
+        }
+      ],
+      "summary": "This PR removes the deprecation warning from the `assoc()` function and updates its docstring to explain why it won't be removed. The implementation change is correct, but the test updates are incomplete: the `pytest.deprecated_call()` context manager was removed from most tests but not from the `test_unknown` method, which will cause that test to fail.",
+      "risk": "high",
+      "duration_s": 19.248,
+      "usage": {
+        "input_tokens": 116936,
+        "output_tokens": 1334,
+        "total_tokens": 118270,
+        "cache_read_input_tokens": 42553,
+        "cache_creation_input_tokens": 33639,
+        "cost_usd": 0.09371805
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "typer-751-clean",
+      "split": "clean",
+      "repo": "tiangolo/typer",
+      "pr_number": 751,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds documentation and tests for the `no_args_is_help` feature in Typer. It includes a new tutorial file demonstrating the feature, documentation explaining it, and corresponding tests. The changes are straightforward additions with no deletions.",
+      "risk": "low",
+      "duration_s": 11.998,
+      "usage": {
+        "input_tokens": 16412,
+        "output_tokens": 769,
+        "total_tokens": 17181,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 4545,
+        "cost_usd": 0.02139325
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-1687-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 1687,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This pull request fixes a malformed Sphinx/reStructuredText cross-reference in the docstring of the `Console.pager()` method. The change corrects `:class:~rich.pager.SystemPager`` to `:class:`~rich.pager.SystemPager`` by adding the missing backtick after `:class:`. This is a pure documentation fix with no functional code changes.",
+      "risk": "low",
+      "duration_s": 11.586,
+      "usage": {
+        "input_tokens": 149775,
+        "output_tokens": 723,
+        "total_tokens": 150498,
+        "cache_read_input_tokens": 30166,
+        "cache_creation_input_tokens": 58563,
+        "cost_usd": 0.14088135
+      },
+      "github_calls": 4,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-891-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 891,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds comprehensive tests for tzinfos input types and fixes a bug in the parser where invalid tzinfo types would cause an UnboundLocalError instead of a proper TypeError. The code change adds an else clause to the _build_tzinfo method to explicitly raise TypeError for unsupported input types. The tests are well-designed and cover valid input types (tzinfo objects, strings, integers, callables) and invalid types.",
+      "risk": "low",
+      "duration_s": 26.289,
+      "usage": {
+        "input_tokens": 283446,
+        "output_tokens": 1546,
+        "total_tokens": 284992,
+        "cache_read_input_tokens": 147235,
+        "cache_creation_input_tokens": 66174,
+        "cost_usd": 0.175208
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-3367-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 3367,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "tests/models/test_responses.py",
+          "lines": {
+            "start": 84,
+            "end": 84
+          },
+          "severity": "critical",
+          "title": "Test assertion changed to compare string representation instead of dictionary",
+          "detail": "Line 84 changed from `assert response.json() == {\"hello\": \"world\"}` to `assert str(response.json()) == \"{'hello': 'world'}\"`.\n\nThis breaks the test's intent. The test should verify that `response.json()` returns the correct parsed dictionary object, not that its string representation matches a particular format. When JSON `{\"hello\":\"world\"}` is parsed, it should return the dictionary `{\"hello\": \"world\"}`, and the test should assert this directly. Converting to string and comparing string representations is semantically incorrect and masks the actual behavior being tested.",
+          "suggestion": "Change line 84 to: `assert response.json() == {\"hello\": \"world\"}`"
+        }
+      ],
+      "summary": "This PR modifies JSON encoding to produce compact output by adding `ensure_ascii=False`, `separators=(\",\", \":\")`, and `allow_nan=False` parameters to `json_dumps()`. The changes update test expectations to match the new compact JSON format. However, there is a critical test logic error in `tests/models/test_responses.py` where the assertion was changed to compare the string representation of a dictionary instead of the dictionary itself.",
+      "risk": "high",
+      "duration_s": 19.599,
+      "usage": {
+        "input_tokens": 143341,
+        "output_tokens": 1418,
+        "total_tokens": 144759,
+        "cache_read_input_tokens": 56186,
+        "cache_creation_input_tokens": 41383,
+        "cost_usd": 0.11020935
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-819-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 819,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR implements a backwards-incompatible change to how pre/post-processors handle None return values. Previously, None was interpreted as \"data was mutated in-place\"; now None is treated as a valid return value. The implementation removes the `utils.if_none()` helper and updates all processor invocations to directly use return values. Tests are updated to explicitly return data and a new regression test verifies None handling.",
+      "risk": "low",
+      "duration_s": 29.29,
+      "usage": {
+        "input_tokens": 274060,
+        "output_tokens": 2291,
+        "total_tokens": 276351,
+        "cache_read_input_tokens": 154614,
+        "cache_creation_input_tokens": 58879,
+        "cost_usd": 0.16108215
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-213-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 213,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR implements a new `last()` function for the more-itertools library that returns the last item of an iterable, or a default value if the iterable is empty. The implementation uses negative indexing for sliceable iterables (fast path) and falls back to using a deque for non-sliceable iterables. The function is well-tested with comprehensive test coverage including edge cases for generators, custom iterables, dictionaries, and OrderedDicts.",
+      "risk": "low",
+      "duration_s": 31.711,
+      "usage": {
+        "input_tokens": 161549,
+        "output_tokens": 2332,
+        "total_tokens": 163881,
+        "cache_read_input_tokens": 32012,
+        "cache_creation_input_tokens": 62007,
+        "cost_usd": 0.15989995
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-8607-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 8607,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR removes a redundant \"See Also\" section from the module-level docstring of edge_augmentation.py. The removed section contained two sphinx cross-references to related modules. This is a straightforward documentation cleanup with no functional changes to the code.",
+      "risk": "low",
+      "duration_s": 11.884,
+      "usage": {
+        "input_tokens": 119516,
+        "output_tokens": 766,
+        "total_tokens": 120282,
+        "cache_read_input_tokens": 38897,
+        "cache_creation_input_tokens": 39109,
+        "cost_usd": 0.09811595
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-929-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 929,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR modifies the `open_stream()` function in click/_compat.py to handle 'a' (append) and 'x' (exclusive create) file modes in addition to 'w' (write) mode when the filename is '-' (stdout). The change replaces a simple 'w' check with a more comprehensive check using `any()` to detect any write-like mode. The logic is sound and correctly routes all write-like modes to stdout.",
+      "risk": "low",
+      "duration_s": 16.407,
+      "usage": {
+        "input_tokens": 54425,
+        "output_tokens": 1157,
+        "total_tokens": 55582,
+        "cache_read_input_tokens": 17113,
+        "cache_creation_input_tokens": 17224,
+        "cost_usd": 0.0491143
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-3213-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 3213,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "CONTRIBUTING.rst",
+          "lines": {
+            "start": 40,
+            "end": 42
+          },
+          "severity": "medium",
+          "title": "Misleading documentation about automatic pre-commit hook installation",
+          "detail": "The documentation states that the pre-commit hook 'should be done for you as a git `pre-commit`_ hook, which gets installed when you run ``pip install -e .[dev]``'. This is incorrect. Installing the pre-commit package via pip does not automatically install or configure git hooks. Users must manually run `pre-commit install` after installation. Additionally, there is no `.pre-commit-config.yaml` file in the repository to define which hooks should run, so even if users ran `pre-commit install`, no hooks would be configured. This misleading documentation could lead contributors to believe their code is being automatically formatted when it is not.",
+          "suggestion": "Clarify the documentation to explain that users must manually run `pre-commit install` after installing the dev dependencies, and ensure a `.pre-commit-config.yaml` file exists in the repository to configure the Black hook."
+        }
+      ],
+      "summary": "This PR adds pre-commit to dev dependencies and documents its use in CONTRIBUTING.rst. However, the documentation contains a misleading claim that pre-commit hooks are automatically installed when running `pip install -e .[dev]`, when in fact users must manually run `pre-commit install` and a `.pre-commit-config.yaml` file must exist to configure the hooks.",
+      "risk": "medium",
+      "duration_s": 17.056,
+      "usage": {
+        "input_tokens": 38076,
+        "output_tokens": 1167,
+        "total_tokens": 39243,
+        "cache_read_input_tokens": 17984,
+        "cache_creation_input_tokens": 7017,
+        "cost_usd": 0.02947965
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "jinja-1002-clean",
+      "split": "clean",
+      "repo": "pallets/jinja",
+      "pr_number": 1002,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a parsing bug where test arguments in Jinja2 templates couldn't handle postfix operations like attribute access (e.g., `object.property`). The fix adds a call to `parse_postfix()` after `parse_primary()` in the `parse_test()` method, mirroring the pattern used in `parse_unary()`. A regression test is included to verify the fix works for dictionary property access in test expressions.",
+      "risk": "low",
+      "duration_s": 20.509,
+      "usage": {
+        "input_tokens": 152085,
+        "output_tokens": 1259,
+        "total_tokens": 153344,
+        "cache_read_input_tokens": 76586,
+        "cache_creation_input_tokens": 35103,
+        "cost_usd": 0.09822835
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "werkzeug-2014-clean",
+      "split": "clean",
+      "repo": "pallets/werkzeug",
+      "pr_number": 2014,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes range request handling for empty files by adding a check to return a 200 response instead of a 416 error when complete_length is 0. The code change adds `or complete_length == 0` to the range request processing condition, and the test is updated to parametrize over both None and 0 values.",
+      "risk": "low",
+      "duration_s": 31.577,
+      "usage": {
+        "input_tokens": 261253,
+        "output_tokens": 2074,
+        "total_tokens": 263327,
+        "cache_read_input_tokens": 111527,
+        "cache_creation_input_tokens": 71232,
+        "cost_usd": 0.1890567
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "requests-4001-clean",
+      "split": "clean",
+      "repo": "psf/requests",
+      "pr_number": 4001,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR updates the docstring for the `timeout` parameter in `requests/api.py` to clarify that the timeout value is specified in seconds. The change is a documentation-only improvement with no impact on code logic or behavior.",
+      "risk": "low",
+      "duration_s": 10.398,
+      "usage": {
+        "input_tokens": 18844,
+        "output_tokens": 536,
+        "total_tokens": 19380,
+        "cache_read_input_tokens": 4679,
+        "cache_creation_input_tokens": 4788,
+        "cost_usd": 0.0185099
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "packaging-21-clean",
+      "split": "clean",
+      "repo": "pypa/packaging",
+      "pr_number": 21,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR makes two cleanup changes: (1) reformats the `_regex` assignment in the Version class from single-line to multi-line format with double quotes, and (2) reorganizes the CHANGELOG to move the VERSION_PATTERN entry from version 14.3 to the current development version 14.5. Both changes are purely cosmetic/organizational with no functional impact.",
+      "risk": "low",
+      "duration_s": 18.093,
+      "usage": {
+        "input_tokens": 54902,
+        "output_tokens": 1139,
+        "total_tokens": 56041,
+        "cache_read_input_tokens": 23466,
+        "cache_creation_input_tokens": 12967,
+        "cost_usd": 0.04271935
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "attrs-363-clean",
+      "split": "clean",
+      "repo": "python-attrs/attrs",
+      "pr_number": 363,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds `__annotations__` attributes to generated `__init__` methods, deriving them from field types. The implementation initializes annotations with `{'return': None}` and adds field annotations for attributes with `init=True`, no converter, and a non-None type. The changes include updates to `_make_init()` and `_attrs_to_init_script()` functions, comprehensive test coverage, and documentation updates.",
+      "risk": "low",
+      "duration_s": 74.132,
+      "usage": {
+        "input_tokens": 105325,
+        "output_tokens": 8671,
+        "total_tokens": 113996,
+        "cache_read_input_tokens": 33159,
+        "cache_creation_input_tokens": 30062,
+        "cost_usd": 0.1263524
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "typer-1048-clean",
+      "split": "clean",
+      "repo": "tiangolo/typer",
+      "pr_number": 1048,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "typer/rich_utils.py",
+          "lines": {
+            "start": 25,
+            "end": 25
+          },
+          "severity": "medium",
+          "title": "Incorrect version check for Literal import",
+          "detail": "The version check was changed from `sys.version_info >= (3, 8)` to `sys.version_info >= (3, 9)`. However, `Literal` was added to the `typing` module in Python 3.8, not 3.9. This causes Python 3.8 users to unnecessarily import `Literal` from `typing_extensions` instead of using the standard library version, which defeats the purpose of this PR. The version check should remain `(3, 8)` for `Literal` since it's available in Python 3.8's `typing` module.",
+          "suggestion": "Change line 25 from `if sys.version_info >= (3, 9):` back to `if sys.version_info >= (3, 8):`"
+        }
+      ],
+      "summary": "This PR aims to avoid unnecessary imports of `typing_extensions` in newer Python versions by centralizing version-specific imports in `typer/_typing.py` and updating other modules to import from there. However, there is a regression in `typer/rich_utils.py` where the version check for `Literal` was incorrectly changed from Python 3.8+ to 3.9+, causing Python 3.8 users to unnecessarily import from `typing_extensions` when `Literal` is already available in the standard library.",
+      "risk": "medium",
+      "duration_s": 19.455,
+      "usage": {
+        "input_tokens": 98301,
+        "output_tokens": 1589,
+        "total_tokens": 99890,
+        "cache_read_input_tokens": 24021,
+        "cache_creation_input_tokens": 33536,
+        "cost_usd": 0.0930111
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "rich-3061-clean",
+      "split": "clean",
+      "repo": "Textualize/rich",
+      "pr_number": 3061,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "rich/text.py",
+          "lines": {
+            "start": 979,
+            "end": 980
+          },
+          "severity": "medium",
+          "title": "Unsafe style check changes semantics - empty string styles now treated as falsy",
+          "detail": "Line 979 changes `if style is not None:` to `if style:`. This is a semantic change because an empty string style (which is falsy) will now be skipped, whereas previously it would have been added. This could break code that intentionally uses empty string styles. The same issue appears on lines 989, 1010, and 1037.",
+          "suggestion": null
+        },
+        {
+          "file": "rich/text.py",
+          "lines": {
+            "start": 567,
+            "end": 586
+          },
+          "severity": "medium",
+          "title": "extend_style() logic error: incorrect span extension condition",
+          "detail": "Line 580 uses `span.end >= end_offset` to determine which spans to extend. This condition is incorrect because it extends spans that end at or after the current text length. However, only spans that end exactly at the current text length should be extended (those that cover the last character). Spans that end after the current text length are invalid and shouldn't exist. This will cause incorrect span boundaries when extending text with styles.",
+          "suggestion": null
+        }
+      ],
+      "summary": "This PR extends the Text class with tab expansion improvements and new style extension methods. It changes the default tab_size from 8 to None, adds Span.extend() and Text.extend_style() methods, and refactors expand_tabs() to properly handle spans during tab expansion.",
+      "risk": "medium",
+      "duration_s": 87.138,
+      "usage": {
+        "input_tokens": 140449,
+        "output_tokens": 8999,
+        "total_tokens": 149448,
+        "cache_read_input_tokens": 43113,
+        "cache_creation_input_tokens": 44396,
+        "cost_usd": 0.1577413
+      },
+      "github_calls": 8,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "dateutil-17-clean",
+      "split": "clean",
+      "repo": "dateutil/dateutil",
+      "pr_number": 17,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "dateutil/rrule.py",
+          "lines": {
+            "start": 813,
+            "end": 814
+          },
+          "severity": "high",
+          "title": "Missing comma in tuple creation prevents iteration over single integer",
+          "detail": "Line 814 contains `byxxx = (byxxx)` which does not create a tuple in Python; it's just the value with grouping parentheses. It should be `byxxx = (byxxx,)` with a comma. When `isinstance(byxxx, integer_types)` is true and byxxx is an integer, the code will attempt to iterate over an integer on line 816 (`for num in byxxx:`), causing a TypeError: 'int' object is not iterable.",
+          "suggestion": null
+        },
+        {
+          "file": "dateutil/rrule.py",
+          "lines": {
+            "start": 498,
+            "end": 499
+          },
+          "severity": "medium",
+          "title": "Inconsistent type for _bysecond: nested tuple instead of set",
+          "detail": "When bysecond is None and freq < SECONDLY, line 499 assigns `self._bysecond = ((dtstart.second,))`, creating a nested tuple `((value,))` instead of a set. This is inconsistent with _byhour (line 465: `set((dtstart.hour,))`) and _byminute (line 482: `set((dtstart.minute,))`). This type inconsistency will cause issues when the code later iterates over _bysecond or performs membership tests, as the behavior differs from the other time components.",
+          "suggestion": null
+        },
+        {
+          "file": "dateutil/rrule.py",
+          "lines": {
+            "start": 506,
+            "end": 513
+          },
+          "severity": "medium",
+          "title": "Redundant assignment that is immediately overwritten",
+          "detail": "Line 506 assigns `self._bysecond = set(bysecond)`, but this assignment is unconditionally overwritten in both branches of the if statement on lines 508-513. In the `freq == SECONDLY` case (lines 508-511), it's overwritten by `__construct_byset`. In the else case (line 513), it's overwritten by `set(bysecond)` again. The first assignment on line 506 serves no purpose and should be removed to avoid confusion.",
+          "suggestion": null
+        }
+      ],
+      "summary": "This PR aims to fix infinite loops in RRULE by converting tuple-based storage to sets for faster lookups and adding validation logic to detect invalid rule combinations. The changes introduce new helper methods `__construct_byset` and `__mod_distance` to handle edge cases where interval and BYXXX parameters create empty rule sets. However, there are three defects in the implementation.",
+      "risk": "high",
+      "duration_s": 29.931,
+      "usage": {
+        "input_tokens": 270437,
+        "output_tokens": 2221,
+        "total_tokens": 272658,
+        "cache_read_input_tokens": 120630,
+        "cache_creation_input_tokens": 74381,
+        "cost_usd": 0.19157025
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "httpx-2911-clean",
+      "split": "clean",
+      "repo": "encode/httpx",
+      "pr_number": 2911,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "httpx/_models.py",
+          "lines": {
+            "start": 760,
+            "end": 761
+          },
+          "severity": "high",
+          "title": "json() method ignores charset encoding from Content-Type header",
+          "detail": "The new implementation uses jsonlib.loads(self.content, **kwargs) which passes raw bytes directly to json.loads(). This bypasses the self.text property and self.encoding logic that respect the charset parameter in the Content-Type header. The old implementation used self.text, which properly handles the charset encoding specified by the server. If a server sends 'Content-Type: application/json; charset=iso-8859-1' or other non-UTF encodings, the new code will not respect this and may fail to parse or produce incorrect results, whereas the old code would correctly decode using the specified charset.",
+          "suggestion": "Consider using self.text instead of self.content to preserve the charset encoding behavior, or explicitly handle the charset_encoding property before passing bytes to jsonlib.loads()."
+        }
+      ],
+      "summary": "This PR simplifies the Response.json() method by removing the guess_json_utf() utility function and changing from using self.text to self.content. While this reduces code complexity, it introduces a behavioral regression: the new implementation ignores the charset encoding specified in the Content-Type header, which the old implementation respected via self.text and self.encoding properties.",
+      "risk": "high",
+      "duration_s": 23.942,
+      "usage": {
+        "input_tokens": 49967,
+        "output_tokens": 2056,
+        "total_tokens": 52023,
+        "cache_read_input_tokens": 4767,
+        "cache_creation_input_tokens": 20206,
+        "cost_usd": 0.0610082
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "marshmallow-527-clean",
+      "split": "clean",
+      "repo": "marshmallow-code/marshmallow",
+      "pr_number": 527,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR fixes a bug in validator handling where Validator class instances (like Equal(False)) would incorrectly trigger a generic 'validator_failed' error instead of raising their own ValidationError with custom messages. The fix distinguishes between plain callable validators that return False and Validator instances that raise exceptions. The implementation adds an isinstance check and includes a test case covering both validator types.",
+      "risk": "low",
+      "duration_s": 20.687,
+      "usage": {
+        "input_tokens": 192937,
+        "output_tokens": 1593,
+        "total_tokens": 194530,
+        "cache_read_input_tokens": 77484,
+        "cache_creation_input_tokens": 54428,
+        "cost_usd": 0.1447734
+      },
+      "github_calls": 9,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "more-itertools-167-clean",
+      "split": "clean",
+      "repo": "more-itertools/more-itertools",
+      "pr_number": 167,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR adds a `validator` parameter to the `bucket()` class to filter bucket keys. The validator function is used to check if a bucket key is valid before accessing it, and items with invalid keys are discarded rather than cached. The implementation includes updates to the docstring with examples, modifications to `__init__`, `__contains__`, `_get_values`, and `__getitem__` methods, plus a test case.",
+      "risk": "low",
+      "duration_s": 55.899,
+      "usage": {
+        "input_tokens": 132618,
+        "output_tokens": 5239,
+        "total_tokens": 137857,
+        "cache_read_input_tokens": 25219,
+        "cache_creation_input_tokens": 47925,
+        "cost_usd": 0.14809715
+      },
+      "github_calls": 6,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "networkx-5002-clean",
+      "split": "clean",
+      "repo": "networkx/networkx",
+      "pr_number": 5002,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "networkx/readwrite/gpickle.py",
+          "lines": {
+            "start": 8,
+            "end": 8
+          },
+          "severity": "low",
+          "title": "Spelling error in security warning message",
+          "detail": "Line 8 contains the typo 'arbitray' which should be 'arbitrary'. The text reads: 'The pickle library is not secure and can be used to create arbitray objects.'",
+          "suggestion": "Change 'arbitray' to 'arbitrary'"
+        }
+      ],
+      "summary": "This PR adds a security warning to the pickle documentation in networkx/readwrite/gpickle.py. The warning appropriately alerts developers about the security risks of using pickle with untrusted data. However, there is a spelling error in the warning message that should be corrected.",
+      "risk": "low",
+      "duration_s": 8.197,
+      "usage": {
+        "input_tokens": 9668,
+        "output_tokens": 545,
+        "total_tokens": 10213,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 0,
+        "cost_usd": 0.012393
+      },
+      "github_calls": 5,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "click-517-clean",
+      "split": "clean",
+      "repo": "pallets/click",
+      "pr_number": 517,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [],
+      "summary": "This PR makes documentation and comment improvements across three files: grammar fixes (\"where\" → \"were\", \"of reject\" → \"or reject\", \"as in that\" → \"in that\"), formatting consistency (\"prog name\" → \"prog_name\"), docstring rewording for the prompt parameter, and addition of a docstring to the make_default_short_help function. All changes are non-functional improvements to documentation and comments with no impact on code logic or behavior.",
+      "risk": "low",
+      "duration_s": 16.936,
+      "usage": {
+        "input_tokens": 198111,
+        "output_tokens": 1101,
+        "total_tokens": 199212,
+        "cache_read_input_tokens": 78587,
+        "cache_creation_input_tokens": 56354,
+        "cost_usd": 0.1469762
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
+    },
+    {
+      "id": "flask-3918-clean",
+      "split": "clean",
+      "repo": "pallets/flask",
+      "pr_number": 3918,
+      "expected": null,
+      "expected_changed_line_span": null,
+      "findings": [
+        {
+          "file": "src/flask/app.py",
+          "lines": {
+            "start": 1294,
+            "end": 1294
+          },
+          "severity": "high",
+          "title": "Accessing error_handler_spec creates unwanted side effects",
+          "detail": "The line `handler_map = self.error_handler_spec[name][c]` accesses a nested defaultdict without checking if the keys exist first. Since `error_handler_spec` is now `defaultdict(lambda: defaultdict(dict))`, accessing a non-existent `name` creates an empty `defaultdict(dict)`, and accessing a non-existent `c` creates an empty `dict()`. This pollutes `error_handler_spec` with empty entries for handler lookups that fail, which the original code with `.setdefault()` and `.get()` would not do. Code that iterates over or inspects `error_handler_spec` will now see these spurious entries.",
+          "suggestion": "Restore the original pattern: `handler_map = self.error_handler_spec.get(name, {}).get(c)` or check key existence before accessing: `if name in self.error_handler_spec and c in self.error_handler_spec[name]: handler_map = self.error_handler_spec[name][c]`"
+        }
+      ],
+      "summary": "This PR refactors Flask to use `defaultdict` instead of manual `.setdefault()` and `.get()` calls, reducing boilerplate code. However, it introduces a critical defect where accessing non-existent keys in `error_handler_spec` creates unwanted empty nested dictionaries as a side effect, which could cause issues with code that expects the dict to only contain registered handlers.",
+      "risk": "high",
+      "duration_s": 40.473,
+      "usage": {
+        "input_tokens": 107998,
+        "output_tokens": 3532,
+        "total_tokens": 111530,
+        "cache_read_input_tokens": 12035,
+        "cache_creation_input_tokens": 46446,
+        "cost_usd": 0.126438
+      },
+      "github_calls": 7,
+      "blocked_calls": [],
+      "dropped_findings": 0,
+      "parse_failures": 0,
+      "synthesis_failed": false,
+      "infra_retries": 0,
+      "infra_error": false,
+      "error": null
     }
-  ],
-  "WARNING": "PARTIAL RUN: 179 of 215 selected cases. Resume with --resume; every rate below is over the cases present."
+  ]
 }

@@ -158,45 +158,51 @@ such, never as a before/after of one change. The baseline is the fixed reference
 run. Hold an agent report against it when `dataset_sha256` and `meta.scoring` match; its provider
 is `none`.
 
-## Results so far
+## Results
 
 **Reference run: `anthropic/claude-haiku-4.5` via OpenRouter, pinned to the Anthropic host,
-temperature 0, rolling prompt cache, no context trimming, scoring v3.**
-[`reports/v1.json`](reports/v1.json), with the baseline over exactly the same cases in
+temperature 0, rolling prompt cache, no context trimming, scoring v3. All 215 cases.**
+[`reports/v1.json`](reports/v1.json); baseline over the same cases in
 [`reports/v1-baseline.json`](reports/v1-baseline.json).
 
-**179 of 215 cases: all 40 injected, all 25 reverted, 114 of 150 clean.** The run stopped when the
-OpenRouter credit ran out; per-case checkpointing kept every completed case
-(`reports/v1.cases.jsonl`, finish with `--resume`). Both bug splits are complete, so detection and
-localisation are final. The false-positive rate is over 114 of 150 clean cases.
-
-**0 parse errors in 179 cases.** No synthesis failure, repaired or otherwise.
-
-| | agent | baseline (same cases) |
+| | agent | baseline |
 |---|---|---|
-| False positives on clean (114) | **28.9%** (33) | 100% |
-| Detection, injected | 85.0% (34/40) | 100% |
-| Detection, reverted | 76.0% (19/25) | 100% |
+| Synthesis parse errors | **0 / 215** | — |
+| Flagged a clean PR (149) | 28.9% (43) | 100% |
+| Detection, injected (40) | 85.0% | 100% |
+| Detection, reverted (25) | 76.0% | 100% |
 | Localisation of detected, injected | 88.2% (30/34) | 0% |
 | Localisation of detected, reverted | **100%** (19/19) | 0% |
 
 Detection by bug kind: transposed_args 100%, flipped_comparison 90%, off_by_one_range_len 80%,
 removed_none_guard 70%, reverted_fix 76%.
 
-**Cost:** 126k tokens per case (48k of them cache reads), $0.099 per case, $17.65 for 179 cases as
-reported by the provider ($19.52 charged to the account, which includes retries and eight cases
-that were run twice when two runners briefly overlapped). Median 21.0s per case, p95 56.2s.
+**Cost:** 127k tokens per case (48k of them cache reads), $0.101 per case, $21.63 for 215 cases as
+reported by the provider. Median 20.3s per case, p95 56.2s. The run was charged about $23 at the
+account level, which includes rate-limit retries and eight cases run twice when two runners briefly
+overlapped.
 
-**Caveats worth stating with the numbers.**
-- One clean case (`click-1801-clean`) hung and hit the 600s case timeout while the machine was
-  thrashing on memory. It counts as an error and therefore as a false positive, so the true FP
-  count is 32 or 33 of 114.
-- The FP rate is a share of *flagged* clean PRs, not of wrong flags. In the dev run, human review
-  found **3 of 6 flags were genuine upstream bugs**, two with matching upstream fixes
-  ([`reports/dev-case-review.md`](reports/dev-case-review.md)). The 33 flags here have not been
-  reviewed one by one; expect the same pattern, so the *mistake* rate is lower than 28.9%.
-- `reverted` is the quality number to quote: 76% of real historical bugs found, every one of them
-  pinned to the right lines.
+**One clean case (`click-1801-clean`) timed out** after 600s while the machine was thrashing, and
+never produced a review. It is an infrastructure failure: excluded from the 149 clean cases and
+reported under `false_positive_rate.infrastructure_failures_excluded`, not counted as a false
+positive. An *agent* failure (e.g. `SynthesisError`) still counts as one.
+
+### 28.9% is the share of clean PRs flagged, not the share of wrong flags
+
+15 of the 43 flags were reviewed by hand against upstream history
+([`reports/clean-flag-review.md`](reports/clean-flag-review.md), seed 20260917, reproducible with
+`python eval/reports/sample_flags.py`):
+
+- **4 genuine bugs in merged code** (26.7%, 95% CI 11–52%), three with a matching upstream fix.
+- **10 defensible but wrong** — real mechanism, intended or pre-existing behaviour, usually with
+  inflated severity.
+- **1 nonsense.**
+
+So the wrong-flag rate is **73% of flags** (95% CI 48–89%), i.e. roughly **21% of clean PRs get a
+wrong flag** and about 8% get a flag that is a real bug. The dev run showed the same pattern: 3 of
+6 flags genuine ([`reports/dev-case-review.md`](reports/dev-case-review.md)).
+
+Quote `reverted` as the quality number: 76% of real historical bugs found, every one localised.
 
 ## Prompt caching on OpenRouter → Claude: measured, not assumed
 
