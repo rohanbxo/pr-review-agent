@@ -52,13 +52,43 @@ Two findings from building this, both measured rather than assumed:
 ## Architecture
 
 ```
-browser ──► nginx :80 ──┬──► /            Next.js 15 (App Router, Auth.js v5)
-                        ├──► /api/auth/*  Next.js (Auth.js routes; see "Path collision")
-                        └──► /api/*       FastAPI (prefix stripped) ──► LangGraph agent ──► GitHub REST (GET/HEAD only)
-                                             │  │
-                                             │  └──► Langfuse (self-hosted, separate compose project)
-                                             ├──► Postgres 16 (identity, RBAC, audit, runs, steps)
-                                             └──► Redis 7 (per-user rate limit logs)
+                         ┌─────────────────────────────────────────────┐
+                         │              YOUR LAPTOP (Docker)           │
+                         │                                             │
+ ┌──────────┐   (1)      │  ┌─────────┐                                │
+ │ Browser  │ ─────────────▶│  nginx  │  the only door in (port 80)    │
+ │  (you)   │◀───────────── │         │                                │
+ └──────────┘            │  └────┬────┘                                │
+       │                 │       │ routes by URL                       │
+       │ (2) login       │   ┌───┴──────────────┐                      │
+       ▼                 │   ▼                  ▼                      │
+ ┌──────────┐            │ ┌────────────┐  ┌──────────────┐            │
+ │  GitHub  │◀──────────────│  Website   │─▶│   API        │            │
+ │  login   │   OAuth    │ │ (Next.js)  │(3)│  (FastAPI)  │            │
+ └──────────┘            │ └────────────┘  └──────┬───────┘            │
+                         │                        │ (4) checks pass     │
+                         │                        ▼                     │
+                         │                ┌──────────────┐             │
+                         │                │   AI AGENT   │             │
+                         │                │ (LangGraph)  │             │
+                         │                │ fetch→analyze│             │
+                         │                │   →synthesize│             │
+                         │                └──┬───────┬───┘             │
+                         │      (5) reads    │       │ (6) asks        │
+                         │                   ▼       ▼                 │
+                         │  ┌───────────────────┐  ┌──────────────┐    │
+                         │  │ READ-ONLY GitHub  │  │  AI model    │    │
+                         │  │ client (GET only) │  │ (Claude Haiku│    │
+                         │  └─────────┬─────────┘  │ via OpenRouter)   │
+                         │            │            └──────────────┘    │
+                         │  ┌─────────┴───┐   ┌──────────┐             │
+                         │  │  Postgres   │   │  Redis   │             │
+                         │  │ users, runs,│   │ rate     │             │
+                         │  │ steps, audit│   │ limits   │             │
+                         │  └─────────────┘   └──────────┘             │
+                         └────────────┼────────────────────────────────┘
+                                      ▼
+                               GitHub (the PR's code)
 ```
 
 - **nginx is the only service in this project that publishes a port** (`80:80`). api, frontend,
